@@ -30,6 +30,7 @@ model User {
   studyNotes    StudyNote[]
   exercises     Exercise[]
   codeErrors    CodeError[]
+  mindMaps      MindMap[]
 }
 
 model Account {
@@ -350,4 +351,20 @@ model CodeError {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+// ─── StudyHub: Mapas Mentais ───────────────────────────────────────────────
+
+model MindMap {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  topic     String?
+  content   String?  @db.Text
+  nodes     Json    @default("[]")
+  edges     Json    @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
