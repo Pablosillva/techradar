@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RelatedJobs } from "@/components/recommendations/related-jobs";
 import { ExternalLink, ArrowLeft } from "lucide-react";
+import { AddToLibraryButton } from "@/components/study/add-to-library-button";
 
 interface LivroPageProps {
   params: Promise<{ id: string }>;
@@ -119,6 +120,7 @@ export default async function LivroPage({ params }: LivroPageProps) {
             </a>
           </Button>
         </div>
+        <AddToLibraryButton itemType="book" itemId={book.id} />
       </div>
 
       {/* Vagas relacionadas */}

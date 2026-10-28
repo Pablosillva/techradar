@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RelatedJobs } from "@/components/recommendations/related-jobs";
 import { ExternalLink, ArrowLeft, Clock } from "lucide-react";
+import { AddToLibraryButton } from "@/components/study/add-to-library-button";
 
 interface AudiobookPageProps {
   params: Promise<{ id: string }>;
@@ -118,6 +119,7 @@ export default async function AudiobookPage({ params }: AudiobookPageProps) {
             </a>
           </Button>
         </div>
+        <AddToLibraryButton itemType="audiobook" itemId={audiobook.id} />
       </div>
 
       {/* Vagas relacionadas */}
