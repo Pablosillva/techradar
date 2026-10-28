@@ -1,0 +1,270 @@
+// prisma/schema.prisma
+// Schema completo do TechRadar — hub de buscas de tecnologia
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Usuário e Autenticação (NextAuth v5 / Auth.js) ──────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("USER")
+  password      String?
+  createdAt     DateTime  @default(now())
+
+  accounts      Account[]
+  sessions      Session[]
+  favorites     Favorite[]
+  searchLogs    SearchLog[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Skills (dicionário curado) ───────────────────────────────────────────
+
+model Skill {
+  id          String   @id @default(cuid())
+  slug        String   @unique // ex: "react", "typescript"
+  name        String   // ex: "React", "TypeScript"
+  category    String   // "frontend" | "backend" | "devops" | "data" | "mobile" | "soft"
+  aliases     String[] // ["reactjs", "react.js", "react js"]
+  description String?
+
+  jobSkills       JobSkill[]
+  courseSkills    CourseSkill[]
+  bookSkills      BookSkill[]
+  audiobookSkills AudiobookSkill[]
+}
+
+// ─── Fontes de Vagas configuráveis via Admin ──────────────────────────────
+
+model JobSource {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  source    String   // chave que referencia o Job.source (ex: "trampos", "coodesh")
+  isActive Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Conteúdo: Vaga ───────────────────────────────────────────────────────
+
+model Job {
+  id          String   @id @default(cuid())
+  externalId  String   @unique // ID da fonte (Remotive, Arbeitnow)
+  source      String   // "remotive" | "arbeitnow"
+  title       String
+  company     String
+  description String   @db.Text
+  url         String
+  location    String?  // "Remote", "São Paulo, BR", etc.
+  isRemote    Boolean  @default(false)
+  jobType     String?  // "full-time" | "contract" | "part-time"
+  salaryMin   Int?
+  salaryMax   Int?
+  currency    String?  @default("USD")
+  level       String?  // "junior" | "pleno" | "senior" | "lead"
+  postedAt    DateTime?
+  expiresAt   DateTime?
+  logoUrl     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  skills    JobSkill[]
+
+  @@index([title])
+  @@index([isRemote])
+  @@index([level])
+  @@index([isActive])
+}
+
+model JobSkill {
+  jobId   String
+  skillId String
+  job     Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([jobId, skillId])
+}
+
+// ─── Conteúdo: Curso ──────────────────────────────────────────────────────
+
+model Course {
+  id           String   @id @default(cuid())
+  externalId   String   @unique
+  source       String   // "classcentral" | "youtube" | "coursera"
+  title        String
+  provider     String   // "freeCodeCamp", "Coursera", etc.
+  description  String   @db.Text
+  url          String
+  thumbnailUrl String?
+  language     String   @default("en")
+  isFree       Boolean  @default(true)
+  price        Float?
+  currency     String?  @default("USD")
+  level        String?  // "beginner" | "intermediate" | "advanced"
+  duration     String?  // "8h", "4 weeks"
+  rating       Float?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  skills    CourseSkill[]
+
+  @@index([title])
+  @@index([isFree])
+  @@index([language])
+}
+
+model CourseSkill {
+  courseId String
+  skillId  String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  skill    Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, skillId])
+}
+
+// ─── Conteúdo: Livro ──────────────────────────────────────────────────────
+
+model Book {
+  id           String   @id @default(cuid())
+  externalId   String   @unique // ISBN ou ID Open Library
+  source       String   // "openlibrary" | "googlebooks"
+  title        String
+  authors      String[]
+  description  String?  @db.Text
+  url          String
+  thumbnailUrl String?
+  language     String   @default("en")
+  pageCount    Int?
+  publishedAt  DateTime?
+  publisher    String?
+  isFree       Boolean  @default(false) // Open Library = domínio público
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  skills    BookSkill[]
+
+  @@index([title])
+  @@index([language])
+}
+
+model BookSkill {
+  bookId  String
+  skillId String
+  book    Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, skillId])
+}
+
+// ─── Conteúdo: Audiobook ──────────────────────────────────────────────────
+
+model Audiobook {
+  id           String   @id @default(cuid())
+  externalId   String   @unique
+  source       String   // "librivox" | "audible" | "storytel"
+  title        String
+  authors      String[]
+  narrator     String?
+  description  String?  @db.Text
+  url          String
+  thumbnailUrl String?
+  language     String   @default("en")
+  durationMin  Int?
+  isFree       Boolean  @default(true) // LibriVox = domínio público
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  skills    AudiobookSkill[]
+
+  @@index([title])
+  @@index([language])
+}
+
+model AudiobookSkill {
+  audiobookId String
+  skillId     String
+  audiobook   Audiobook @relation(fields: [audiobookId], references: [id], onDelete: Cascade)
+  skill       Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([audiobookId, skillId])
+}
+
+// ─── Favoritos (N:N polimórfico via type + externalId) ───────────────────
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  itemType  String   // "job" | "course" | "book" | "audiobook"
+  itemId    String   // ID do item no banco
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemType, itemId])
+  @@index([userId])
+}
+
+// ─── Log de buscas (para perfil e recomendações personalizadas) ───────────
+
+model SearchLog {
+  id          String   @id @default(cuid())
+  userId      String?  // null = usuário anônimo
+  query       String
+  tab         String   // "vagas" | "cursos" | "livros" | "audiobooks" | "tudo"
+  filters     Json?    // Snapshot dos filtros aplicados
+  resultCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([query])
+  @@index([createdAt])
+}
