@@ -28,6 +28,7 @@ model User {
   searchLogs    SearchLog[]
   flashcards    Flashcard[]
   studyNotes    StudyNote[]
+  exercises     Exercise[]
 }
 
 model Account {
@@ -304,4 +305,33 @@ model StudyNote {
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── StudyHub: Treino de código ───────────────────────────────────────────
+
+model Exercise {
+  id           String   @id @default(cuid())
+  userId       String
+  title        String
+  description  String   @db.Text
+  language     String   @default("typescript")
+  starterCode  String   @default("")
+  solutionCode String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  submissions CodeSubmission[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CodeSubmission {
+  id          String   @id @default(cuid())
+  exerciseId String
+  userId      String
+  code        String   @db.Text
+  aiFeedback String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }
