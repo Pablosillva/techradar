@@ -8,6 +8,17 @@ import { extractSkillsFromText } from "@/lib/skills/extract";
  * Sincroniza audiobooks da API LibriVox.
  */
 export async function POST(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  const xCronSecret = request.headers.get("x-cron-secret");
+  const { searchParams } = new URL(request.url);
+  const querySecret = searchParams.get("secret");
+  const expectedToken = process.env.CRON_SECRET;
+  const providedToken = authHeader?.replace(/^Bearer\s+/i, "") ?? xCronSecret ?? querySecret;
+
+  if (!expectedToken || providedToken !== expectedToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { query = "" } = await request.json().catch(() => ({}));
 
