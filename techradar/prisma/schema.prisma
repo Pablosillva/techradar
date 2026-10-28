@@ -26,6 +26,8 @@ model User {
   sessions      Session[]
   favorites     Favorite[]
   searchLogs    SearchLog[]
+  flashcards    Flashcard[]
+  studyNotes    StudyNote[]
 }
 
 model Account {
@@ -267,4 +269,39 @@ model SearchLog {
   @@index([userId])
   @@index([query])
   @@index([createdAt])
+}
+
+// ─── StudyHub: Flashcards e Notas ─────────────────────────────────────────
+
+model Flashcard {
+  id            String   @id @default(cuid())
+  userId        String
+  front         String
+  back          String
+  sourceNoteId String?
+  source        String? // "ai" | "manual" | "code-error" | "note"
+  ease          Float    @default(2.5) // fator de facilidade (algoritmo SM-2)
+  interval      Int      @default(0) // dias
+  repetitions  Int      @default(0)
+  status        String   @default("NEW") // "NEW" | "LEARNING" | "REVIEW" | "RELEARN"
+  dueDate      DateTime?
+  lastReviewedAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, dueDate])
+  @@index([userId])
+}
+
+model StudyNote {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String   @db.Text
+  source    String? // "manual" | "ai" | "book" | "lecture"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

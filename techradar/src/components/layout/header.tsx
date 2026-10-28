@@ -50,6 +50,12 @@ export async function Header() {
           >
             Audiobooks
           </Link>
+          <Link
+            href="/flashcards"
+            className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            Estudos
+          </Link>
 
           <div className="h-4 w-px bg-gray-200 dark:bg-gray-700" aria-hidden="true" />
 
