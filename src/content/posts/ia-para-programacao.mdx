@@ -1,0 +1,104 @@
+---
+title: "IA para programação: como usar sem se ferir"
+description: "Guia prático de IA para programação: autocomplete, chat e agentes, como escrever prompt técnico de qualidade e os riscos de segurança que ninguém comenta."
+date: "2026-10-04"
+category: "ia"
+tags: ["IA", "Programação", "Segurança", "Produtividade"]
+featured: false
+views: 7210
+---
+
+## Três abordagens, três custos
+
+Autocomplete inline completa a próxima linha enquanto você digita. É a forma de
+menor atrito e a mais fácil de abandonar: se a sugestão estiver errada, você
+apaga e segue. Chat serve para perguntas que exigem contexto maior — "por que
+esse hook roda duas vezes". Agentes leem e editam o repositório inteiro sozinhos.
+
+A ordem em que a maioria chega ao terceiro posto é automática e quase sempre
+correta: primeiro o autocomplete muda seu dia, o chat aparece quando a dúvida
+cresce, o agente vem depois, porque exige mais disciplina de revisão. Inverter
+essa ordem custa tempo.
+
+## O prompt técnico que funciona
+
+A diferença entre uma resposta útil e uma genérica quase sempre é o contexto
+que você deixou de fora. Um prompt fraco pede "código para validar e-mail".
+Um prompt forte entrega quatro coisas:
+
+1. **Stack e versões** — `Express 4`, `Node 20`, não "JavaScript".
+2. **Trecho relevante** — as 20 linhas que cercam o problema.
+3. **Comportamento esperado** — o que deve acontecer, não só o que escrever.
+4. **Restrições** — o que não pode mudar, o que já foi tentado.
+
+Esse quarto item é o mais subestimado. Sem "não altere a assinatura pública da
+função", o modelo refatora o arquivo inteiro e você perde mais tempo
+desfazendo do que economizando.
+
+```text
+Contexto: Express 4 + Node 20, projeto em JavaScript puro (sem TypeScript).
+
+Trecho atual (src/middleware/auth.js):
+  function checar(req, res, next) {
+    const token = req.headers.authorization;
+    const dados = verificar(token);
+    if (dados) req.usuario = dados;
+    next();
+  }
+
+Problema: quando o token é inválido, `verificar` lança exceção e o processo
+sobe. Quero que a rota retorne 401 com JSON { erro: "token_invalido" }.
+
+Restrições: não mude a assinatura da função, não adicione dependência nova,
+mantenha o estilo síncrono do arquivo.
+```
+
+## Segurança: a parte que ninguém escreve nos tutoriais
+
+**Nunca cole segredo.** Chave de API, senha de banco, token de acesso,
+conteúdo do `.env`. Isso vale para chat de navegador quanto para ferramenta
+local — e ferramentas locais são piores, porque muitas leem o arquivo `.env`
+automaticamente por estarem rodando dentro da pasta do projeto. Se a chave já
+saiu, considere ela comprometida e rotacione; não é exagero.
+
+**Nunca cole dado de cliente.** CPF, endereço, telefone, prontuário, contrato.
+Troque por placeholder antes de perguntar. Uma IA não é um anonimizador: você
+não tem controle sobre retenção, suboperadores ou jurisdição do processamento.
+
+**Prompt injection é real.** Com agente conectado ao repositório, conteúdo
+incontrolado entra no contexto — um issue do GitHub, um README, um comentário de
+código. Texto externo pode conter instruções. Um agente com acesso a arquivos e
+shell não distingue "o usuário pediu" de "estava escrito num arquivo". Trate
+conteúdo externo como dado, nunca como comando.
+
+**Alucinação de API.** Este é o modo de falha mais caro. O modelo inventa
+métodos, flags e parâmetros com a mesma naturalidade, às vezes combinando API de
+versão antiga com sintaxe de versão nova. O sintoma típico não é erro de
+compilação: é `x is not a function` em tempo de execução, numa linha que
+"parece certa".
+
+A defesa é chateante e funciona: **fixe a versão no prompt** e **verifique no
+autocomplete do editor**. Se o método não existe na sua instalada, não existe.
+
+## Como escolher a ferramenta certa
+
+Autocomplete para o dia a dia. Chat para entender código que você não escreveu.
+Agente para tarefas mecânicas e bem delimitadas — migração de API, adição de
+teste em padrão que já existe, renomeação em massa. Quanto mais ampla a
+delegação, maior a superfície de revisão: um agente que mexe em 40 arquivos
+exige leitura de diff de 40 arquivos, e aí a produtividade vira prejuízo.
+
+Se o seu fluxo envolve tokens, a
+[ferramenta de decodificação de JWT](/ferramentas/jwt-decoder) ajuda a conferir
+o que está dentro do token localmente, sem mandar nada para fora.
+
+## Resumo
+
+- Autocomplete, chat e agente resolvem problemas diferentes, nessa ordem de
+  adoção.
+- Contexto com stack, versão, trecho e comportamento esperado é o que separa
+  resposta útil de código genérico.
+- Segredo, chave e dado de cliente não vão para prompt — nunca.
+- Conteúdo externo lido por agente é dado, não instrução.
+- API inventada não quebra no editor: quebra em produção. Fixe a versão e
+  confira no autocomplete.

@@ -29,6 +29,7 @@ model User {
   flashcards    Flashcard[]
   studyNotes    StudyNote[]
   exercises     Exercise[]
+  codeErrors    CodeError[]
 }
 
 model Account {
@@ -322,6 +323,8 @@ model Exercise {
 
   submissions CodeSubmission[]
 
+  codeErrors CodeError[]
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -333,5 +336,18 @@ model CodeSubmission {
   aiFeedback String?  @db.Text
   createdAt   DateTime @default(now())
 
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+model CodeError {
+  id         String   @id @default(cuid())
+  userId     String
+  exerciseId String
+  summary    String   @db.Text
+  code       String?  @db.Text
+  aiFeedback String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }

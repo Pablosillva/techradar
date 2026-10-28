@@ -1,0 +1,134 @@
+---
+title: "Geração de imagens com IA: como escrever um bom prompt"
+description: "Guia de geração de imagens com IA: a estrutura de um bom prompt, o que os modelos erram, e os aspectos legais, éticos e de uso comercial."
+date: "2026-09-15"
+category: "ia"
+tags: ["IA", "Imagens", "Design", "Direitos Autorais"]
+featured: false
+views: 8920
+---
+
+## A anatomia de um bom prompt
+
+Prompt fraco descreve o que você quer de forma vaga: "um gato bonito". Prompt
+bom descreve com **precisão de briefing criativo**. Os modelos respondem a
+detalhe estruturado, não a adjetivo solto.
+
+Uma fórmula que funciona:
+
+```text
+sujeito + ação + ambiente + estilo + iluminação + composição + câmera
+```
+
+Exemplo preenchido:
+
+```text
+Retrato de uma aprendiz de ferreiro, 22 anos, segurando uma bigorna e um
+martelo, oficina antiga ao fundo com fornalha acesa, fotografia
+documental em tons quentes, luz lateral forte vinda da esquerda, fundo
+desfocado, lente de 50mm, granulação de filme 35mm
+```
+
+Compare com "uma menina numa oficina". A segunda versão produz algo genérico
+porque deixou tudo para o modelo decidir — e o modelo decide pela média do que
+já viu.
+
+Três dicas práticas:
+
+- **Seja específico sobre o que não quer.** "sem texto, sem marca-d'água, sem
+  fundo branco" evita metade do retrabalho.
+- **Itere em uma variável por vez.** Mude a iluminação e mantenha o resto; se
+  mudar tudo, você não sabe o que causou o efeito.
+- **Cite referência visual, não artista.** "no estilo de fotografia publicitária
+  dos anos 90" funciona melhor que citar um nome, e evita problema jurídico.
+
+## O que os modelos fazem bem e mal
+
+**Bom:** composição e atmosfera. Paleta, profundidade de campo, hora do dia e
+textura de material. É aqui que a geração de imagem realmente brilha.
+
+**Ruim — texto dentro da imagem.** Letras continuam sendo o ponto fraco.
+Vocabulário aparece embaralhado, sobretudo com mais de três palavras. Solução
+prática: gere a imagem sem texto e adicione a tipografia em um editor, ou use
+recursos de correção de área para consertar só o trecho.
+
+**Ruim — mãos e anatomia.** Melhorou muito, mas ainda falha em poses
+complexas, dedos fundidos e objetos segurados de forma impossível. Se a mão é
+o foco, o trabalho extra de refazer é certo.
+
+**Ruim — contagem de objetos.** "Três maçãs numa mesa" produz duas, quatro ou
+seis. Se a quantidade importa, gere um objeto por vez e componha.
+
+**Ruim — física e causalidade.** Objetos se atravessam, sombras caem em
+direções impossíveis e o reflexo não corresponde à fonte de luz.
+
+## Direitos autorais e uso comercial
+
+Aqui é onde a prática e a lei nem sempre conversam.
+
+**Titularidade.** No Brasil, a autoria é de pessoa física. Uma imagem gerada por
+IA não tem autor humano identificável, o que cria um limbo para registro em
+cartório — a ONPI exige declaração de autoria. Na prática, muitos contratos
+tratam a imagem como pertencente a quem pagou pela geração, mas isso vem do
+contrato, não do direito autoral.
+
+**Uso comercial.** Os termos variam entre ferramentas e **mudam com
+frequência**. Alguns planos permitem uso comercial; outros proíbem. Leia os
+termos da ferramenta que você usa antes de vender a imagem, e guarde print da
+versão vigente.
+
+**Estilo de artista.** Evite pedir o estilo de um artista vivo identificável.
+Não existe exceção que salve isso: pedir "no estilo de [nome]" é pedir para a
+rede treinar na obra dele. Prefira descrever o período e a técnica.
+
+**Marca-d'água e procedência.** Muitas ferramentas aplicam marca visível ou
+metadados de proveniência (C2PA). Isso reduz o valor comercial e evita que você
+seja responsabilizado por uma imagem gerada com a ferramenta errada.
+
+## Imagens de pessoas reais
+
+O risco aqui é legal e sério, e vale uma regra simples: **não gere a imagem de
+uma pessoa real sem autorização por escrito.**
+
+O direito de imagem no Brasil protege a imagem da pessoa, e o uso comercial sem
+consentimento gera obrigação de indenização, sem falar em publicidade não
+declarada. Existe ainda o risco de deepfake e, quando o assunto é menor de
+idade, a impossibilidade de consentimento válido.
+
+Regras que evitam problema:
+
+1. Consentimento por escrito, com finalidade definida e prazo.
+2. Nunca use a imagem de alguém para sugerir endosso que não existe.
+3. Divulgue que a imagem foi gerada por IA quando o parecido não for óbvio.
+4. Não use rosto de pessoa real em material político ou sexualizado.
+
+E a alternativa, quando o objetivo é uma imagem de marca: um gerador de avatar
+baseado em descrição, em vez da foto de alguém que não assinou contrato.
+
+## Quando o objetivo é só codificar um link
+
+Um caso frequente: a empresa quer "uma imagem com o link da loja". Aqui, imagem
+gerada por IA é a ferramenta errada, por três motivos práticos — o texto sai
+errado, o design fica inconsistente entre gerações e ninguém consegue atualizar
+quando o link muda.
+
+Para levar uma pessoa a uma URL, o formato certo é um **QR Code**: é
+determinístico, escaneia de primeira e você atualiza o destino em segundos sem
+regerar nada. Nosso [gerador de QR Code](/ferramentas/gerador-de-qr-code) faz
+isso direto no navegador, com ajuste de tamanho e cores.
+
+A IA entra depois, se entrar: para criar a arte de fundo da embalagem, o padrão
+do post, ou a ilustração que acompanha o material. Não para fazer a letra.
+
+## Resumo
+
+- Prompt de imagem funciona como briefing: sujeito, ação, ambiente, estilo,
+  iluminação, composição e câmera.
+- Os modelos acertam atmosfera e composição; erram texto, mãos, contagem e
+  física.
+- Verifique os termos de uso da ferramenta antes do uso comercial — eles mudam
+  com frequência.
+- Imagem de pessoa real exige consentimento por escrito; a alternativa é avatar
+  gerado por descrição.
+- Quando o objetivo é levar alguém a um link, use QR Code em vez de imagem
+  gerada.

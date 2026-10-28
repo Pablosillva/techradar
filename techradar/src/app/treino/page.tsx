@@ -28,6 +28,14 @@ export default async function TreinoPage({ searchParams }: TreinoPageProps) {
       })
     : null;
 
+  const errors =
+    exercise && exercise.id
+      ? await prisma.codeError.findMany({
+          where: { exerciseId: exercise.id },
+          orderBy: { createdAt: "desc" },
+        })
+      : [];
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Treino de Código</h1>
@@ -46,8 +54,33 @@ export default async function TreinoPage({ searchParams }: TreinoPageProps) {
                 exerciseId={exercise.id}
                 language={exercise.language}
                 initialCode={exercise.starterCode}
+                solutionCode={exercise.solutionCode ?? ""}
               />
             </div>
+
+            {errors.length > 0 ? (
+              <div className="mt-6">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Diário de erros
+                </h2>
+                <div className="mt-4 space-y-2">
+                  {errors.map((err) => (
+                    <Card key={err.id}>
+                      <CardContent className="py-3">
+                        <p className="text-sm text-gray-900 dark:text-white">
+                          {err.summary}
+                        </p>
+                        {err.aiFeedback ? (
+                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Detalhe: {err.aiFeedback}
+                          </p>
+                        ) : null}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       ) : (

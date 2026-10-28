@@ -1,0 +1,192 @@
+---
+title: "Como hospedar um site na VPS do zero"
+description: "Guia passo a passo para hospedar um site em uma VPS: escolha de distro, usuário sem privilégios, chave SSH, Nginx, HTTPS com Let's Encrypt e firewall."
+date: "2026-10-01"
+category: "software"
+tags: ["VPS", "Nginx", "Linux", "Deploy", "HTTPS"]
+featured: true
+views: 11260
+---
+
+## Quando a VPS compensa
+
+Hospedagem gerenciada é mais barata e menos trabalho. A VPS faz sentido quando
+você precisa de acesso ao sistema, porta customizada, ou um processo rodando
+24 horas por um preço previsível. Não é o caminho para "coloque um blog no ar
+domingo".
+
+O provedor importa menos que a distro. Um droplet de 4 GB na Hetzner, uma
+instância na Lightsail, um servidor Oracle Cloud — o setup é idêntico. Escolha
+**Ubuntu 24.04 LTS** se você quer documentação em português e pacotes
+prontos; evite distros "mínimas" para o primeiro servidor, porque o painel de
+controle delas não vem instalado.
+
+O dimensionamento inicial mais defensável: 1 vCPU e 1 GB de RAM para site
+estático ou aplicação pequena. Um proxy Nginx e um processo Node mal passam de
+150 MB, então sobra folga para sistema e banco pequeno. Só cresça quando o
+monitoramento mostrar gargalo — mais RAM mascara má configuração quase tão bem
+quanto resolve carga real.
+
+Antes de contratar, confirme três coisas: o preço mensal inclui banda de verdade
+ou é limitado; o suporte aceita **IPv6** (a Let's Encrypt já emite certificado
+para protocolo novo); e o painel de snapshots existe, porque restaurar uma
+máquina quebrada é bem mais rápido do que remontar do zero.
+
+## Primeiro acesso: usuário sem root
+
+Logar direto como root e trabalhar assim é o erro mais comum — e o que mais
+custa. Comece criando um usuário de trabalho e suba para ele:
+
+```bash
+# ainda como root, após conectar com root@SEU_IP
+adduser deploy
+usermod -aG sudo deploy
+
+# copia sua chave pública para o novo usuário
+rsync -avz ~/.ssh/authorized_keys deploy@SEU_IP:~/.ssh/
+```
+
+Agora teste **antes** de desligar o root, em outro terminal:
+
+```bash
+ssh deploy@SEU_IP
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y nginx ufw certbot python3-certbot-nginx
+```
+
+Só depois de confirmar que `deploy` funciona é seguro travar o root:
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+```text
+PermitRootLogin no
+PasswordAuthentication no
+```
+
+```bash
+sudo systemctl restart ssh
+```
+
+Nunca desligue o acesso por senha antes de ter chave funcionando. É assim que
+a gente perde o servidor.
+
+## Firewall: a parte que evita o incidente
+
+Por padrão, a VPS abre quase nada. Cada porta aberta é uma superfície de
+ataque. Comece bloqueando tudo e liberando só o necessário:
+
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow 22/tcp      # SSH — libere primeiro, ou você se tranca fora
+sudo ufw allow 80/tcp      # HTTP (redireciona para HTTPS)
+sudo ufw allow 443/tcp     # HTTPS
+sudo ufw enable
+sudo ufw status
+```
+
+Repare que **não** abrimos a porta da aplicação. O Node vai escutar em
+`127.0.0.1` e só o Nginx fala com ele — tráfego externo nunca chega
+diretamente ao processo. Isso vale para qualquer porta: banco de dados,
+Redis, admin. Nada disso deveria estar exposto.
+
+O erro comum é abrir a porta 3000 "só para testar". O teste funciona, o
+serviço funciona, e a porta continua aberta na reconfiguração seguinte. Se
+precisa depurar do lado de fora, use um túnel SSH em vez de liberar a porta.
+
+Vale lembrar que provedores de nuvem aplicam **security groups** próprios, em
+camada acima do `ufw`. Os dois precisam estar configurados: o `ufw` protege a
+máquina, o security group protege a rede do provedor. Abrir só em um dos dois
+não basta.
+
+## Nginx como proxy reverso
+
+Crie o site em `/etc/nginx/sites-available/meusite`:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name meusite.com www.meusite.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+
+        # sem isso o app não enxerga o IP real do visitante
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # necessário para o hot reload do Next.js (WebSocket)
+        proxy_set_header Upgrade    $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+Ative e recarregue:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/meusite /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Rode `nginx -t` **sempre** antes do reload. Um typo em production derruba o
+serviço inteiro, e o `nginx -t` transforma isso em um aviso.
+
+## HTTPS com Let's Encrypt
+
+O certificado é gratuito e renovado sozinho. Com o Nginx já rodando:
+
+```bash
+sudo certbot --nginx -d meusite.com -d www.meusite.com
+```
+
+O `certbot` edita o `server` block, adiciona o redirecionamento de 80 para 443 e
+cria o `server` block de HTTPS sozinho. Teste o renewal antes de precisar dele:
+
+```bash
+sudo certbot renew --dry-run
+```
+
+Para conferir que a renovação está agendada:
+
+```bash
+systemctl status certbot.timer
+```
+
+A renovação roda em background, mas vale saber o que acontece se ela falhar: o
+certificado expira, o navegador passa a avisar o visitante, e em alguns casos o
+Nginx nem recarrega o certificado novo. Se o site é crítico, monitoring de
+validade custa quase nada e evita uma ligação de cliente.
+
+## Checklist de fechamento
+
+Antes de declarar pronto, confira quatro pontos. O `sudo ufw status` deve mostrar
+apenas 22, 80 e 443 abertos. O processo da aplicação escuta em `127.0.0.1`, nunca
+em `0.0.0.0`. O acesso é por chave e o root está bloqueado. E o
+`certbot renew --dry-run` passou.
+
+São quatro verificações que separam "no ar" de "exposto" — e vale refazê-las a
+cada mudança de configuração, não só na setup.
+
+Um detalhe que economiza tempo na primeira configuração: o DNS precisa apontar
+para o IP da VPS antes de rodar o `certbot`. A Let's Encrypt valida o domínio por
+HTTP, então um registro DNS ainda propagando faz o certificado falhar sem motivo
+aparente.
+
+## Resumo
+
+- VPS faz sentido quando você precisa de controle; para blog, hosting gerenciado
+  basta. Ubuntu LTS é a distro mais simples, e 1 vCPU com 1 GB resolve site
+  pequeno.
+- Crie usuário não-root e valide o acesso por chave **antes** de desligar o root.
+- `ufw` bloqueia tudo por padrão; libere 22, 80 e 443, e mantenha o app preso ao
+  `127.0.0.1`.
+- Nginx faz proxy reverso e TLS; rode `nginx -t` antes de qualquer reload.
+- `certbot` emite e renova sozinho — valide com `renew --dry-run`.

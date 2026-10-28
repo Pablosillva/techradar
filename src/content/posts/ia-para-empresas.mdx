@@ -1,0 +1,116 @@
+---
+title: "IA para empresas: onde vale a pena (e onde não vale)"
+description: "Casos de uso reais de IA nas empresas, ROI honesto, custo de implementação, governança e privacidade sob a LGPD, com o que evitar."
+date: "2026-09-24"
+category: "ia"
+tags: ["IA", "Empresas", "LGPD", "Governança"]
+featured: false
+views: 6450
+---
+
+## Onde a IA realmente economiza tempo
+
+O ganho não vem de "substituir pessoas". Vem de tirar trabalho de **leitura e
+redação repetitiva** do caminho crítico. Os casos que tendem a pagar a conta:
+
+**Suporte ao cliente.** Roteirizar a base de conhecimento, sugerir resposta a
+partir do histórico do ticket, resumir conversas longas. O ganho aparece no tempo
+médio de resolução.
+
+**Triagem de e-mail e documentos.** Classificar ("cobrança", "suporte",
+"contrato"), extrair campos (número do pedido, CNPJ, valor) e encaminhar. É
+automação com variáveis, e aqui a IA brilha porque o texto muda toda vez.
+
+**Resumo de documentos.** Contratos, laudos, relatórios longos. A IA reduz trinta
+páginas a uma página de pontos de atenção. Faz sentido quando alguém precisa
+**decidir** com base no documento; se ninguém lê o resumo, não há ganho.
+
+**Geração de conteúdo.** Variação para marketing: headlines, descrições, posts.
+Volume alto e baixo risco, desde que um humano revise.
+
+**Análise de dados.** O uso mais subestimado: descrever a pergunta em vez de
+escrever SQL, explorando uma base que ninguém queria abrir.
+
+## Onde a IA não ajuda
+
+- **Decisão final.** O modelo prevê risco de crédito; quem assina é gente.
+ Análise jurídica e registro em cartório continuam humanos.
+- **Processo com regra fixa.** Se o passo é "acima de um valor, encaminhe", um
+  `if` resolve em milissegundos, com custo zero e sem chance de alucinar.
+- **Volume baixo.** Trinta mensagens por dia se resolvem com meia hora de
+  automação determinística. Modelo de linguagem não se paga em escala pequena.
+- **Alta criticidade sem verificação.** Medicina, crédito, segurança, jurídico.
+  Erro não detectado custa muito mais que a hora poupada.
+
+A pergunta que separa as duas listas é: "se a IA errar, alguém percebe rápido, ou
+o erro vira decisão ruim três meses depois?" Se for a segunda, o processo exige
+revisão humana — e talvez nem valha a pena.
+
+## O custo real (não é a API)
+
+A assinatura do modelo é a parte visível e costuma ser a menor. O custo grande é
+o entorno:
+
+- **Integração.** Alinhar o sistema existente com a IA exige trabalho de
+  engenharia que ninguém contabiliza.
+- **Avaliação.** Montar um conjunto de casos de teste, definir o que é resposta
+  boa e medir isso antes e depois de qualquer mudança de prompt.
+- **Treinamento** da equipe e reescrita dos processos internos.
+- **Manutenção contínua.** Modelos mudam de versão e quebram prompts que
+  funcionavam. Isso é custo recorrente, não uma despesa única.
+
+## LGPD e governança
+
+Empresas brasileiras não podem tratar "usamos uma IA" como detalhe jurídico. O que
+a LGPD exige:
+
+- **Base legal** para tratar os dados que alimentam o modelo — e dados de
+  clientes nem sempre têm consentimento como base.
+- **Finalidade definida.** Usar dado de suporte para treinar modelo é outra
+  finalidade, e precisa ser nova, informada e legítima.
+- **Avaliação de impacto (RIPD)** quando o tratamento é sensível ou de alto
+  risco.
+- **Transferência internacional.** Os grandes provedores processam fora do
+  Brasil. A LGPD admite, com cláusulas contratuais padrão, mas você precisa saber
+  que isso acontece e documentar.
+
+Governança prática: um dono do processo — não o time de TI — responde pelo
+resultado; toda interação que vira decisão fica registrada; e existe um caminho
+de revisão humana para erro. IA sem responsável é automação com vocabulário novo.
+
+## Privacidade: onde o processamento acontece
+
+O ponto que mais surpreende gerentes: **os prompts podem virar dado de
+treinamento do fornecedor**, dependendo do plano. Configurar isso errado expõe
+CPF, endereço e histórico de clientes a terceiros sem que ninguém tenha decidido
+isso.
+
+Checklist antes de integrar qualquer ferramenta com dado real:
+
+1. O dado é sensível, foi anonimizado, ou tem base legal clara para aquela
+   finalidade?
+2. O provedor treina com suas entradas por padrão? Dá para desativar?
+3. Onde ficam os servidores, e quem é o operador no tratamento?
+4. Qual a política de retenção, e quanto tempo os logs ficam guardados?
+5. Existe contrato com suboperadores e previsão de transferência internacional?
+
+Se qualquer resposta for "não sei", o primeiro passo não é integrar: é perguntar
+ao fornecedor, por escrito.
+
+## Como medir se valeu a pena
+
+Defina a métrica **antes** de construir: tempo médio de primeira resposta, tempo
+de resolução, tickets escalados, minutos para fechar um relatório. Registre a
+linha de base manual. Sem isso, qualquer resultado parece sucesso — inclusive o
+caso em que nada mudou e você só pagou a assinatura.
+
+## Resumo
+
+- IA paga quando automatiza leitura e redação repetitiva em volume alto; não paga
+  em tarefa de regra fixa, volume baixo ou decisão crítica.
+- O custo real é integração, avaliação e manutenção — não a API.
+- Sob a LGPD, você precisa de base legal, finalidade definida e atenção à
+  transferência internacional e ao uso dos dados para treinamento.
+- Privacidade é questão de desenho: anonimização, retenção e localização do
+  processamento se decidem antes da integração.
+- Meça contra uma linha de base real, senão você não saberá se houve ganho.

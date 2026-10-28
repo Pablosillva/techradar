@@ -1,0 +1,137 @@
+---
+title: "Como começar no React do zero (em 2026)"
+description: "Guia completo para você aprender React do zero, mesmo sem experiência. Conceitos essenciais, o que estudar primeiro e um projeto real para praticar."
+date: "2026-10-08"
+category: "programacao"
+tags: ["React", "JavaScript", "Front-end", "Guia"]
+featured: true
+views: 14200
+---
+
+React é a biblioteca de interface mais usada do mundo, mas o caminho até ela está
+cheio de material que já envelheceu. Este guia corta o ruído e mostra o que
+realmente importa aprender primeiro.
+
+## O que é o React, de verdade
+
+React é uma biblioteca para construir interfaces a partir de **componentes**. Um
+componente é uma função que retorna uma descrição do que deve aparecer na tela.
+
+```jsx
+function Saudacao({ nome }) {
+  return <h1>Olá, {nome}!</h1>;
+}
+```
+
+Só isso. Todo o resto — hooks, estado, roteamento — existe para resolver
+problemas que surgem quando você tem muitos componentes coexistindo.
+
+> **Aprenda o JavaScript antes.** React é uma camada fina sobre a linguagem. Se
+> você ainda se atrapalha com `const`, funções arrow e módulos, esse é o gargalo
+> real — não o framework.
+
+## Os 4 conceitos que unlockam tudo
+
+1. **JSX** — HTML com expressões do JavaScript embutidas.
+2. **Props** — dados que passam de pai para filho.
+3. **Estado** — dados que mudam com o tempo e disparam re-render.
+4. **Eventos** — a forma de o usuário provocar mudança de estado.
+
+A maioria dos problemas que você enfrenta nos primeiros meses é, na verdade, um
+dos quatro acima mal entendido.
+
+## Estado é a parte difícil
+
+Estado é o que separa quem sofre com React de quem não sofre. A regra mental que
+resolve 90% dos casos:
+
+> Se duas variáveis precisam mudar juntas, elas são um estado só.
+
+```jsx
+// ❌ Dois estados que sempre precisam estar sincronizados
+const [email, setEmail] = useState("");
+const [erro, setErro] = useState("");
+
+// ✅ Um estado só
+const [form, setForm] = useState({ email: "", erro: "" });
+```
+
+E a segunda regra: **não copie o estado para derivar outro estado.** Se você
+consegue calcular um valor a partir de outro durante o render, calcule — não
+guarde.
+
+```jsx
+// ❌ Redundante: `total` pode ficar dessincronizado
+const [itens, setItens] = useState([]);
+const [total, setTotal] = useState(0);
+
+// ✅ Derivado durante o render
+const total = itens.reduce((soma, i) => soma + i.preco, 0);
+```
+
+## seu primeiro projeto real
+
+Um contador não ensina React. Construa algo com **estado compartilhado e efeito
+colateral**: uma lista de tarefas com filtro, persistência em `localStorage` e
+busca por texto.
+
+```jsx
+import { useState, useEffect, useMemo } from "react";
+
+export function ListaDeTarefas() {
+  const [tarefas, setTarefas] = useState(() => {
+    // Inicializador preguiçoso: só roda no primeiro render.
+    const salvo = localStorage.getItem("tarefas");
+    return salvo ? JSON.parse(salvo) : [];
+  });
+  const [busca, setBusca] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("tarefas", JSON.stringify(tarefas));
+  }, [tarefas]);
+
+  // useMemo evita refiltrar a lista a cada tecla digitada.
+  const visiveis = useMemo(
+    () => tarefas.filter((t) => t.texto.includes(busca)),
+    [tarefas, busca],
+  );
+
+  return (
+    <div>
+      <input value={busca} onChange={(e) => setBusca(e.target.value)} />
+      <ul>
+        {visiveis.map((t) => (
+          <li key={t.id}>{t.texto}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+Esse projeto cobre inicialização preguiçosa, efeito com dependência, derivação
+memoizada e persistência — exatamente o que aparece em almost toda aplicação real.
+
+## O que NÃO estudar agora
+
+- **GraphQL.** Não é pré-requisito. Aprenda primeiro a consumir uma REST API com
+  `fetch`.
+- **Redux.** Antes de estado global, quase sempre uma Context ou o estado no
+  servidor resolve. Redux é um problema de arquitetura, não o primeiro passo.
+- **CSS complexo.** Não deixe o estilo virar o gargalo do aprendizado.
+
+## Próximos passos
+
+Quando o projeto acima estiver funcionando, o próximo salto natural é lidar com
+dados reais: carregar uma API, tratar carregamento e erro, e entender
+renderização no servidor. Esse é o terreno do Next.js.
+
+Se você quiser ver o resultado desses conceitos aplicados a dados estruturados,
+nossa [ferramenta de formatação JSON](/ferramentas/formatador-json) pode ajudar a
+inspecionar o que uma API devolve.
+
+## Resumo
+
+React é simples no começo e traiçoeiro no meio. Foque em JSX, props, estado e
+efeitos. Construa um projeto que persista dados. E resista à tentação de aprender
+tudo ao mesmo tempo — a lista acima é a ordem que funciona.

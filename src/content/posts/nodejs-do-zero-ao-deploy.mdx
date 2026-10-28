@@ -1,0 +1,165 @@
+---
+title: "Node.js do zero ao deploy"
+description: "Node.js do básico à produção: event loop e I/O não bloqueante, módulos ESM, package.json, variáveis de ambiente, PM2 e health check de deploy."
+date: "2026-09-28"
+category: "programacao"
+tags: ["Node.js", "JavaScript", "Backend", "Deploy"]
+featured: true
+views: 13870
+---
+
+## O que o Node realmente é
+
+O Node não é "JavaScript no servidor" — é V8 (o motor do Chrome) em um processo
+que também expõe APIs de sistema: arquivos, rede, processos, criptografia. Por
+isso ele é forte para I/O e fraco para trabalho pesado de CPU.
+
+## Event loop: por que o I/O não trava
+
+Este é o conceito que, entendido, resolve a maior parte dos bugs de
+performance. O Node roda seu JavaScript em **uma única thread**. Quando ela
+encontra uma operação de I/O — ler um arquivo, esperar uma resposta de rede —
+ela **não bloqueia**: registra a operação, entrega o controle ao event loop e
+segue executando o resto. Quando a operação termina, o callback entra na fila e
+a thread volta a executá-la.
+
+O ponto de erro clássico é tratar I/O como se fosse síncrono:
+
+```js
+import { readFileSync } from "node:fs";
+import express from "express";
+
+const app = express();
+
+// bloqueia a thread inteira. Enquanto o arquivo lê, NENHUMA outra
+// requisição é atendida — mesmo de outro usuário.
+const dados = readFileSync("./catalogo.json", "utf8");
+```
+
+A versão correta usa a API assíncrona:
+
+```js
+import { readFile } from "node:fs/promises";
+import express from "express";
+
+const app = express();
+
+app.get("/catalogo", async (_req, res) => {
+  // a thread fica livre enquanto o disco responde
+  const dados = await readFile("./catalogo.json", "utf8");
+  res.json(JSON.parse(dados));
+});
+```
+
+A regra prática: **sempre que existir uma versão com `await`, prefira**. Se você
+não tem controle da chamada (uma lib síncrona, um laço que trava), mova para um
+`worker_threads` para não segurar a thread principal.
+
+## ESM e CommonJS
+
+O Node suporta dois sistemas de módulos e conviver com os dois é fonte de
+confusão. CommonJS é o antigo (`require`, `module.exports`). ESM é o padrão
+moderno (`import`, `export`) e é o que você deve usar em projeto novo.
+
+A chave de tudo é o campo `"type"` no `package.json`:
+
+```json
+{
+  "type": "module"
+}
+```
+
+Com isso, todo `.js` do projeto é interpretado como ESM. Um arquivo que precisa
+ser CommonJS pode se chamar `.cjs` — ou o inverso, `.mjs` para forçar ESM.
+
+Um detalhe que pega: em ESM não existe `__dirname`. Você usa `import.meta`
+no lugar:
+
+```js
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const dirAtual = path.dirname(fileURLToPath(import.meta.url));
+```
+
+Em Node recente (`import.meta.dirname`) já resolve isso direto.
+
+## package.json e dependências
+
+O `package.json` é o manifesto do projeto: nome, versão, scripts e
+dependências. Dois campos merecem atenção em produção:
+
+- `"engines"` declara a versão de Node exigida, evitando surpresa no
+  deploy.
+- `package-lock.json` deve **sempre** ir para o controle de versão. É ele que
+  garante que todo mundo instale exatamente as mesmas versões.
+
+No servidor, prefira `npm ci` a `npm install`. O `ci` respeita o lockfile
+exatamente e falha se ele estiver inconsistente com o `package.json` — é o
+comportamento que você quer em produção.
+
+## Variáveis de ambiente
+
+Configuração muda entre ambientes; código, não. Por isso todo valor
+configurável (URL do banco, chave de API, porta) vem de `process.env`.
+
+Na prática você usa um arquivo `.env` local, carregado pela biblioteca `dotenv`
+ou, em Node moderno, nativamente com `--env-file`:
+
+```bash
+# carrega as variáveis ao iniciar
+node --env-file=.env server.js
+```
+
+```js
+const porta = process.env.PORT ?? 3000;
+const conn = process.env.DATABASE_URL;
+```
+
+A regra que não se negocia: **`.env` nunca entra no Git**. Adicione ao
+`.gitignore` e versione apenas um `.env.example` com as chaves e valores
+vazios, para documentar o que a aplicação espera. Se uma chave já foi
+commitada, rotacione — não basta remover o arquivo do histórico.
+
+## Produção: PM2 e health check
+
+Rodar `node server.js` no terminal funciona, mas morre junto com a sessão e
+não reinicia após um erro. O PM2 resolve os dois: gerencia processos, registra
+logs e reinicia em caso de queda.
+
+```bash
+npm install -g pm2
+
+pm2 start server.js --name api
+pm2 save                # persiste a lista de processos
+pm2 startup             # reinicia o PM2 junto com o boot da máquina
+pm2 logs api            # acompanha o log
+```
+
+O comando `pm2 startup` imprime uma linha para você executar com `sudo`; só
+depois disso o PM2 volta sozinho após um reboot.
+
+Para o sistema de orquestração saber se a aplicação está viva, exponha um
+endpoint de health check que responda rápido e sem depender de nada externo:
+
+```js
+app.get("/health", (_req, res) => {
+  res.status(200).json({ ok: true, uptime: process.uptime() });
+});
+```
+
+Ele deve ser barato: nada de consulta a banco nesse caminho, porque um health
+check lento derruba o orquestrador que o chama. Se precisar validar
+dependências, faça em um endpoint separado, `/ready`.
+
+## Resumo
+
+- O Node usa uma thread e I/O não bloqueante: prefira a API com `await` e
+  mova trabalho de CPU para `worker_threads`.
+- Adote ESM com `"type": "module"`; use `import.meta` no lugar de
+  `__dirname`.
+- Configure por `process.env`, carregue `.env` e **nunca** versione esse
+  arquivo; use `npm ci` no deploy.
+- Em produção, PM2 com `pm2 start`, `pm2 save` e `pm2 startup` para o processo
+  sobreviver a erros e reboots.
+- Exponha um `/health` barato para a orquestração detectar falhas.

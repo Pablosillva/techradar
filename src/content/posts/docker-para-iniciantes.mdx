@@ -1,0 +1,209 @@
+---
+title: "Docker para iniciantes: do zero ao primeiro container"
+description: "Docker do zero: imagem e container, Dockerfile comentado, .dockerignore, comandos básicos, volumes e docker-compose com aplicação e Postgres."
+date: "2026-09-19"
+category: "programacao"
+tags: ["Docker", "DevOps", "Infraestrutura", "Guia"]
+featured: true
+views: 10890
+---
+
+## Imagem é classe, container é instância
+
+A analogia funciona melhor que qualquer definição. Uma **imagem** é a classe: um
+modelo imutável, com o sistema operacional e suas dependências empacotadas. Um
+**container** é a instância: a imagem rodando, com o próprio sistema de
+arquivos e processo.
+
+Duas consequências práticas caem direto: você pode ter dez containers a partir da
+mesma imagem sem peso duplicado no disco, e container é descartável — se algo
+sai de controle, você joga fora e sobe outro a partir da mesma imagem.
+
+O fluxo mental é sempre: **Dockerfile → imagem → container**.
+
+## O Dockerfile mínimo (e comentado)
+
+O Dockerfile é uma receita. Cada instrução vira uma camada, e camadas são
+reusadas em cache — por isso a ordem das linhas importa muito.
+
+```dockerfile
+# 1. Base enxuta. Fixe a versão; ":latest" em produção é pedir problema.
+FROM node:22-alpine
+
+# 2. Defina o diretório de trabalho antes de qualquer COPY.
+WORKDIR /app
+
+# 3. Copie SÓ o manifesto antes do código. Enquanto o package.json não mudar,
+#    essa camada é reaproveitada e o build fica segundos mais rápido.
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# 4. Agora o código, que muda o tempo todo.
+COPY . .
+
+# 5. Não rode como root. Processo de aplicação não precisa de privilégio.
+USER node
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
+```
+
+Três detalhes que economizam problemas: `--omit=dev` não instala dependências de
+desenvolvimento na imagem; `USER node` evita que um bug na aplicação vire
+comprometimento do host; e a forma de array em `CMD` evita que o shell interprete
+os argumentos.
+
+Uma ressalva honesta: `alpine` é ótima para JS puro, mas bibliotecas nativas
+compiladas (`sharp`, `bcrypt`) às vezes precisam de toolchain de build. Se a
+instalação falhar, troque por `node:22-slim` antes de ficar horas depurando.
+
+## O .dockerignore
+
+Sem esse arquivo, o `COPY . .` manda o build context inteiro — incluindo
+`node_modules` do seu host, `.git` e o `.env` — para dentro da imagem. Isso
+incha o build, polui a imagem e vaza segredo. O `.dockerignore` fica na raiz do
+projeto:
+
+```text
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.env.*
+Dockerfile
+.dockerignore
+coverage
+.next
+dist
+```
+
+Note que `.env` está lá. Arquivo de ambiente dentro da imagem é segredo
+dentro da imagem — e imagem vai para registry.
+
+## O ciclo de vida no dia a dia
+
+```bash
+# constrói a imagem a partir do Dockerfile na pasta atual
+docker build -t minha-api:1.0.0 .
+
+# sobe um container da imagem, publicando a porta 3000 da máquina na 3000
+docker run -d --name api -p 3000:3000 minha-api:1.0.0
+
+# lista containers em execução
+docker ps
+
+# acompanha o log (Ctrl+C sai sem parar o container)
+docker logs -f api
+
+# entra no container enquanto ele roda
+docker exec -it api sh
+
+# para e remove
+docker stop api && docker rm api
+```
+
+O `-d` é o que devolve o terminal: sem ele, o processo ocupa o shell. E sem
+`--name`, o Docker inventa um nome aleatório e você perde a referência no
+comando seguinte.
+
+## Volumes: dados que sobrevivem ao container
+
+Container é descartável — e o banco de dados não pode ser. Um **volume** guarda
+os dados fora do ciclo de vida do container:
+
+```bash
+docker volume create dados-pg
+docker run -d --name pg -p 5432:5432 \
+  -e POSTGRES_PASSWORD=segredo \
+  -e POSTGRES_DB=app \
+  -v dados-pg:/var/lib/postgresql/data \
+  postgres:16-alpine
+```
+
+Sem o volume, `docker rm pg` leva o banco inteiro junto. Com o volume, o
+container pode ser destruído e recriado com os dados intactos.
+
+Atenção ao detalhe de segurança: `-e POSTGRES_PASSWORD=segredo` deixa a senha no
+histórico do shell. Em ambiente real, use arquivo de ambiente ou gerenciador de
+segredos.
+
+## Docker Compose com app e Postgres
+
+Manter dois containers de pé à mão, com a rede certa, é o que o Compose resolve.
+O arquivo fica na raiz do projeto:
+
+```yaml
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://app:segredo@db:5432/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: segredo
+      POSTGRES_DB: app
+    volumes:
+      - dados-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dados-pg:
+```
+
+E os comandos:
+
+```bash
+docker compose up -d --build
+docker compose logs -f app
+docker compose exec db psql -U app -d app
+docker compose down
+```
+
+Repare no `condition: service_healthy`. Um `depends_on` simples só garante que o
+container do banco **começou**, não que o Postgres **aceita conexão** — e a
+aplicação iniciar cedo demais falha e conexa. O `healthcheck` transforma "começou"
+em "está pronto".
+
+## Por que localhost do container não é o seu
+
+Este é o tropeço que todo mundo enfrenta na primeira hora. Cada container tem seu
+**próprio** namespace de rede. `localhost` lá dentro significa o próprio
+container, não a sua máquina. Por isso `localhost:5432` no app não acha um
+banco rodando na sua máquina.
+
+Existem três caminhos, na ordem em que você deve preferir:
+
+1. **Nome do serviço do Compose.** Quando dois serviços estão na mesma rede do
+   Compose, o DNS interno resolve pelo nome: `db:5432` é o Postgres. É o jeito
+   certo.
+2. **`host.docker.internal`.** Aponta para o host. Funciona sozinho no Docker
+   Desktop (Mac e Windows); no Linux, precisa de `--add-host=host.docker.internal:host-gateway`.
+3. **IP do host na rede Docker.** Funciona, mas muda entre máquinas — evite.
+
+Do lado inverso, do *host* para o container, vale `-p 3000:3000`: o
+`localhost:3000` funciona porque a porta foi publicada para a máquina.
+
+## Resumo
+
+- Imagem é o modelo, container é a instância rodando; o fluxo é Dockerfile,
+  imagem, container.
+- Coloque `package*.json` antes do `COPY . .` para aproveitar o cache de camadas,
+  e nunca esqueça o `.dockerignore` — ele evita vazar `.env`.
+- `docker run -d --name` é o mínimo para ter controle sobre o processo.
+- Volume é o que impede o banco de morrer com o container.
+- Compose conecta serviços pelo **nome**, não por `localhost`, e `depends_on`
+  com `condition: service_healthy` espera o banco ficar pronto de verdade.

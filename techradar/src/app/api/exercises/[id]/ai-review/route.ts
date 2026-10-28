@@ -32,7 +32,16 @@ export async function POST(
     return NextResponse.json({ error: "Exercício não encontrado" }, { status: 404 });
   }
 
-  const { feedback, score } = await reviewCode(code, exercise.description);
+  const solutionCode = typeof body.solutionCode === "string" ? body.solutionCode : "";
+  const context = [
+    exercise.description,
+    solutionCode ? `Solução de referência:
+${solutionCode}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const { feedback, score } = await reviewCode(code, context);
 
   const userId = session.user.id as string;
 
