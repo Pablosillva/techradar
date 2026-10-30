@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RelatedJobs } from "@/components/recommendations/related-jobs";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft, BookOpen } from "lucide-react";
 import { AddToLibraryButton } from "@/components/study/add-to-library-button";
 
 interface LivroPageProps {
@@ -112,12 +112,18 @@ export default async function LivroPage({ params }: LivroPageProps) {
           </div>
         )}
 
-        <div className="mt-8">
+        <div className="mt-8 flex items-center gap-3">
           <Button asChild size="lg">
             <a href={book.url} target="_blank" rel="noopener noreferrer">
-              Acessar livro
+              Acessar na fonte
               <ExternalLink size={16} className="ml-2" aria-hidden="true" />
             </a>
+          </Button>
+          <Button
+            size="lg"
+            asChild
+          >
+            <Link href={`/livro/${id}/ler`}>Ler no StudyHub <BookOpen size={16} className="ml-2" aria-hidden="true" /></Link>
           </Button>
         </div>
         <AddToLibraryButton itemType="book" itemId={book.id} />

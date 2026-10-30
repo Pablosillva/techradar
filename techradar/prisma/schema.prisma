@@ -32,6 +32,7 @@ model User {
   codeErrors    CodeError[]
   mindMaps      MindMap[]
   libraryItems  LibraryItem[]
+  bookmarks     Bookmark[]
 }
 
 model Account {
@@ -195,6 +196,7 @@ model Book {
   updatedAt    DateTime @updatedAt
 
   skills    BookSkill[]
+  chapters  Chapter[]
 
   @@index([title])
   @@index([language])
@@ -207,6 +209,44 @@ model BookSkill {
   skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
   @@id([bookId, skillId])
+}
+
+// ─── Capítulos de livro (leitor dedicado) ────────────────────────────────────
+
+model Chapter {
+  id        String   @id @default(cuid())
+  bookId    String
+  title     String
+  order     Int
+  pagesStart Int?
+  pagesEnd  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookmarks Bookmark[]
+
+  @@index([bookId, order])
+}
+
+// ─── Marcador de leitura (posição → nota) ────────────────────────────────────
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  itemType  String
+  itemId    String
+  chapterId String?
+  position  Int
+  note      String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  @@index([userId, itemType, itemId])
+  @@index([userId, createdAt])
 }
 
 // ─── Conteúdo: Audiobook ──────────────────────────────────────────────────

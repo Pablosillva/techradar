@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RelatedJobs } from "@/components/recommendations/related-jobs";
-import { ExternalLink, ArrowLeft, Clock } from "lucide-react";
+import { ExternalLink, ArrowLeft, Clock, Volume2 } from "lucide-react";
 import { AddToLibraryButton } from "@/components/study/add-to-library-button";
 
 interface AudiobookPageProps {
@@ -111,12 +111,18 @@ export default async function AudiobookPage({ params }: AudiobookPageProps) {
           </div>
         )}
 
-        <div className="mt-8">
+        <div className="mt-8 flex items-center gap-3">
           <Button asChild size="lg">
             <a href={audiobook.url} target="_blank" rel="noopener noreferrer">
-              Acessar audiobook
+              Abrir áudio na fonte
               <ExternalLink size={16} className="ml-2" aria-hidden="true" />
             </a>
+          </Button>
+          <Button
+            size="lg"
+            asChild
+          >
+            <Link href={`/audiobook/${id}/ouvir`}>Ouvir no StudyHub <Volume2 size={16} className="ml-2" aria-hidden="true" /></Link>
           </Button>
         </div>
         <AddToLibraryButton itemType="audiobook" itemId={audiobook.id} />
