@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Header } from "@/components/layout/header";
+import { Sidebar } from "@/components/layout/sidebar";
+import { Topbar } from "@/components/layout/topbar";
 import { Footer } from "@/components/layout/footer";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -9,11 +10,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "TechRadar — Hub de Buscas de Tecnologia",
-    template: "%s | TechRadar",
+    default: "StudyHub — Painel de Estudos",
+    template: "%s | StudyHub",
   },
   description:
-    "Centralize sua busca por vagas, cursos, livros e audiobooks de tecnologia. Cruzamento inteligente de skills para acelerar sua carreira.",
+    "Seu hub de estudos: flashcards, treino de código, mapas mentais, biblioteca e muito mais.",
 };
 
 export default function RootLayout({
@@ -23,11 +24,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100`}>
+      <body className={`${inter.className} min-h-screen bg-[#0a0a0f] text-gray-200 antialiased`}>
         <Providers>
           <div className="flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
+            <Topbar />
+            <div className="flex-1 flex">
+              <Sidebar />
+              <main className="flex-1 overflow-x-hidden">
+                <div className="px-6 pt-6 pb-12 lg:pl-[calc(64px+1rem)]">{children}</div>
+              </main>
+            </div>
             <Footer />
           </div>
         </Providers>
