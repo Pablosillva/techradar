@@ -28,6 +28,7 @@ model User {
   searchLogs    SearchLog[]
   flashcards    Flashcard[]
   studyNotes    StudyNote[]
+  tags          Tag[]
   exercises     Exercise[]
   codeErrors    CodeError[]
   mindMaps      MindMap[]
@@ -362,12 +363,45 @@ model Flashcard {
 model StudyNote {
   id        String   @id @default(cuid())
   userId    String
-  content   String   @db.Text
-  source    String? // "manual" | "ai" | "book" | "lecture"
+  title     String   // título da nota
+  markdown  String   @db.Text // conteúdo em Markdown
+  source    String? // "manual" | "ai" | "book" | "lecture" | "highlight"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags    NoteTag[]
+
+  @@index([userId])
+  @@index([updatedAt])
+}
+
+// ─── Tags para notas (estilo Obsidian) ─────────────────────────────────────
+
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String   // ex: "React", "middleware", "estudo"
+  slug      String   @unique // ex: "react", "middleware"
+  color     String? // cor da tag (hex)
+  createdAt DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes    NoteTag[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+}
+
+// ─── Relação N:N Nota ↔ Tag ────────────────────────────────────────────────
+
+model NoteTag {
+  noteId String
+  tagId  String
+  note   StudyNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag    Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([noteId, tagId])
 }
 
 // ─── StudyHub: Treino de código ───────────────────────────────────────────

@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Roadmap", href: "/roadmap", icon: FileText },
-  { name: "Caderno", href: "/caderno", icon: BookOpen },
+  { name: "Notas", href: "/notas", icon: BookOpen },
   { name: "Laboratório", href: "/laboratorio", icon: FlaskConical },
   { name: "Exercícios", href: "/treino", icon: Code2 },
   { name: "Revisões", href: "/flashcards", icon: RefreshCw },

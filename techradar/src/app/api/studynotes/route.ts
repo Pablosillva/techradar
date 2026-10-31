@@ -34,20 +34,21 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const content = typeof body.content === "string" ? body.content.trim() : "";
-  if (!content) {
-    return NextResponse.json({ error: "content é obrigatório" }, { status: 400 });
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  const markdown = typeof body.markdown === "string" ? body.markdown.trim() : "";
+  if (!title || !markdown) {
+    return NextResponse.json({ error: "title e markdown são obrigatórios" }, { status: 400 });
   }
 
   const userId = session.user.id as string;
 
   const note = await prisma.studyNote.create({
-    data: { userId, content, source: body.source ?? "manual" },
+    data: { userId, title, markdown, source: body.source ?? "manual" },
   });
 
   let generatedCards: { front: string; back: string }[] = [];
   if (body.generate !== false && process.env.ANTHROPIC_API_KEY) {
-    const { cards } = await generateFlashcardsFromNote(content, body.context);
+    const { cards } = await generateFlashcardsFromNote(markdown, body.context);
     generatedCards = cards;
 
     for (const card of cards) {
