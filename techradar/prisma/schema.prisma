@@ -34,6 +34,8 @@ model User {
   mindMaps      MindMap[]
   libraryItems  LibraryItem[]
   bookmarks     Bookmark[]
+  documents     Document[]
+  highlights    Highlight[]
 }
 
 model Account {
@@ -303,6 +305,45 @@ model LibraryItem {
   @@index([userId, status])
 }
 
+// ─── Documentos da biblioteca (PDF/EPUB) ───────────────────────────────────
+
+model Document {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  fileType  String   // "pdf" | "epub"
+  fileUrl   String   // URL externa ou path local
+  fileData  String?  // base64 para MVP (sem bucket externo)
+  fileSize  Int
+  pageCount Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  highlights Highlight[]
+
+  @@index([userId])
+}
+
+model Highlight {
+  id        String   @id @default(cuid())
+  userId    String
+  documentId String
+  text      String   @db.Text
+  page      Int
+  position  Json?
+  noteId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document  Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  note      StudyNote? @relation(fields: [noteId], references: [id], onDelete: SetNull)
+
+  @@index([userId, documentId])
+  @@index([userId, createdAt])
+}
+
 // ─── Favoritos (N:N polimórfico via type + externalId) ───────────────────
 
 model Favorite {
@@ -369,8 +410,9 @@ model StudyNote {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags    NoteTag[]
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags      NoteTag[]
+  highlights Highlight[]
 
   @@index([userId])
   @@index([updatedAt])

@@ -30,6 +30,7 @@ const navItems = [
   { name: "Projetos", href: "/projetos", icon: Briefcase },
   { name: "Candidaturas", href: "/candidaturas", icon: UserIcon },
   { name: "Biblioteca", href: "/biblioteca", icon: Library },
+  { name: "Documentos", href: "/documentos", icon: FileText },
   { name: "Tarefas", href: "/tarefas", icon: Calendar },
   { name: "Configurações", href: "/configuracoes", icon: Settings },
 ];
