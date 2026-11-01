@@ -16,6 +16,7 @@ import {
   Calendar,
   Settings,
   ChevronRight,
+  Volume2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +32,7 @@ const navItems = [
   { name: "Candidaturas", href: "/candidaturas", icon: UserIcon },
   { name: "Biblioteca", href: "/biblioteca", icon: Library },
   { name: "Documentos", href: "/documentos", icon: FileText },
+  { name: "Audiobooks", href: "/busca?tab=audiobooks", icon: Volume2 },
   { name: "Tarefas", href: "/tarefas", icon: Calendar },
   { name: "Configurações", href: "/configuracoes", icon: Settings },
 ];

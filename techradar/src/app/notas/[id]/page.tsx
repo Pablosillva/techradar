@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
+import { AudioPlayer } from "@/components/study/audio-player";
 
 interface NotaPageProps {
   params: Promise<{ id: string }>;
@@ -86,6 +87,13 @@ export default async function NotaPage({ params }: NotaPageProps) {
               <p className="text-gray-500 italic">Sem conteúdo.</p>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Ouvir nota em voz alta */}
+      <Card>
+        <CardContent className="p-6">
+          <AudioPlayer text={note.markdown} title={note.title} />
         </CardContent>
       </Card>
 

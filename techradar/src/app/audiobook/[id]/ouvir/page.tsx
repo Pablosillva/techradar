@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookOpen, ChevronRight, Volume2 } from "lucide-react";
 import Link from "next/link";
+import { AudioPlayer } from "@/components/study/audio-player";
 
 interface AudiobookPlayerPageProps {
   params: Promise<{ id: string }>;
@@ -190,6 +191,17 @@ export default async function AudiobookPlayerPage({
                   style={{ width: `${library?.progress ?? 0}%` }}
                 />
               </div>
+            </div>
+
+            {/* Síntese de voz para descrição/resumo */}
+            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                Ouvir descrição (síntese de voz)
+              </h3>
+              <AudioPlayer
+                text={audiobook.description || `Áudiobook: ${audiobook.title} por ${audiobook.authors.join(", ")}`}
+                title={audiobook.title}
+              />
             </div>
 
             <div className="mt-6 flex items-center gap-3">
