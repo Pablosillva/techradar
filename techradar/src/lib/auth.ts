@@ -1,72 +1,87 @@
-import NextAuth from "next-auth";
-import GitHub from "next-auth/providers/github";
-import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { cookies } from "next/headers";
+import { jwtVerify, SignJWT } from "jose";
 import { prisma } from "./prisma";
 import { compare } from "bcryptjs";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    GitHub({
-      clientId: process.env.AUTH_GITHUB_ID ?? "",
-      clientSecret: process.env.AUTH_GITHUB_SECRET ?? "",
-    }),
-    Credentials({
-      id: "credentials",
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Senha", type: "password" },
+const SECRET = new TextEncoder().encode(
+  process.env.AUTH_SECRET || "fallback-secret-do-not-use-in-production-change-me"
+);
+
+export async function auth() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("session")?.value;
+
+    if (!token) return null;
+
+    const { payload } = await jwtVerify(token, SECRET);
+    return {
+      user: {
+        id: payload.id as string,
+        email: payload.email as string,
+        name: payload.name as string | undefined,
+        role: payload.role as string,
       },
-      async authorize(credentials: Partial<Record<"email" | "password", unknown>>) {
-        const email = credentials?.email as string | undefined;
-        const password = credentials?.password as string | undefined;
+    };
+  } catch {
+    return null;
+  }
+}
 
-        if (!email || !password) {
-          return null;
-        }
+export async function signIn(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
+  if (!email || !password) {
+    return { error: "Credenciais inválidas" };
+  }
 
-        if (!user?.password) {
-          return null;
-        }
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
 
-        const passwordHash = user.password;
+  if (!user || !user.password) {
+    return { error: "Credenciais inválidas" };
+  }
 
-        const isValid = await compare(password, passwordHash);
+  const isValid = await compare(password, user.password);
 
-        if (!isValid) {
-          return null;
-        }
+  if (!isValid) {
+    return { error: "Credenciais inválidas" };
+  }
 
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          image: user.image,
-        };
-      },
-    }),
-  ],
-  pages: {
-    signIn: "/entrar",
-  },
-  session: {
-    strategy: "jwt",
-  },
-  callbacks: {
-    session({ session, token, user }) {
-      if (session.user) {
-        const userId = (user?.id ?? token?.sub) as string | undefined;
-        if (userId) {
-          session.user.id = userId;
-        }
-      }
-      return session;
-    },
-  },
-});
+  const token = await new SignJWT({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(SECRET);
+
+  const cookieStore = await cookies();
+  cookieStore.set("session", token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  });
+
+  return { success: true, user };
+}
+
+export async function signOut() {
+  const cookieStore = await cookies();
+  cookieStore.delete("session");
+}
+
+export async function requireAuth() {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Não autenticado");
+  }
+  return session;
+}

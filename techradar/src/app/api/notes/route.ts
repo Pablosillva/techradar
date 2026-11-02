@@ -81,3 +81,4 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ data: note }, { status: 201 });
 }
+

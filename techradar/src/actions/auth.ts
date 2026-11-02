@@ -1,66 +1,64 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { hash, compare } from "bcryptjs";
-import { signIn } from "@/lib/auth";
 import { redirect } from "next/navigation";
-
-export async function githubSignInAction() {
-  await signIn("github", { callbackUrl: "/" });
-}
+import { signIn, signOut } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { hash } from "bcryptjs";
 
 export async function loginAction(formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
   if (!email || !password) {
-    redirect("/entrar?error=campos");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
-
-  if (!user?.password) {
     redirect("/entrar?error=credenciais");
   }
 
-  const isValid = await compare(password, user.password);
+  const result = await signIn(formData);
 
-  if (!isValid) {
+  if (result?.error) {
     redirect("/entrar?error=credenciais");
   }
 
-  await signIn("credentials", { email, password, redirectTo: "/" });
+  redirect("/");
+}
+
+export async function githubSignInAction() {
+  redirect("/entrar?error=github-desabilitado");
+}
+
+export async function logoutAction() {
+  await signOut();
+  redirect("/entrar");
 }
 
 export async function registerAction(formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
-  const name = String(formData.get("name") ?? "");
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
   if (!email || !password) {
-    redirect("/entrar?error=campos");
+    redirect("/cadastrar?error=dados-incompletos");
   }
 
-  if (password.length < 6) {
-    redirect("/entrar?error=senha");
-  }
+  const existing = await prisma.user.findUnique({
+    where: { email },
+  });
 
-  const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    redirect("/entrar?error=email");
+    redirect("/cadastrar?error=email-em-uso");
   }
 
-  const hashed = await hash(password, 10);
-  const user = await prisma.user.create({
+  const { hash } = await import("bcryptjs");
+  const hashedPassword = await hash(password, 10);
+
+  await prisma.user.create({
     data: {
       email,
-      password: hashed,
       name: name || null,
+      password: hashedPassword,
       role: "USER",
     },
   });
 
-  await signIn("credentials", { email, password, redirectTo: "/" });
+  redirect("/entrar?ok=conta-criada");
 }

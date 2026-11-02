@@ -55,3 +55,4 @@ export async function GET(request: Request) {
     data: { notes, books, flashcards },
   });
 }
+

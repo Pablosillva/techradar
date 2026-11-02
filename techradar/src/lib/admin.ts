@@ -1,9 +1,17 @@
-import type { Session } from "next-auth";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export interface AuthSession {
+  user: {
+    id: string;
+    email: string;
+    name?: string;
+    role: string;
+  } | null;
+}
+
 export interface AdminSession {
-  session: Session | null;
+  session: AuthSession | null;
   userId: string | null;
   isAdmin: boolean;
 }
@@ -13,10 +21,10 @@ export interface AdminSession {
  * Retorna { isAdmin } para facilitar o uso nos route handlers.
  */
 export async function getAdminSession(): Promise<AdminSession> {
-  const session: Session | null = await auth();
+  const session: AuthSession | null = await auth();
 
   if (!session?.user?.id) {
-    return { session, userId: null, isAdmin: false };
+    return { session: null, userId: null, isAdmin: false };
   }
 
   const user = await prisma.user.findUnique({

@@ -88,8 +88,8 @@ export async function Header() {
               user={{
                 name: session.user.name ?? undefined,
                 email: session.user.email ?? undefined,
-                image: session.user.image ?? undefined,
-                id: (session.user as { id?: string }).id ?? "",
+                image: undefined,
+                id: session.user.id ?? "",
               }}
             />
           ) : (
