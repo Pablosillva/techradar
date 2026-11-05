@@ -1,4 +1,4 @@
-# TechRadar — Hub de Buscas de Tecnologia
+# DevPath Hub — Seu hub de estudos e tecnologia
 
 Centralize sua busca por vagas, cursos, livros e audiobooks de tecnologia em um só lugar. Receba recomendações cruzadas baseadas nas skills que você precisa.
 
@@ -16,7 +16,7 @@ Centralize sua busca por vagas, cursos, livros e audiobooks de tecnologia em um 
 
 A página `/admin` (protegida por autenticação) permite:
 
-- **Fontes de Vagas**: Adicionar sites (ex: Trampos.co, Coadesh) que passam a ser buscáveis no TechRadar via filtro de fonte. Inclui fontes padrão (Remotive, Arbeitnow).
+- **Fontes de Vagas**: Adicionar sites (ex: Trampos.co, Coadesh) que passam a ser buscáveis no DevPath Hub via filtro de fonte. Inclui fontes padrão (Remotive, Arbeitnow).
 - **Cursos**: Editar cursos (título, provider, URL, preço, nível, duração, gratuito/pago, skills).
 - **Livros**: Editar livros (título, autores, URL, editora, páginas, gratuito/pago, skills).
 - **Audiobooks**: Editar audiobooks (título, autores, narrador, URL, duração, gratuito/pago, skills).
@@ -160,7 +160,7 @@ techradar/
 1. Acesse https://github.com/settings/developers
 2. Crie um novo OAuth App
 3. Configure:
-   - **Application name**: TechRadar
+   - **Application name**: DevPath Hub
    - **Homepage URL**: `http://localhost:3000` (dev) ou URL de produção
    - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
 4. Copie o **Client ID** e **Client Secret**

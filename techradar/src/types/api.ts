@@ -1,5 +1,5 @@
 /**
- * Tipos compartilhados de request/response da API do TechRadar.
+ * Tipos compartilhados de request/response da API do DevPath Hub.
  */
 
 export type TabType = "vagas" | "cursos" | "livros" | "audiobooks" | "tudo";

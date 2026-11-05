@@ -57,7 +57,7 @@ export default async function AdminPage() {
             Fontes de Vagas
           </h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Adicione sites de vagas para que possam ser buscados no TechRadar.
+            Adicione sites de vagas para que possam ser buscados no DevPath Hub.
           </p>
           <div className="mt-4">
             <JobSourcesManager

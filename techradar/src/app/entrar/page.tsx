@@ -10,7 +10,7 @@ export default function EntrarPage() {
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Entrar no TechRadar</CardTitle>
+          <CardTitle className="text-2xl">Entrar no DevPath Hub</CardTitle>
           <CardDescription>
             Salve favoritos e acompanhe seu histórico de buscas
           </CardDescription>

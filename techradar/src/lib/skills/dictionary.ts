@@ -1,5 +1,5 @@
 /**
- * Dicionário curado de skills para o TechRadar.
+ * Dicionário curado de skills para o DevPath Hub.
  * Cada skill tem slug único, nome exibido, categoria e aliases para normalização.
  */
 

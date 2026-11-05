@@ -10,11 +10,17 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "StudyHub — Painel de Estudos",
-    template: "%s | StudyHub",
+    default: "DevPath Hub",
+    template: "%s | DevPath Hub",
   },
   description:
     "Seu hub de estudos: flashcards, treino de código, mapas mentais, biblioteca e muito mais.",
+  icons: [
+    { rel: "icon", type: "image/svg+xml", url: "/favicon.svg" },
+    { rel: "icon", type: "image/png", sizes: "32x32", url: "/favicon.svg" },
+    { rel: "icon", type: "image/png", sizes: "16x16", url: "/favicon.svg" },
+    { rel: "apple-touch-icon", sizes: "180x180", url: "/favicon.svg" },
+  ],
 };
 
 export default function RootLayout({

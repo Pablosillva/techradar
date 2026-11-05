@@ -1,5 +1,5 @@
 /**
- * Algoritmo de score de recomendação do TechRadar.
+ * Algoritmo de score de recomendação do DevPath Hub.
  *
  * Score = (cobertura de skills × 0.7) + (popularidade da fonte × 0.3)
  *

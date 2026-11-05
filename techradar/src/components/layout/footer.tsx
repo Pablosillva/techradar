@@ -4,8 +4,8 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            <span className="font-semibold text-gray-700 dark:text-gray-300">TechRadar</span>{" "}
-            — Hub de buscas de tecnologia
+            <span className="font-semibold text-gray-700 dark:text-gray-300">DevPath Hub</span>{" "}
+            — Seu hub de estudos e tecnologia
           </p>
           <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
             <a href="https://remotive.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
