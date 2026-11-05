@@ -3,28 +3,53 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: #0a0a0f;
-  --color-foreground: #e5e7eb;
+  /* DevPath Hub — paleta dark SaaS */
+  --color-background: #070b12;
+  --color-foreground: #e6edf7;
+
+  --color-ink: #070b12;
+  --color-panel: #0d1420;
+  --color-panel-2: #111a28;
+  --color-line: #1d2a3b;
+  --color-muted: #8a9bb2;
+
+  --color-accent: #22d3ee;
+  --color-accent-strong: #06b6d4;
+  --color-violet: #8b5cf6;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --background: #0a0a0f;
-  --foreground: #e5e7eb;
+  --background: #070b12;
+  --foreground: #e6edf7;
+  color-scheme: dark;
 }
 
 .dark {
-  --background: #0a0a0f;
-  --foreground: #f9fafb;
+  --background: #070b12;
+  --foreground: #e6edf7;
+}
+
+html {
+  background-color: var(--background);
 }
 
 body {
-  background: var(--background);
+  min-height: 100vh;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(1100px 520px at 12% -12%, rgba(34, 211, 238, 0.09), transparent 62%),
+    radial-gradient(900px 480px at 100% -5%, rgba(139, 92, 246, 0.08), transparent 58%),
+    radial-gradient(700px 500px at 50% 110%, rgba(14, 165, 233, 0.05), transparent 60%);
+  background-attachment: fixed;
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Foco visível para acessibilidade */
 *:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #22d3ee;
   outline-offset: 2px;
 }
 
@@ -39,10 +64,27 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #374151;
-  border-radius: 4px;
+  background: #253449;
+  border-radius: 999px;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #374151;
+::-webkit-scrollbar-thumb:hover {
+  background: #33465f;
+}
+
+/* Trilha de progresso animada dos cards do dashboard */
+@keyframes devpath-bar {
+  from {
+    width: 0%;
+  }
+}
+
+.progress-bar {
+  animation: devpath-bar 900ms ease-out both;
+}
+
+/* Tooltip simples para o heatmap */
+.heatmap-cell:hover .heatmap-tooltip {
+  opacity: 1;
+  transform: translateY(-2px);
 }

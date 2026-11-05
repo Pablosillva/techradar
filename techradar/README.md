@@ -4,6 +4,7 @@ Centralize sua busca por vagas, cursos, livros e audiobooks de tecnologia em um 
 
 ## Funcionalidades
 
+- **Dashboard real**: métricas, sequência, metas, revisões, gráfico de 30 dias, progresso por tecnologia, tarefas, projetos e calendário — tudo calculado a partir do banco
 - **Busca unificada**: Vagas, Cursos, Livros e Audiobooks em um único hub
 - **Cruzamento inteligente**: Ao ver uma vaga, receba recomendações de cursos/livros/audiobooks que cobrem as skills exigidas
 - **Filtros avançados**: Remoto/presencial, nível, gratuito/pago, idioma, faixa salarial, fonte e skill
@@ -32,6 +33,23 @@ As rotas de admin utilizam:
 - `PUT /api/admin/books/[id]` — atualiza livro
 - `GET /api/admin/audiobooks` — lista audiobooks
 - `PUT /api/admin/audiobooks/[id]` — atualiza audiobook
+
+## Dashboard (Etapa 2)
+
+A rota `/` agora usa o shell dark do DevPath Hub (sidebar colapsável, topbar com busca
+global, notificações e perfil) e monta todos os cartões com dados reais do Prisma:
+
+- **Horas hoje / Sequência / Metas / Revisões pendentes**: sessões de estudo, metas de
+  `UserSettings` e flashcards vencidos.
+- **Evolução dos estudos**: série contínua dos últimos 30 dias (inclui dias sem estudo).
+- **Progresso por tecnologia**: derivado dos títulos e status dos itens do roadmap.
+- **Recomendação do dia**: prioriza a revisão mais atrasada e, na ausência dela, o
+  próximo item do roadmap.
+- **Tarefas, projetos, calendário e última atividade**: registros reais do usuário.
+
+Os cálculos puros ficam em `src/lib/dashboard/helpers.ts` (com testes) e as consultas em
+`src/lib/dashboard.ts`. O tema usa as variáveis de `src/app/globals.css` e o `class="dark"`
+no `<html>`.
 
 ## Backend de estudos (Etapa 1)
 
@@ -97,14 +115,13 @@ Conteúdo externo (vagas/livros/audiobooks) é opcional via `npm run db:seed:con
 - **Frontend/Backend**: Next.js 16 (App Router) + TypeScript
 - **Estilização**: Tailwind CSS 4 + shadcn/ui
 - **Banco de dados**: PostgreSQL + Prisma ORM
-- **Autenticação**: NextAuth v5 (Auth.js) com GitHub
+- **Autenticação**: JWT em cookie `httpOnly` + bcrypt (implementação própria em `src/lib/auth.ts`)
 - **Testes**: Vitest
 
 ## Pré-requisitos
 
 - Node.js 18+
 - PostgreSQL (local ou Neon/Supabase)
-- Conta GitHub (para OAuth)
 
 ## Instalação
 

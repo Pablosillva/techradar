@@ -1,23 +1,36 @@
 export function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-950">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            <span className="font-semibold text-gray-700 dark:text-gray-300">DevPath Hub</span>{" "}
-            — Seu hub de estudos e tecnologia
-          </p>
-          <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <a href="https://remotive.com" target="_blank" rel="noopener noreferrer" className="hover:underline">
-              Remotive
-            </a>
-            <a href="https://openlibrary.org" target="_blank" rel="noopener noreferrer" className="hover:underline">
-              Open Library
-            </a>
-            <a href="https://librivox.org" target="_blank" rel="noopener noreferrer" className="hover:underline">
-              LibriVox
-            </a>
-          </div>
+    <footer className="border-t border-white/[0.05]">
+      <div className="flex flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:px-6 lg:px-8">
+        <p>
+          <span className="font-semibold text-slate-300">DevPath Hub</span> — Do mecânico ao Full
+          Stack.
+        </p>
+        <div className="flex items-center gap-4">
+          <a
+            href="https://remotive.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-slate-300"
+          >
+            Remotive
+          </a>
+          <a
+            href="https://openlibrary.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-slate-300"
+          >
+            Open Library
+          </a>
+          <a
+            href="https://librivox.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-colors hover:text-slate-300"
+          >
+            LibriVox
+          </a>
         </div>
       </div>
     </footer>

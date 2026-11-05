@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type ButtonHTMLAttributes } from "react";
 import Link from "next/link";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "outline" | "ghost" | "secondary" | "destructive";
+  variant?: "default" | "outline" | "ghost" | "secondary" | "destructive" | "glow";
   size?: "default" | "sm" | "lg" | "icon";
   asChild?: boolean;
   href?: string;
@@ -12,21 +12,23 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", asChild, href, children, ...props }, ref) => {
     const classes = cn(
-      "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#070b12] disabled:pointer-events-none disabled:opacity-50",
       {
-        "bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500":
+        "bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 shadow-[0_10px_30px_-12px_rgba(34,211,238,0.65)] hover:from-cyan-300 hover:to-blue-400":
           variant === "default",
-        "border border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-gray-500 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800":
+        "border border-line bg-white/[0.03] text-slate-200 hover:border-cyan-500/40 hover:bg-white/[0.06] hover:text-white":
           variant === "outline",
-        "hover:bg-gray-100 focus-visible:ring-gray-500 dark:hover:bg-gray-800":
+        "text-slate-300 hover:bg-white/[0.06] hover:text-white":
           variant === "ghost",
-        "bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700":
+        "border border-line bg-panel-2 text-slate-200 hover:bg-[#162235]":
           variant === "secondary",
-        "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500":
+        "bg-red-600 text-white hover:bg-red-500 focus-visible:ring-red-400":
           variant === "destructive",
+        "bg-gradient-to-r from-cyan-400 via-sky-400 to-violet-500 text-slate-950 shadow-[0_12px_34px_-14px_rgba(139,92,246,0.75)] hover:brightness-110":
+          variant === "glow",
         "h-10 px-4 py-2": size === "default",
-        "h-8 rounded-md px-3 text-xs": size === "sm",
-        "h-11 rounded-md px-8": size === "lg",
+        "h-8 rounded-lg px-3 text-xs": size === "sm",
+        "h-11 rounded-lg px-6": size === "lg",
         "h-10 w-10": size === "icon",
       },
       className

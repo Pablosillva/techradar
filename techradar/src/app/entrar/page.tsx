@@ -7,7 +7,7 @@ import { Github } from "@/components/ui/github-icon";
 
 export default function EntrarPage() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center px-4 py-10">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Entrar no DevPath Hub</CardTitle>
