@@ -14,7 +14,7 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const notes = await prisma.studyNote.findMany({
+  const notes = await prisma.note.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
   });
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
   const userId = session.user.id as string;
 
-  const note = await prisma.studyNote.create({
+  const note = await prisma.note.create({
     data: { userId, title, markdown, source: body.source ?? "manual" },
   });
 

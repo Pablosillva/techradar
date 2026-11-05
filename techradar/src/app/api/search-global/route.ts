@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   }
 
   const [notes, books, flashcards] = await Promise.all([
-    prisma.studyNote.findMany({
+    prisma.note.findMany({
       where: {
         userId: session.user.id,
         OR: [

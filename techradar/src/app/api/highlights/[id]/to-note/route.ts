@@ -40,7 +40,7 @@ export async function POST(
 
   const markdown = parsed.data.markdown || `> ${highlight.text}\n\nFonte: página ${highlight.page}`;
 
-  const note = await prisma.studyNote.create({
+  const note = await prisma.note.create({
     data: {
       userId: session.user.id as string,
       title: parsed.data.title,

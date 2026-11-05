@@ -25,7 +25,7 @@ export default async function NotasPage({ searchParams }: NotasPageProps) {
   const { tag } = await searchParams;
 
   const [notes, tags] = await Promise.all([
-    prisma.studyNote.findMany({
+    prisma.note.findMany({
       where: {
         userId: session.user.id,
         ...(tag ? { tags: { some: { tag: { slug: tag } } } } : {}),

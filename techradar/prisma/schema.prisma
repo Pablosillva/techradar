@@ -1,5 +1,5 @@
 // prisma/schema.prisma
-// Schema completo do TechRadar — hub de buscas de tecnologia
+// Schema completo do DevPath Hub — hub de estudos e evolução profissional
 
 generator client {
   provider = "prisma-client-js"
@@ -22,20 +22,32 @@ model User {
   password      String?
   createdAt     DateTime  @default(now())
 
-  accounts      Account[]
-  sessions      Session[]
-  favorites     Favorite[]
-  searchLogs    SearchLog[]
-  flashcards    Flashcard[]
-  studyNotes    StudyNote[]
-  tags          Tag[]
-  exercises     Exercise[]
-  codeErrors    CodeError[]
-  mindMaps      MindMap[]
-  libraryItems  LibraryItem[]
-  bookmarks     Bookmark[]
-  documents     Document[]
-  highlights    Highlight[]
+  accounts     Account[]
+  sessions     Session[]
+  favorites    Favorite[]
+  searchLogs   SearchLog[]
+  flashcards   Flashcard[]
+  studyNotes   Note[]
+  tags         Tag[]
+  exercises    Exercise[]
+  codeErrors   CodeError[]
+  mindMaps     MindMap[]
+  libraryItems LibraryItem[]
+  bookmarks    Bookmark[]
+  documents    Document[]
+  highlights   Highlight[]
+
+  // DevPath Hub: domínio de estudos (todas as entidades são isoladas por userId)
+  settings        UserSettings?
+  roadmaps        Roadmap[]
+  roadmapItems    RoadmapItem[]
+  studyContents   StudyContent[]
+  learningPaths   LearningPath[]
+  subjects        Subject[]
+  topics          Topic[]
+  studySessions   StudySession[]
+  projects        Project[]
+  jobApplications JobApplication[]
 }
 
 model Account {
@@ -78,8 +90,8 @@ model VerificationToken {
 model Skill {
   id          String   @id @default(cuid())
   slug        String   @unique // ex: "react", "typescript"
-  name        String   // ex: "React", "TypeScript"
-  category    String   // "frontend" | "backend" | "devops" | "data" | "mobile" | "soft"
+  name        String // ex: "React", "TypeScript"
+  category    String // "frontend" | "backend" | "devops" | "data" | "mobile" | "soft"
   aliases     String[] // ["reactjs", "react.js", "react js"]
   description String?
 
@@ -95,8 +107,8 @@ model JobSource {
   id        String   @id @default(cuid())
   name      String
   url       String
-  source    String   // chave que referencia o Job.source (ex: "trampos", "coodesh")
-  isActive Boolean  @default(true)
+  source    String // chave que referencia o Job.source (ex: "trampos", "coodesh")
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -104,28 +116,28 @@ model JobSource {
 // ─── Conteúdo: Vaga ───────────────────────────────────────────────────────
 
 model Job {
-  id          String   @id @default(cuid())
-  externalId  String   @unique // ID da fonte (Remotive, Arbeitnow)
-  source      String   // "remotive" | "arbeitnow"
+  id          String    @id @default(cuid())
+  externalId  String    @unique // ID da fonte (Remotive, Arbeitnow)
+  source      String // "remotive" | "arbeitnow"
   title       String
   company     String
-  description String   @db.Text
+  description String    @db.Text
   url         String
-  location    String?  // "Remote", "São Paulo, BR", etc.
-  isRemote    Boolean  @default(false)
-  jobType     String?  // "full-time" | "contract" | "part-time"
+  location    String? // "Remote", "São Paulo, BR", etc.
+  isRemote    Boolean   @default(false)
+  jobType     String? // "full-time" | "contract" | "part-time"
   salaryMin   Int?
   salaryMax   Int?
-  currency    String?  @default("USD")
-  level       String?  // "junior" | "pleno" | "senior" | "lead"
+  currency    String?   @default("USD")
+  level       String? // "junior" | "pleno" | "senior" | "lead"
   postedAt    DateTime?
   expiresAt   DateTime?
   logoUrl     String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  skills    JobSkill[]
+  skills JobSkill[]
 
   @@index([title])
   @@index([isRemote])
@@ -136,8 +148,8 @@ model Job {
 model JobSkill {
   jobId   String
   skillId String
-  job     Job   @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  job     Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
   @@id([jobId, skillId])
 }
@@ -147,9 +159,9 @@ model JobSkill {
 model Course {
   id           String   @id @default(cuid())
   externalId   String   @unique
-  source       String   // "classcentral" | "youtube" | "coursera"
+  source       String // "classcentral" | "youtube" | "coursera"
   title        String
-  provider     String   // "freeCodeCamp", "Coursera", etc.
+  provider     String // "freeCodeCamp", "Coursera", etc.
   description  String   @db.Text
   url          String
   thumbnailUrl String?
@@ -157,13 +169,13 @@ model Course {
   isFree       Boolean  @default(true)
   price        Float?
   currency     String?  @default("USD")
-  level        String?  // "beginner" | "intermediate" | "advanced"
-  duration     String?  // "8h", "4 weeks"
+  level        String? // "beginner" | "intermediate" | "advanced"
+  duration     String? // "8h", "4 weeks"
   rating       Float?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  skills    CourseSkill[]
+  skills CourseSkill[]
 
   @@index([title])
   @@index([isFree])
@@ -182,24 +194,24 @@ model CourseSkill {
 // ─── Conteúdo: Livro ──────────────────────────────────────────────────────
 
 model Book {
-  id           String   @id @default(cuid())
-  externalId   String   @unique // ISBN ou ID Open Library
-  source       String   // "openlibrary" | "googlebooks"
+  id           String    @id @default(cuid())
+  externalId   String    @unique // ISBN ou ID Open Library
+  source       String // "openlibrary" | "googlebooks"
   title        String
   authors      String[]
-  description  String?  @db.Text
+  description  String?   @db.Text
   url          String
   thumbnailUrl String?
-  language     String   @default("en")
+  language     String    @default("en")
   pageCount    Int?
   publishedAt  DateTime?
   publisher    String?
-  isFree       Boolean  @default(false) // Open Library = domínio público
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isFree       Boolean   @default(false) // Open Library = domínio público
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  skills    BookSkill[]
-  chapters  Chapter[]
+  skills   BookSkill[]
+  chapters Chapter[]
 
   @@index([title])
   @@index([language])
@@ -208,8 +220,8 @@ model Book {
 model BookSkill {
   bookId  String
   skillId String
-  book    Book  @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  skill   Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  book    Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
 
   @@id([bookId, skillId])
 }
@@ -217,16 +229,16 @@ model BookSkill {
 // ─── Capítulos de livro (leitor dedicado) ────────────────────────────────────
 
 model Chapter {
-  id        String   @id @default(cuid())
-  bookId    String
-  title     String
-  order     Int
+  id         String   @id @default(cuid())
+  bookId     String
+  title      String
+  order      Int
   pagesStart Int?
-  pagesEnd  Int?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  pagesEnd   Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  book      Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
   bookmarks Bookmark[]
 
   @@index([bookId, order])
@@ -245,7 +257,7 @@ model Bookmark {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
 
   @@index([userId, itemType, itemId])
@@ -257,7 +269,7 @@ model Bookmark {
 model Audiobook {
   id           String   @id @default(cuid())
   externalId   String   @unique
-  source       String   // "librivox" | "audible" | "storytel"
+  source       String // "librivox" | "audible" | "storytel"
   title        String
   authors      String[]
   narrator     String?
@@ -270,7 +282,7 @@ model Audiobook {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  skills    AudiobookSkill[]
+  skills AudiobookSkill[]
 
   @@index([title])
   @@index([language])
@@ -288,21 +300,37 @@ model AudiobookSkill {
 // ─── Biblioteca pessoal: livros e audiobooks do usuário ─────────────────────
 
 model LibraryItem {
-  id        String   @id @default(cuid())
-  userId    String
-  itemType  String   // "book" | "audiobook"
-  itemId    String   // ID do Book ou Audiobook
-  status    String   // "to_read" | "reading" | "completed"
-  progress  Int      @default(0) // 0-100
-  rating    Int?     // 1-5
+  id       String @id @default(cuid())
+  userId   String
+  itemType String // "book" | "audiobook" | "pdf"
+  itemId   String // ID do Book/Audiobook ou identificador do arquivo
+  status   String // "to_read" | "reading" | "completed"
+  progress Int    @default(0) // 0-100
+
+  // Metadados do item (livro em PDF ou audiobook)
+  title          String?
+  author         String?
+  coverUrl       String?
+  fileUrl        String? // URL assinada/rota protegida de leitura
+  fileKey        String? // chave do arquivo no storage local/objeto
+  mimeType       String?
+  fileSize       Int?
+  totalPages     Int?
+  durationSec    Int?
+  currentPage    Int       @default(0) // progresso de leitura em PDF
+  positionSec    Int       @default(0) // progresso de reprodução do audiobook
+  lastAccessedAt DateTime?
+
+  rating    Int? // 1-5
   notes     String?  @db.Text
-  addedAt   DateTime @default(now())
+  createdAt DateTime @default(now()) @map("addedAt")
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, itemType, itemId])
   @@index([userId, status])
+  @@index([userId, lastAccessedAt])
 }
 
 // ─── Documentos da biblioteca (PDF/EPUB) ───────────────────────────────────
@@ -311,34 +339,34 @@ model Document {
   id        String   @id @default(cuid())
   userId    String
   title     String
-  fileType  String   // "pdf" | "epub"
-  fileUrl   String   // URL externa ou path local
-  fileData  String?  // base64 para MVP (sem bucket externo)
+  fileType  String // "pdf" | "epub"
+  fileUrl   String // URL externa ou path local
+  fileData  String? // base64 para MVP (sem bucket externo)
   fileSize  Int
   pageCount Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   highlights Highlight[]
 
   @@index([userId])
 }
 
 model Highlight {
-  id        String   @id @default(cuid())
-  userId    String
+  id         String   @id @default(cuid())
+  userId     String
   documentId String
-  text      String   @db.Text
-  page      Int
-  position  Json?
-  noteId    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  text       String   @db.Text
+  page       Int
+  position   Json?
+  noteId     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  document  Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  note      StudyNote? @relation(fields: [noteId], references: [id], onDelete: SetNull)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  note     Note?    @relation(fields: [noteId], references: [id], onDelete: SetNull)
 
   @@index([userId, documentId])
   @@index([userId, createdAt])
@@ -349,8 +377,8 @@ model Highlight {
 model Favorite {
   id        String   @id @default(cuid())
   userId    String
-  itemType  String   // "job" | "course" | "book" | "audiobook"
-  itemId    String   // ID do item no banco
+  itemType  String // "job" | "course" | "book" | "audiobook"
+  itemId    String // ID do item no banco
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -363,10 +391,10 @@ model Favorite {
 
 model SearchLog {
   id          String   @id @default(cuid())
-  userId      String?  // null = usuário anônimo
+  userId      String? // null = usuário anônimo
   query       String
-  tab         String   // "vagas" | "cursos" | "livros" | "audiobooks" | "tudo"
-  filters     Json?    // Snapshot dos filtros aplicados
+  tab         String // "vagas" | "cursos" | "livros" | "audiobooks" | "tudo"
+  filters     Json? // Snapshot dos filtros aplicados
   resultCount Int      @default(0)
   createdAt   DateTime @default(now())
 
@@ -380,20 +408,20 @@ model SearchLog {
 // ─── StudyHub: Flashcards e Notas ─────────────────────────────────────────
 
 model Flashcard {
-  id            String   @id @default(cuid())
-  userId        String
-  front         String
-  back          String
-  sourceNoteId String?
-  source        String? // "ai" | "manual" | "code-error" | "note"
-  ease          Float    @default(2.5) // fator de facilidade (algoritmo SM-2)
-  interval      Int      @default(0) // dias
-  repetitions  Int      @default(0)
-  status        String   @default("NEW") // "NEW" | "LEARNING" | "REVIEW" | "RELEARN"
-  dueDate      DateTime?
+  id             String    @id @default(cuid())
+  userId         String
+  front          String
+  back           String
+  sourceNoteId   String?
+  source         String? // "ai" | "manual" | "code-error" | "note"
+  ease           Float     @default(2.5) // fator de facilidade (algoritmo SM-2)
+  interval       Int       @default(0) // dias
+  repetitions    Int       @default(0)
+  status         String    @default("NEW") // "NEW" | "LEARNING" | "REVIEW" | "RELEARN"
+  dueDate        DateTime?
   lastReviewedAt DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -401,21 +429,22 @@ model Flashcard {
   @@index([userId])
 }
 
-model StudyNote {
+model Note {
   id        String   @id @default(cuid())
   userId    String
-  title     String   // título da nota
+  title     String // título da nota
   markdown  String   @db.Text // conteúdo em Markdown
   source    String? // "manual" | "ai" | "book" | "lecture" | "highlight"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags      NoteTag[]
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags       NoteTag[]
   highlights Highlight[]
 
   @@index([userId])
   @@index([updatedAt])
+  @@map("StudyNote")
 }
 
 // ─── Tags para notas (estilo Obsidian) ─────────────────────────────────────
@@ -423,13 +452,13 @@ model StudyNote {
 model Tag {
   id        String   @id @default(cuid())
   userId    String
-  name      String   // ex: "React", "middleware", "estudo"
+  name      String // ex: "React", "middleware", "estudo"
   slug      String   @unique // ex: "react", "middleware"
   color     String? // cor da tag (hex)
   createdAt DateTime @default(now())
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notes    NoteTag[]
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes NoteTag[]
 
   @@unique([userId, slug])
   @@index([userId])
@@ -440,8 +469,8 @@ model Tag {
 model NoteTag {
   noteId String
   tagId  String
-  note   StudyNote @relation(fields: [noteId], references: [id], onDelete: Cascade)
-  tag    Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([noteId, tagId])
 }
@@ -467,12 +496,12 @@ model Exercise {
 }
 
 model CodeSubmission {
-  id          String   @id @default(cuid())
+  id         String   @id @default(cuid())
   exerciseId String
-  userId      String
-  code        String   @db.Text
+  userId     String
+  code       String   @db.Text
   aiFeedback String?  @db.Text
-  createdAt   DateTime @default(now())
+  createdAt  DateTime @default(now())
 
   exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }
@@ -486,7 +515,7 @@ model CodeError {
   aiFeedback String?  @db.Text
   createdAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }
 
@@ -498,10 +527,235 @@ model MindMap {
   title     String
   topic     String?
   content   String?  @db.Text
-  nodes     Json    @default("[]")
-  edges     Json    @default("[]")
+  nodes     Json     @default("[]")
+  edges     Json     @default("[]")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// DevPath Hub — Domínio de estudos
+// Todas as entidades abaixo são isoladas por userId (ownership no backend).
+// ══════════════════════════════════════════════════════════════════════════
+
+// ─── Preferências do usuário ───────────────────────────────────────────────
+
+model UserSettings {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  theme              String   @default("dark") // "dark" | "light" | "system"
+  locale             String   @default("pt-BR")
+  timezone           String   @default("America/Sao_Paulo")
+  dailyGoalMinutes   Int      @default(240)
+  weeklyGoalMinutes  Int      @default(1200)
+  reviewReminders    Boolean  @default(true)
+  emailNotifications Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Trilha de estudo ──────────────────────────────────────────────────────
+
+model Roadmap {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?  @db.Text
+  goal        String?  @db.Text // objetivo de carreira da trilha
+  level       String   @default("beginner") // "beginner" | "intermediate" | "advanced"
+  color       String? // cor de destaque (hex)
+  order       Int      @default(0)
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items RoadmapItem[]
+
+  @@index([userId, isArchived])
+  @@index([userId, order])
+}
+
+// ─── Item da trilha (unidade de estudo) ────────────────────────────────────
+
+model RoadmapItem {
+  id               String    @id @default(cuid())
+  userId           String
+  roadmapId        String
+  title            String
+  description      String?   @db.Text
+  // "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "NEEDS_REVIEW"
+  status           String    @default("NOT_STARTED")
+  order            Int       @default(0)
+  estimatedMinutes Int?
+  resourceUrl      String? // link oficial opcional
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roadmap  Roadmap        @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  contents StudyContent[]
+  sessions StudySession[]
+
+  @@index([userId, roadmapId, order])
+  @@index([userId, status])
+}
+
+// ─── Conteúdo teórico de um item ───────────────────────────────────────────
+
+model StudyContent {
+  id            String   @id @default(cuid())
+  userId        String
+  roadmapItemId String
+  title         String
+  // "NOTE" | "LINK" | "VIDEO" | "ARTICLE" | "PDF"
+  type          String   @default("NOTE")
+  content       String?  @db.Text // markdown/HTML sanitizado na renderização
+  url           String?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roadmapItem RoadmapItem @relation(fields: [roadmapItemId], references: [id], onDelete: Cascade)
+
+  @@index([userId, roadmapItemId, order])
+}
+
+// ─── Learning Path (agrupamento macro) → Subject → Topic ──────────────────
+
+model LearningPath {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?  @db.Text
+  level       String   @default("beginner")
+  order       Int      @default(0)
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjects Subject[]
+
+  @@index([userId, isArchived])
+}
+
+model Subject {
+  id             String   @id @default(cuid())
+  userId         String
+  learningPathId String
+  title          String
+  description    String?  @db.Text
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningPath LearningPath @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  topics       Topic[]
+
+  @@index([userId, learningPathId, order])
+}
+
+model Topic {
+  id               String   @id @default(cuid())
+  userId           String
+  subjectId        String
+  title            String
+  description      String?  @db.Text
+  // "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "NEEDS_REVIEW"
+  status           String   @default("NOT_STARTED")
+  order            Int      @default(0)
+  estimatedMinutes Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject  Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  sessions StudySession[]
+
+  @@index([userId, subjectId, order])
+  @@index([userId, status])
+}
+
+// ─── Sessão de estudo (alimenta métricas e gráfico de evolução) ────────────
+
+model StudySession {
+  id            String   @id @default(cuid())
+  userId        String
+  topicId       String?
+  roadmapItemId String?
+  date          DateTime @default(now())
+  minutes       Int
+  source        String   @default("manual") // "manual" | "pomodoro" | "roadmap" | "review"
+  notes         String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic       Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  roadmapItem RoadmapItem? @relation(fields: [roadmapItemId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, topicId])
+}
+
+// ─── Projetos do portfólio ─────────────────────────────────────────────────
+
+model Project {
+  id          String    @id @default(cuid())
+  userId      String
+  title       String
+  description String?   @db.Text
+  // "PLANNING" | "IN_PROGRESS" | "REVIEW" | "DONE" | "PAUSED"
+  status      String    @default("PLANNING")
+  progress    Int       @default(0) // 0-100
+  techStack   String[]  @default([])
+  repoUrl     String?
+  liveUrl     String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, updatedAt])
+}
+
+// ─── Candidaturas (acompanhamento de vagas) ────────────────────────────────
+
+model JobApplication {
+  id         String    @id @default(cuid())
+  userId     String
+  company    String
+  role       String
+  jobUrl     String?
+  source     String? // "linkedin" | "manual" | ...
+  location   String?
+  isRemote   Boolean   @default(true)
+  // "SAVED" | "APPLIED" | "INTERVIEW" | "OFFER" | "REJECTED" | "WITHDRAWN"
+  status     String    @default("SAVED")
+  salaryMin  Int?
+  salaryMax  Int?
+  currency   String    @default("BRL")
+  appliedAt  DateTime?
+  nextStepAt DateTime?
+  notes      String?   @db.Text
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, nextStepAt])
 }

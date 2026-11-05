@@ -1,71 +1,55 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/api/auth";
+import { handleRoute, jsonOk, parseBody } from "@/lib/api/response";
+import { createLibraryItemSchema } from "@/lib/validations/library";
 
 /**
  * GET /api/library
- * Lista itens da biblioteca do usuário.
+ * Lista itens da biblioteca do usuário autenticado.
  */
 export async function GET() {
-  const session = await auth();
+  return handleRoute(async () => {
+    const user = await requireUser();
 
-  if (!session?.user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+    const items = await prisma.libraryItem.findMany({
+      where: { userId: user.id },
+      orderBy: { updatedAt: "desc" },
+    });
 
-  const items = await prisma.libraryItem.findMany({
-    where: { userId: session.user.id },
-    orderBy: { updatedAt: "desc" },
+    return jsonOk(items);
   });
-
-  return NextResponse.json({ data: items });
 }
 
 /**
  * POST /api/library
- * Adiciona um livro ou audiobook à biblioteca.
+ * Adiciona um livro, PDF ou audiobook à biblioteca do usuário.
  */
 export async function POST(request: Request) {
-  const session = await auth();
+  return handleRoute(async () => {
+    const user = await requireUser();
+    const input = await parseBody(request, createLibraryItemSchema);
 
-  if (!session?.user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+    const item = await prisma.libraryItem.create({
+      data: {
+        userId: user.id,
+        itemType: input.itemType,
+        itemId: input.itemId,
+        title: input.title ?? null,
+        author: input.author ?? null,
+        coverUrl: input.coverUrl ?? null,
+        fileUrl: input.fileUrl ?? null,
+        fileKey: input.fileKey ?? null,
+        mimeType: input.mimeType ?? null,
+        fileSize: input.fileSize ?? null,
+        totalPages: input.totalPages ?? null,
+        durationSec: input.durationSec ?? null,
+        status: input.status,
+        progress: input.status === "completed" ? 100 : 0,
+        rating: input.rating ?? null,
+        notes: input.notes ?? null,
+      },
+    });
 
-  const body = await request.json().catch(() => ({}));
-  const itemType = typeof body.itemType === "string" ? body.itemType : "";
-  const itemId = typeof body.itemId === "string" ? body.itemId : "";
-  const status = typeof body.status === "string" ? body.status : "to_read";
-
-  if (!itemType || !itemId) {
-    return NextResponse.json(
-      { error: "itemType e itemId são obrigatórios" },
-      { status: 400 }
-    );
-  }
-  if (!["book", "audiobook"].includes(itemType)) {
-    return NextResponse.json(
-      { error: 'itemType deve ser "book" ou "audiobook"' },
-      { status: 400 }
-    );
-  }
-  if (!["to_read", "reading", "completed"].includes(status)) {
-    return NextResponse.json(
-      { error: 'status deve ser "to_read", "reading" ou "completed"' },
-      { status: 400 }
-    );
-  }
-
-  const item = await prisma.libraryItem.create({
-    data: {
-      userId: session.user.id as string,
-      itemType,
-      itemId,
-      status,
-      progress: body.status === "completed" ? 100 : 0,
-    },
+    return jsonOk(item, 201);
   });
-
-  return NextResponse.json({ data: item }, { status: 201 });
 }
-

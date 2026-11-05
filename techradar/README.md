@@ -33,6 +33,65 @@ As rotas de admin utilizam:
 - `GET /api/admin/audiobooks` — lista audiobooks
 - `PUT /api/admin/audiobooks/[id]` — atualiza audiobook
 
+## Backend de estudos (Etapa 1)
+
+O domínio de estudos foi modelado no Prisma, com isolamento por `userId` em **todas** as entidades:
+
+`User`, `UserSettings`, `Roadmap`, `RoadmapItem`, `StudyContent`, `LibraryItem`, `LearningPath`, `Subject`, `Topic`, `Note`, `StudySession`, `Project`, `JobApplication`.
+
+### Segurança das rotas
+
+- Toda rota de API usa `requireUser()` (`src/lib/api/auth.ts`), que valida o JWT do cookie
+  `session` e recarrega o usuário no banco (a role nunca vem do token).
+- Toda mutação valida o payload com **Zod** (`src/lib/validations/*`).
+- `src/lib/api/response.ts` centraliza erros: 400 (JSON inválido), 401, 403, 404,
+  409 (duplicado), 422 (validação) e 500 (sem vazar detalhes internos).
+- Updates e deletes usam `where: { id, userId }` (`updateMany`/`deleteMany`),
+  impedindo que um usuário altere registros de outro (IDOR).
+
+> **Nota de arquitetura:** o projeto usa o modelo full-stack do **Next.js App Router**
+> (Route Handlers + Server Actions) no lugar de um servidor Express separado. A
+> separação de responsabilidades é mantida em `src/lib/api`, `src/lib/validations`
+> e `src/app/api/**`.
+
+### Rotas principais
+
+| Rota | Métodos |
+|---|---|
+| `/api/roadmaps` | `GET`, `POST` |
+| `/api/roadmaps/[id]` | `GET`, `PATCH`, `DELETE` |
+| `/api/roadmaps/[id]/items` | `POST` |
+| `/api/roadmap-items/[id]` | `GET`, `PATCH`, `DELETE` |
+| `/api/roadmap-items/[id]/contents` | `POST` |
+| `/api/study-contents/[id]` | `PATCH`, `DELETE` |
+| `/api/learning-paths` | `GET`, `POST` |
+| `/api/learning-paths/[id]` | `GET`, `PATCH`, `DELETE` |
+| `/api/learning-paths/[id]/subjects` | `POST` |
+| `/api/subjects/[id]` | `PATCH`, `DELETE` |
+| `/api/subjects/[id]/topics` | `POST` |
+| `/api/topics/[id]` | `PATCH`, `DELETE` |
+| `/api/study-sessions` | `GET`, `POST` |
+| `/api/study-sessions/[id]` | `PATCH`, `DELETE` |
+| `/api/projects` | `GET`, `POST` |
+| `/api/projects/[id]` | `GET`, `PATCH`, `DELETE` |
+| `/api/job-applications` | `GET`, `POST` |
+| `/api/job-applications/[id]` | `GET`, `PATCH`, `DELETE` |
+| `/api/settings` | `GET`, `PATCH` |
+| `/api/profile` | `PATCH` |
+| `/api/library` | `GET`, `POST` |
+| `/api/library/[id]` | `GET`, `PUT`, `PATCH`, `DELETE` |
+
+### Usuários de demonstração (seed)
+
+| E-mail | Senha | Role |
+|---|---|---|
+| `admin@devpath.com` | `DevPath@2026!Admin` | `ADMIN` |
+| `pablo@devpath.com` | `DevPath@2026!User` | `USER` |
+
+O seed é idempotente para a conta demo: recria apenas os dados de domínio do
+usuário `pablo@devpath.com` (trilha, projetos, candidaturas, sessões, revisões).
+Conteúdo externo (vagas/livros/audiobooks) é opcional via `npm run db:seed:content`.
+
 ## Stack Técnica
 
 - **Frontend/Backend**: Next.js 16 (App Router) + TypeScript
@@ -98,7 +157,8 @@ Acesse http://localhost:3000
 | `npm run db:generate` | Gera o cliente Prisma |
 | `npm run db:push` | Cria/atualiza tabelas no banco |
 | `npm run db:migrate` | Cria migrações do Prisma |
-| `npm run db:seed` | Popula o banco com dados de demonstração |
+| `npm run db:seed` | Popula usuários demo e dados do dashboard |
+| `npm run db:seed:content` | Popula também vagas/livros/audiobooks externos |
 | `npm run db:studio` | Abre o Prisma Studio |
 | `npm test` | Executa os testes |
 

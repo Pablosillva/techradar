@@ -32,12 +32,15 @@ export async function logoutAction() {
 }
 
 export async function registerAction(formData: FormData) {
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const name = String(formData.get("name") ?? "").trim();
+  const email = String(formData.get("email") ?? "")
+    .trim()
+    .toLowerCase();
+  const password = String(formData.get("password") ?? "");
 
-  if (!email || !password) {
-    redirect("/cadastrar?error=dados-incompletos");
+  // Validação mínima no servidor (não confiar apenas no HTML).
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8) {
+    redirect("/cadastrar?error=dados-invalidos");
   }
 
   const existing = await prisma.user.findUnique({
@@ -48,8 +51,7 @@ export async function registerAction(formData: FormData) {
     redirect("/cadastrar?error=email-em-uso");
   }
 
-  const { hash } = await import("bcryptjs");
-  const hashedPassword = await hash(password, 10);
+  const hashedPassword = await hash(password, 12);
 
   await prisma.user.create({
     data: {
@@ -57,6 +59,9 @@ export async function registerAction(formData: FormData) {
       name: name || null,
       password: hashedPassword,
       role: "USER",
+      settings: {
+        create: {},
+      },
     },
   });
 

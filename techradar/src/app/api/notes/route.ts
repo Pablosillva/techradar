@@ -1,84 +1,62 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
+import { requireUser } from "@/lib/api/auth";
+import { handleRoute, jsonOk, parseBody, parseQuery } from "@/lib/api/response";
+import { createNoteSchema, listNotesQuerySchema } from "@/lib/validations/note";
 
-const createNoteSchema = z.object({
-  title: z.string().min(1).max(200),
-  markdown: z.string().optional().default(""),
-  source: z.enum(["manual", "ai", "book", "lecture", "highlight"]).optional(),
-  tagIds: z.array(z.string()).optional(),
-});
-
-/**
- * GET /api/notes
- * Lista notas do usuário com busca opcional.
- */
+/** GET /api/notes — lista notas do usuário com busca opcional. */
 export async function GET(request: Request) {
-  const session = await auth();
+  return handleRoute(async () => {
+    const user = await requireUser();
+    const { q, tagId } = parseQuery(request, listNotesQuerySchema);
 
-  if (!session?.user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+    const notes = await prisma.note.findMany({
+      where: {
+        userId: user.id,
+        ...(q
+          ? {
+              OR: [
+                { title: { contains: q, mode: "insensitive" } },
+                { markdown: { contains: q, mode: "insensitive" } },
+              ],
+            }
+          : {}),
+        ...(tagId ? { tags: { some: { tagId, tag: { userId: user.id } } } } : {}),
+      },
+      include: { tags: { include: { tag: true } } },
+      orderBy: { updatedAt: "desc" },
+    });
 
-  const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q") ?? "";
-  const tagId = searchParams.get("tagId");
-
-  const notes = await prisma.studyNote.findMany({
-    where: {
-      userId: session.user.id as string,
-      ...(q ? { OR: [{ title: { contains: q, mode: "insensitive" } }, { markdown: { contains: q, mode: "insensitive" } }] } : {}),
-      ...(tagId ? { tags: { some: { tagId } } } : {}),
-    },
-    include: {
-      tags: { include: { tag: true } },
-    },
-    orderBy: { updatedAt: "desc" },
+    return jsonOk(notes);
   });
-
-  return NextResponse.json({ data: notes });
 }
 
-/**
- * POST /api/notes
- * Cria uma nova nota.
- */
+/** POST /api/notes — cria uma nota. */
 export async function POST(request: Request) {
-  const session = await auth();
+  return handleRoute(async () => {
+    const user = await requireUser();
+    const input = await parseBody(request, createNoteSchema);
 
-  if (!session?.user) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
+    // Só permite vincular tags que pertencem ao próprio usuário.
+    let tagIds: string[] = [];
+    if (input.tagIds?.length) {
+      const ownedTags = await prisma.tag.findMany({
+        where: { id: { in: input.tagIds }, userId: user.id },
+        select: { id: true },
+      });
+      tagIds = ownedTags.map((tag) => tag.id);
+    }
 
-  const body = await request.json().catch(() => ({}));
-  const parsed = createNoteSchema.safeParse(body);
+    const note = await prisma.note.create({
+      data: {
+        userId: user.id,
+        title: input.title,
+        markdown: input.markdown ?? "",
+        source: input.source ?? "manual",
+        ...(tagIds.length ? { tags: { create: tagIds.map((tagId) => ({ tagId })) } } : {}),
+      },
+      include: { tags: { include: { tag: true } } },
+    });
 
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
-
-  const { title, markdown, source, tagIds } = parsed.data;
-
-  const note = await prisma.studyNote.create({
-    data: {
-      userId: session.user.id as string,
-      title,
-      markdown,
-      source: source ?? "manual",
-      ...(tagIds?.length
-        ? {
-            tags: {
-              create: tagIds.map((tagId) => ({ tagId })),
-            },
-          }
-        : {}),
-    },
-    include: {
-      tags: { include: { tag: true } },
-    },
+    return jsonOk(note, 201);
   });
-
-  return NextResponse.json({ data: note }, { status: 201 });
 }
-

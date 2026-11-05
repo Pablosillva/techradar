@@ -6,6 +6,7 @@
  */
 
 import { PrismaClient } from "@prisma/client";
+import { hash } from "bcryptjs";
 import { SKILL_DEFINITIONS } from "../src/lib/skills/dictionary";
 import { extractSkillsFromText } from "../src/lib/skills/extract";
 import { fetchRemotiveJobs, normalizeRemotiveJob } from "../src/lib/sources/remotive";
@@ -206,15 +207,332 @@ async function seedAudiobooks() {
 }
 
 async function main() {
-  console.log("🚀 Iniciando seed do TechRadar...\n");
+  console.log("🚀 Iniciando seed do DevPath Hub...\n");
 
-  await seedSkills();
-  await seedJobs();
-  await seedBooks();
-  await seedAudiobooks();
+  const demo = await seedDemoUsers();
+  await seedDemoData(demo.pabloId);
+
+  // Conteúdo externo (vagas/livros/audiobooks) é opcional e depende de rede.
+  if (process.argv.includes("--with-content")) {
+    await seedSkills();
+    await seedJobs();
+    await seedBooks();
+    await seedAudiobooks();
+  }
 
   console.log("\n🎉 Seed concluído!");
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// Usuários e dados de demonstração do DevPath Hub
+// ══════════════════════════════════════════════════════════════════════════
+
+const ADMIN_EMAIL = "admin@devpath.com";
+const ADMIN_PASSWORD = "DevPath@2026!Admin";
+const DEMO_EMAIL = "pablo@devpath.com";
+const DEMO_PASSWORD = "DevPath@2026!User";
+
+async function seedDemoUsers() {
+  console.log("🌱 Criando usuários de demonstração...");
+
+  const adminPassword = await hash(ADMIN_PASSWORD, 12);
+  const demoPassword = await hash(DEMO_PASSWORD, 12);
+
+  const admin = await prisma.user.upsert({
+    where: { email: ADMIN_EMAIL },
+    update: { role: "ADMIN", password: adminPassword, emailVerified: new Date() },
+    create: {
+      email: ADMIN_EMAIL,
+      name: "DevPath Admin",
+      password: adminPassword,
+      role: "ADMIN",
+      emailVerified: new Date(),
+    },
+  });
+
+  const pablo = await prisma.user.upsert({
+    where: { email: DEMO_EMAIL },
+    update: { name: "Pablo Silva", password: demoPassword },
+    create: {
+      email: DEMO_EMAIL,
+      name: "Pablo Silva",
+      password: demoPassword,
+      role: "USER",
+      emailVerified: new Date(),
+    },
+  });
+
+  await prisma.userSettings.upsert({
+    where: { userId: pablo.id },
+    update: {},
+    create: { userId: pablo.id, dailyGoalMinutes: 240, weeklyGoalMinutes: 1200 },
+  });
+
+  console.log(`✅ Admin: ${admin.email}`);
+  console.log(`✅ Demo:  ${pablo.email}`);
+
+  return { adminId: admin.id, pabloId: pablo.id };
+}
+
+/**
+ * Popula o dashboard do usuário demo com dados coerentes.
+ * Idempotente: limpa apenas os dados de domínio DO USUÁRIO DEMO antes de recriar.
+ */
+async function seedDemoData(userId: string) {
+  console.log("🌱 Populando dashboard de demonstração...");
+
+  await prisma.$transaction([
+    prisma.studySession.deleteMany({ where: { userId } }),
+    prisma.studyContent.deleteMany({ where: { userId } }),
+    prisma.roadmapItem.deleteMany({ where: { userId } }),
+    prisma.roadmap.deleteMany({ where: { userId } }),
+    prisma.topic.deleteMany({ where: { userId } }),
+    prisma.subject.deleteMany({ where: { userId } }),
+    prisma.learningPath.deleteMany({ where: { userId } }),
+    prisma.project.deleteMany({ where: { userId } }),
+    prisma.jobApplication.deleteMany({ where: { userId } }),
+    prisma.flashcard.deleteMany({ where: { userId } }),
+    prisma.note.deleteMany({ where: { userId } }),
+  ]);
+
+  // ── Trilha principal ────────────────────────────────────────────────────
+  const roadmap = await prisma.roadmap.create({
+    data: {
+      userId,
+      title: "Full Stack em 12 meses",
+      description:
+        "Do zero ao primeiro emprego: fundamentos, frontend, backend, banco de dados e deploy.",
+      goal: "Conquistar a primeira vaga como desenvolvedor Full Stack.",
+      level: "beginner",
+      color: "#0ea5e9",
+      order: 0,
+      items: {
+        create: [
+          { userId, title: "Fundamentos de JavaScript", status: "COMPLETED", order: 0, estimatedMinutes: 600 },
+          { userId, title: "TypeScript na prática", status: "COMPLETED", order: 1, estimatedMinutes: 480 },
+          { userId, title: "React: componentes e estado", status: "IN_PROGRESS", order: 2, estimatedMinutes: 720 },
+          { userId, title: "Next.js App Router", status: "IN_PROGRESS", order: 3, estimatedMinutes: 600 },
+          { userId, title: "APIs com Node.js e Prisma", status: "NOT_STARTED", order: 4, estimatedMinutes: 900 },
+          { userId, title: "PostgreSQL e modelagem de dados", status: "NEEDS_REVIEW", order: 5, estimatedMinutes: 480 },
+          { userId, title: "Deploy, CI/CD e observabilidade", status: "NOT_STARTED", order: 6, estimatedMinutes: 360 },
+        ],
+      },
+    },
+    include: { items: true },
+  });
+
+  const reactItem = roadmap.items.find((item) => item.title.startsWith("React"));
+  const nextItem = roadmap.items.find((item) => item.title.startsWith("Next.js"));
+  const sqlItem = roadmap.items.find((item) => item.title.startsWith("PostgreSQL"));
+
+  if (reactItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: reactItem.id,
+        title: "Resumo: props, state e fluxo de dados",
+        type: "NOTE",
+        content:
+          "## Props\nDados imutáveis passados do pai para o filho.\n\n## State\nEstado local que dispara re-render quando muda.\n\n## Fluxo\nDados descem por props e eventos sobem por callbacks.",
+        order: 0,
+      },
+    });
+  }
+
+  if (nextItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: nextItem.id,
+        title: "Documentação oficial do App Router",
+        type: "LINK",
+        url: "https://nextjs.org/docs/app",
+        order: 0,
+      },
+    });
+  }
+
+  if (sqlItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: sqlItem.id,
+        title: "Checklist de revisão: índices e JOINs",
+        type: "NOTE",
+        content:
+          "1. Entender quando o planner usa índice.\n2. Diferenciar INNER, LEFT e FULL JOIN.\n3. Praticar EXPLAIN ANALYZE em consultas lentas.",
+        order: 0,
+      },
+    });
+  }
+
+  // ── Learning path (macro) ───────────────────────────────────────────────
+  await prisma.learningPath.create({
+    data: {
+      userId,
+      title: "Formação Full Stack",
+      description: "Trilha macro com disciplinas e tópicos de estudo.",
+      level: "beginner",
+      subjects: {
+        create: [
+          {
+            userId,
+            title: "Frontend",
+            order: 0,
+            topics: {
+              create: [
+                { userId, title: "HTML semântico", status: "COMPLETED", order: 0 },
+                { userId, title: "CSS moderno e responsivo", status: "COMPLETED", order: 1 },
+                { userId, title: "React e gerenciamento de estado", status: "IN_PROGRESS", order: 2 },
+              ],
+            },
+          },
+          {
+            userId,
+            title: "Backend",
+            order: 1,
+            topics: {
+              create: [
+                { userId, title: "Node.js e APIs REST", status: "IN_PROGRESS", order: 0 },
+                { userId, title: "Autenticação e autorização", status: "NOT_STARTED", order: 1 },
+              ],
+            },
+          },
+          {
+            userId,
+            title: "Banco de dados",
+            order: 2,
+            topics: {
+              create: [
+                { userId, title: "Modelagem relacional", status: "NEEDS_REVIEW", order: 0 },
+                { userId, title: "Prisma ORM", status: "NOT_STARTED", order: 1 },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  // ── Projetos ────────────────────────────────────────────────────────────
+  await prisma.project.createMany({
+    data: [
+      {
+        userId,
+        title: "Sistema de Ordens de Serviço",
+        description: "CRUD completo com autenticação e dashboard.",
+        status: "IN_PROGRESS",
+        progress: 45,
+        techStack: ["React", "Node.js", "PostgreSQL"],
+        startedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45),
+      },
+      {
+        userId,
+        title: "Startup Builder",
+        description: "Game de aprendizado com sistema de startups.",
+        status: "PLANNING",
+        progress: 20,
+        techStack: ["React", "Node.js", "PostgreSQL"],
+      },
+      {
+        userId,
+        title: "Portfólio Pessoal",
+        description: "Site pessoal com projetos e currículo.",
+        status: "REVIEW",
+        progress: 80,
+        techStack: ["React", "TypeScript"],
+        liveUrl: "https://example.com",
+      },
+    ],
+  });
+
+  // ── Candidaturas ────────────────────────────────────────────────────────
+  await prisma.jobApplication.createMany({
+    data: [
+      {
+        userId,
+        company: "Nubank",
+        role: "Desenvolvedor Full Stack Júnior",
+        status: "APPLIED",
+        location: "Remoto",
+        appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
+      },
+      {
+        userId,
+        company: "Rocketseat",
+        role: "Frontend Engineer",
+        status: "INTERVIEW",
+        location: "Remoto",
+        appliedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12),
+        nextStepAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
+      },
+      {
+        userId,
+        company: "Stone",
+        role: "Backend Developer",
+        status: "SAVED",
+        location: "São Paulo, BR",
+      },
+    ],
+  });
+
+  // ── Sessões de estudo (últimos 30 dias) ─────────────────────────────────
+  const sessions = Array.from({ length: 30 }, (_, index) => {
+    const daysAgo = 29 - index;
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    date.setHours(19, 0, 0, 0);
+
+    // Curva crescente com dias de descanso, para o gráfico ficar realista.
+    const base = 40 + Math.round(index * 3.2);
+    const minutes = daysAgo % 7 === 0 ? 0 : base + ((index * 17) % 45);
+
+    return { userId, date, minutes, source: "manual" };
+  }).filter((session) => session.minutes > 0);
+
+  await prisma.studySession.createMany({ data: sessions });
+
+  // ── Revisões pendentes (12) ─────────────────────────────────────────────
+  const cards = [
+    ["React - Hooks", "useState, useEffect, useMemo e regras dos hooks."],
+    ["React - Context API", "Compartilha estado sem prop drilling."],
+    ["TypeScript - Interfaces", "Contratos de forma para objetos."],
+    ["TypeScript - Generics", "Tipos parametrizados e reutilizáveis."],
+    ["Node.js - Express", "Middlewares e rotas."],
+    ["Node.js - Streams", "Processamento incremental de dados."],
+    ["PostgreSQL - CRUD", "INSERT, SELECT, UPDATE e DELETE."],
+    ["PostgreSQL - Índices", "Aceleram leituras e custam escritas."],
+    ["Next.js - Server Components", "Renderização no servidor por padrão."],
+    ["Next.js - Route Handlers", "Endpoints HTTP no App Router."],
+    ["Prisma - Relations", "Relações 1:N e N:N no schema."],
+    ["Prisma - Migrations", "Evolução versionada do banco."],
+  ];
+
+  await prisma.flashcard.createMany({
+    data: cards.map(([front, back], index) => ({
+      userId,
+      front,
+      back,
+      source: "seed",
+      status: "NEW",
+      dueDate: new Date(Date.now() - 1000 * 60 * 60 * (index + 1)),
+    })),
+  });
+
+  // ── Nota de exemplo ─────────────────────────────────────────────────────
+  await prisma.note.create({
+    data: {
+      userId,
+      title: "TypeScript — Interfaces e Generics",
+      markdown:
+        "# Interfaces\n\nDescrevem a forma de um objeto.\n\n# Generics\n\nPermitem reutilizar tipos mantendo a segurança.\n\n```ts\nfunction identity<T>(value: T): T {\n  return value;\n}\n```",
+      source: "manual",
+    },
+  });
+
+  console.log("✅ Dashboard de demonstração populado");
+}
+
 
 main()
   .catch((error) => {

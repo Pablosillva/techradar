@@ -20,7 +20,7 @@ export default async function NotaPage({ params }: NotaPageProps) {
     redirect("/entrar");
   }
 
-  const note = await prisma.studyNote.findFirst({
+  const note = await prisma.note.findFirst({
     where: { id, userId: session.user.id },
     include: { tags: { include: { tag: true } } },
   });

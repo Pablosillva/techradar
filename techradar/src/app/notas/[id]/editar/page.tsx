@@ -25,7 +25,7 @@ export default async function EditarNotaPage({ params }: EditarNotaPageProps) {
     redirect("/entrar");
   }
 
-  const note = await prisma.studyNote.findFirst({
+  const note = await prisma.note.findFirst({
     where: { id, userId: session.user.id },
     include: { tags: { include: { tag: true } } },
   });
@@ -49,7 +49,7 @@ export default async function EditarNotaPage({ params }: EditarNotaPageProps) {
     const parsed = updateSchema.safeParse({ title, markdown, tagIds });
     if (!parsed.success) return;
 
-    await prisma.studyNote.update({
+    await prisma.note.update({
       where: { id },
       data: {
         title,
