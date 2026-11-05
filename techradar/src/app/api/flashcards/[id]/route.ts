@@ -46,7 +46,7 @@ export async function PUT(
   );
 
   const updated = await prisma.flashcard.update({
-    where: { id },
+    where: { id, userId: session.user.id },
     data: {
       ease: next.ease,
       interval: next.interval,

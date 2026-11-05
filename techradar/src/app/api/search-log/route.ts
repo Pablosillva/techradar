@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/security/rate-limit";
+import { getIP } from "@/lib/security/ip";
 
 /**
  * POST /api/search-log
@@ -8,6 +10,18 @@ import { prisma } from "@/lib/prisma";
  */
 export async function POST(request: Request) {
   try {
+    // Rate limiting anônimo por IP
+    const rl = rateLimit(`search-log:${getIP(request)}`, {
+      limit: 30,
+      windowMs: 60_000,
+    });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Muitas requisições. Tente novamente mais tarde.", code: "RATE_LIMITED" },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
     const body = await request.json();
 

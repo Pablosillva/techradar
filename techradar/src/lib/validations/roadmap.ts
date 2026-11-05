@@ -83,3 +83,8 @@ export type UpdateRoadmapInput = z.infer<typeof updateRoadmapSchema>;
 export type CreateRoadmapItemInput = z.infer<typeof createRoadmapItemSchema>;
 export type UpdateRoadmapItemInput = z.infer<typeof updateRoadmapItemSchema>;
 export type CreateStudyContentInput = z.infer<typeof createStudyContentSchema>;
+
+/** Criação de trilha pelo admin: exige o dono (userId). */
+export const adminCreateRoadmapSchema = createRoadmapSchema.extend({
+  userId: idSchema,
+});

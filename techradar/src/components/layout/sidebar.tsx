@@ -19,6 +19,7 @@ import {
   ChevronRight,
   X,
   Sparkles,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,13 @@ const navItems = [
 ];
 
 interface SidebarProps {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+    role: string;
+  };
   collapsed: boolean;
   mobileOpen: boolean;
   counts: { applications: number; tasks: number; reviews: number };
@@ -47,6 +55,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({
+  user,
   collapsed,
   mobileOpen,
   counts,
@@ -193,6 +202,35 @@ export function Sidebar({
           })}
         </nav>
 
+        {/* Admin (apenas visível para administradores) */}
+        {user.role === "ADMIN" && (
+          <Link
+            href="/admin"
+            title={collapsed ? "Admin" : undefined}
+            aria-current={pathname === "/admin" ? "page" : undefined}
+            className={cn(
+              "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+              pathname === "/admin"
+                ? "bg-gradient-to-r from-cyan-400/15 via-cyan-400/[0.06] to-transparent text-white"
+                : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-100",
+              collapsed && "lg:justify-center lg:px-0"
+            )}
+          >
+            <span
+              className="absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-full bg-cyan-400 transition-opacity"
+              aria-hidden="true"
+            />
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors"
+            >
+              <Shield className="h-[18px] w-[18px]" strokeWidth={1.9} />
+            </span>
+            <span className={cn("flex-1 truncate", collapsed && "lg:hidden")}>
+              Admin
+            </span>
+          </Link>
+        )}
+        
         {/* Card motivacional + progresso semanal */}
         <div className={cn("p-3", collapsed && "lg:hidden")}>
           <div className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-gradient-to-br from-cyan-400/[0.08] via-transparent to-violet-500/[0.08] p-4">

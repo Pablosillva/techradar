@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StudyPanel } from "@/components/recommendations/study-panel";
 import { formatSalary, timeAgo } from "@/lib/utils";
+import { sanitizeHtml } from "@/lib/security/sanitize";
 import { MapPin, Clock, Building2, ExternalLink, ArrowLeft } from "lucide-react";
 
 interface VagaPageProps {
@@ -131,7 +132,9 @@ export default async function VagaPage({ params }: VagaPageProps) {
           </h2>
           <div
             className="prose prose-sm mt-2 max-w-none text-gray-700 dark:text-gray-300"
-            dangerouslySetInnerHTML={{ __html: job.description }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(job.description),
+            }}
           />
         </div>
 

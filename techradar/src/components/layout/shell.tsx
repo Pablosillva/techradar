@@ -67,6 +67,7 @@ export function AppShell({
   return (
     <>
       <Sidebar
+        user={user}
         collapsed={collapsed}
         mobileOpen={mobileOpen}
         counts={counts}

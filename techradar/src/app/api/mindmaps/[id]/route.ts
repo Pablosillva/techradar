@@ -48,8 +48,16 @@ export async function PUT(
   const nodes = Array.isArray(body.nodes) ? body.nodes : undefined;
   const edges = Array.isArray(body.edges) ? body.edges : undefined;
 
+  const mindMap = await prisma.mindMap.findFirst({
+    where: { id, userId: session.user.id },
+  });
+
+  if (!mindMap) {
+    return NextResponse.json({ error: "Mapa não encontrado" }, { status: 404 });
+  }
+
   const updated = await prisma.mindMap.update({
-    where: { id },
+    where: { id, userId: session.user.id },
     data: {
       ...(title ? { title } : {}),
       ...(nodes ? { nodes: nodes as never } : {}),
@@ -57,16 +65,7 @@ export async function PUT(
     },
   });
 
-  // Garante que o usuário só acesse o próprio mapa
-  const owned = await prisma.mindMap.findFirst({
-    where: { id, userId: session.user.id },
-  });
-
-  if (!owned) {
-    return NextResponse.json({ error: "Mapa não encontrado" }, { status: 404 });
-  }
-
-  return NextResponse.json({ data: owned });
+  return NextResponse.json({ data: mindMap });
 }
 
 /**

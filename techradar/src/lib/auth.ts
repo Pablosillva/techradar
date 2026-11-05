@@ -2,9 +2,17 @@ import { cookies } from "next/headers";
 import { jwtVerify, SignJWT } from "jose";
 import { prisma } from "./prisma";
 import { compare } from "bcryptjs";
+import { generateCsrfToken, setCsrfTokenCookie } from "./security/csrf";
+import { rateLimit } from "./security/rate-limit";
+
+const AUTH_SECRET = process.env.AUTH_SECRET;
+
+if (!AUTH_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error("AUTH_SECRET environment variable is required in production");
+}
 
 const SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "fallback-secret-do-not-use-in-production-change-me"
+  AUTH_SECRET || "dev-secret-only-change-in-production",
 );
 
 export async function auth() {
@@ -38,6 +46,12 @@ export async function signIn(formData: FormData) {
     return { error: "Credenciais inválidas" };
   }
 
+  // Rate limiting por email para prevenir brute force
+  const rl = rateLimit(`auth:signin:${email}`, { limit: 10, windowMs: 60_000 });
+  if (!rl.allowed) {
+    return { error: "Muitas tentativas de login. Tente novamente em 1 minuto." };
+  }
+
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -67,7 +81,17 @@ export async function signIn(formData: FormData) {
   cookieStore.set("session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
+    maxAge: 60 * 60 * 24 * 7,
+    path: "/",
+  });
+
+  // CSRF token cookie (readable by client for X-CSRF-Token header)
+  const csrfToken = generateCsrfToken();
+  cookieStore.set("csrf_token", csrfToken, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
     maxAge: 60 * 60 * 24 * 7,
     path: "/",
   });
@@ -78,6 +102,7 @@ export async function signIn(formData: FormData) {
 export async function signOut() {
   const cookieStore = await cookies();
   cookieStore.delete("session");
+  cookieStore.delete("csrf_token");
 }
 
 export async function requireAuth() {

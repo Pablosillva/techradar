@@ -49,8 +49,17 @@ export async function PUT(
     typeof body.position === "number" ? body.position : undefined;
   const note = typeof body.note === "string" ? body.note.trim() : undefined;
 
-  const bookmark = await prisma.bookmark.update({
-    where: { id },
+  const bookmark = await prisma.bookmark.findFirst({
+    where: { id, userId: session.user.id },
+    include: { chapter: true },
+  });
+
+  if (!bookmark) {
+    return NextResponse.json({ error: "Marcador não encontrado" }, { status: 404 });
+  }
+
+  const updated = await prisma.bookmark.update({
+    where: { id, userId: session.user.id },
     data: {
       ...(position !== undefined ? { position } : {}),
       ...(note !== undefined ? { note } : {}),
@@ -58,15 +67,7 @@ export async function PUT(
     include: { chapter: true },
   });
 
-  const owned = await prisma.bookmark.findFirst({
-    where: { id, userId: session.user.id },
-  });
-
-  if (!owned) {
-    return NextResponse.json({ error: "Marcador não encontrado" }, { status: 404 });
-  }
-
-  return NextResponse.json({ data: bookmark });
+  return NextResponse.json({ data: updated });
 }
 
 /**

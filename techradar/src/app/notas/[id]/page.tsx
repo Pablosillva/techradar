@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { AudioPlayer } from "@/components/study/audio-player";
+import { sanitizeHtml } from "@/lib/security/sanitize";
 
 interface NotaPageProps {
   params: Promise<{ id: string }>;
@@ -82,7 +83,7 @@ export default async function NotaPage({ params }: NotaPageProps) {
         <CardContent className="p-6">
           <div className="prose prose-invert prose-lg max-w-none">
             {note.markdown ? (
-              <div dangerouslySetInnerHTML={{ __html: note.markdown }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(note.markdown) }} />
             ) : (
               <p className="text-gray-500 italic">Sem conteúdo.</p>
             )}

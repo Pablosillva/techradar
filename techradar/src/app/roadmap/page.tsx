@@ -1,90 +1,68 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { RoadmapWorkspace } from "@/components/roadmap/roadmap-workspace";
 import { auth } from "@/lib/auth";
-import { Card, CardContent } from "@/components/ui/card";
+import { prisma } from "@/lib/prisma";
+import type {
+  RoadmapDto,
+  RoadmapItemStatus,
+  RoadmapLevel,
+  StudyContentType,
+} from "@/lib/roadmap/types";
+
+export const metadata: Metadata = {
+  title: "Roadmap",
+};
 
 export default async function RoadmapPage() {
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect("/entrar");
   }
 
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-        Roadmap de Estudos
-      </h1>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Planeje sua jornada de aprendizado com foco nas habilidades mais demandadas.
-      </p>
+  const roadmaps = await prisma.roadmap.findMany({
+    where: {
+      userId: session.user.id,
+      isArchived: false,
+    },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    include: {
+      items: {
+        orderBy: { order: "asc" },
+        include: {
+          contents: { orderBy: { order: "asc" } },
+        },
+      },
+    },
+  });
 
-      <div className="mt-8 space-y-6">
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Módulo 1: Fundamentos de Programação
-            </h2>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">▹</span>
-                <span className="text-gray-700 dark:text-gray-300">Lógica de programação</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-blue-400 dark:text-blue-400">✓</span>
-                <span className="text-gray-700 dark:text-gray-300">HTML/CSS</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">▹</span>
-                <span className="text-gray-700 dark:text-gray-300">JavaScript</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+  const data: RoadmapDto[] = roadmaps.map((roadmap) => ({
+    id: roadmap.id,
+    title: roadmap.title,
+    description: roadmap.description,
+    goal: roadmap.goal,
+    level: roadmap.level as RoadmapLevel,
+    color: roadmap.color,
+    order: roadmap.order,
+    items: roadmap.items.map((item) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      status: item.status as RoadmapItemStatus,
+      order: item.order,
+      estimatedMinutes: item.estimatedMinutes,
+      resourceUrl: item.resourceUrl,
+      contents: item.contents.map((content) => ({
+        id: content.id,
+        title: content.title,
+        type: content.type as StudyContentType,
+        content: content.content,
+        url: content.url,
+        order: content.order,
+      })),
+    })),
+  }));
 
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Módulo 2: Frontend
-            </h2>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2">
-                <span className="text-blue-400 dark:text-blue-400">✓</span>
-                <span className="text-gray-700 dark:text-gray-300">React</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">▹</span>
-                <span className="text-gray-700 dark:text-gray-300">TypeScript</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">▹</span>
-                <span className="text-gray-700 dark:text-gray-300">Next.js</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Módulo 3: Backend
-            </h2>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">▹</span>
-                <span className="text-gray-700 dark:text-gray-300">Node.js</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">▹</span>
-                <span className="text-gray-700 dark:text-gray-300">PostgreSQL</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-gray-400 dark:text-gray-500">▹</span>
-                <span className="text-gray-700 dark:text-gray-300">APIs REST</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+  return <RoadmapWorkspace roadmaps={data} />;
 }

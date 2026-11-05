@@ -11,6 +11,7 @@ interface LibraryItem {
   id: string;
   itemType: string;
   itemId: string;
+  fileKey?: string | null;
   status: string;
   progress: number;
   rating?: number | null;
@@ -71,7 +72,9 @@ export default async function BibliotecaPage() {
             const href =
               item.itemType === "book"
                 ? `/livro/${item.itemId}`
-                : `/audiobook/${item.itemId}`;
+                : item.itemType === "pdf" || item.fileKey
+                  ? `/library/${item.id}`
+                  : `/audiobook/${item.itemId}`;
             return (
               <Card key={item.id}>
                 <CardContent className="p-5">
