@@ -45,20 +45,24 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     const { id } = await params;
     const input = await parseBody(request, updateRoadmapItemSchema);
 
+    let targetUserId: string | undefined;
+
     if (input.roadmapId) {
       const target = await prisma.roadmap.findUnique({
         where: { id: input.roadmapId },
-        select: { id: true },
+        select: { id: true, userId: true },
       });
       if (!target) {
         throw new ApiError(404, "Trilha de destino não encontrada", { code: "NOT_FOUND" });
       }
+      targetUserId = target.userId;
     }
 
     const updated = await prisma.roadmapItem.updateMany({
       where: { id },
       data: {
         ...(input.roadmapId !== undefined ? { roadmapId: input.roadmapId } : {}),
+        ...(targetUserId ? { userId: targetUserId } : {}),
         ...(input.title !== undefined ? { title: input.title } : {}),
         ...(input.description !== undefined ? { description: input.description } : {}),
         ...(input.order !== undefined ? { order: input.order } : {}),
@@ -77,6 +81,14 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
     if (updated.count === 0) {
       throw new ApiError(404, "Item não encontrado", { code: "NOT_FOUND" });
+    }
+
+    // Mantém o ownership dos conteúdos coerente com a trilha de destino.
+    if (targetUserId) {
+      await prisma.studyContent.updateMany({
+        where: { roadmapItemId: id },
+        data: { userId: targetUserId },
+      });
     }
 
     return jsonOk(await prisma.roadmapItem.findUnique({ where: { id } }));

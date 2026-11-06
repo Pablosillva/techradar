@@ -38,6 +38,7 @@ export async function GET(request: Request) {
         id: roadmap.id,
         title: roadmap.title,
         description: roadmap.description,
+        goal: roadmap.goal,
         level: roadmap.level,
         color: roadmap.color,
         order: roadmap.order,
@@ -69,6 +70,15 @@ export async function POST(request: Request) {
     }
 
     const input = await parseBody(request, adminCreateRoadmapSchema);
+
+    const owner = await prisma.user.findUnique({
+      where: { id: input.userId },
+      select: { id: true },
+    });
+
+    if (!owner) {
+      throw new ApiError(404, "Usuário dono não encontrado", { code: "NOT_FOUND" });
+    }
 
     const roadmap = await prisma.roadmap.create({
       data: {

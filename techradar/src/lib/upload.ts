@@ -110,3 +110,12 @@ export async function ensureUploadDir(): Promise<void> {
 export function generateFileKey(ext: string): string {
   return `${randomBytes(16).toString("hex")}.${ext}`;
 }
+
+/**
+ * Remove o arquivo físico correspondente à chave, com validação de formato.
+ * Silencioso quando o arquivo já não existe (idempotente).
+ */
+export async function deleteStoredFile(fileKey: string | null | undefined): Promise<void> {
+  if (!fileKey || !/^[a-z0-9]+\.[a-z0-9]+$/i.test(fileKey)) return;
+  await fs.unlink(storagePath(fileKey)).catch(() => undefined);
+}

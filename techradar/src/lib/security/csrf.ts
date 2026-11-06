@@ -27,12 +27,15 @@ export async function getCsrfTokenFromCookie(): Promise<string | null> {
   return cookie ? cookie.value : null;
 }
 
-/** Sets the CSRF token cookie on a NextResponse. */
+/**
+ * Sets the CSRF token cookie on a NextResponse.
+ * O cookie precisa ser legível pelo JS (double-submit): NÃO usar HttpOnly.
+ */
 export function setCsrfTokenCookie(response: NextResponse, token: string): void {
   response.headers.set(
     "Set-Cookie",
     `${CSRF_COOKIE_NAME}=${token}; Path=/; SameSite=Strict${
-      process.env.NODE_ENV === "production" ? "; Secure; HttpOnly" : ""
+      process.env.NODE_ENV === "production" ? "; Secure" : ""
     }; Max-Age=604800`,
   );
 }

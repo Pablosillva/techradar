@@ -47,6 +47,8 @@ export const createLibraryItemSchema = z.object({
 
 export const updateLibraryItemSchema = z
   .object({
+    title: z.string().trim().min(1).max(200).optional(),
+    author: z.string().trim().max(200).optional().nullable(),
     status: libraryStatusSchema.optional(),
     progress: z.coerce.number().int().min(0).max(100).optional(),
     rating: z.coerce.number().int().min(1).max(5).optional().nullable(),

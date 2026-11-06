@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/api/auth";
 import { ApiError, handleRoute, jsonOk, parseBody } from "@/lib/api/response";
 import { updateLibraryItemSchema } from "@/lib/validations/library";
+import { deleteStoredFile } from "@/lib/upload";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -86,6 +87,15 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
     const user = await requireUser();
     const { id } = await params;
 
+    const item = await prisma.libraryItem.findFirst({
+      where: { id, userId: user.id },
+      select: { fileKey: true },
+    });
+
+    if (!item) {
+      throw new ApiError(404, "Item não encontrado", { code: "NOT_FOUND" });
+    }
+
     const deleted = await prisma.libraryItem.deleteMany({
       where: { id, userId: user.id },
     });
@@ -93,6 +103,8 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
     if (deleted.count === 0) {
       throw new ApiError(404, "Item não encontrado", { code: "NOT_FOUND" });
     }
+
+    await deleteStoredFile(item.fileKey);
 
     return jsonOk({ success: true });
   });

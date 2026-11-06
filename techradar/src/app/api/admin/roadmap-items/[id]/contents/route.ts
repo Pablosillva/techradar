@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdminUser } from "@/lib/api/auth";
 import { ApiError, handleRoute, jsonOk, parseBody } from "@/lib/api/response";
+import { cookies } from "next/headers";
+import { validateCsrfRequest } from "@/lib/security/csrf";
 import { studyContentBaseSchema } from "@/lib/validations/roadmap";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -16,6 +18,15 @@ const nestedContentSchema = studyContentBaseSchema
 export async function POST(request: Request, { params }: RouteContext) {
   return handleRoute(async () => {
     await requireAdminUser();
+
+    // CSRF protection (double-submit cookie + header).
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get("csrf_token")?.value ?? null;
+    const csrfValidation = validateCsrfRequest(request, cookieToken);
+    if (!csrfValidation.valid) {
+      throw new ApiError(403, csrfValidation.reason, { code: "CSRF_INVALID" });
+    }
+
     const { id: roadmapItemId } = await params;
     const input = await parseBody(request, nestedContentSchema);
 

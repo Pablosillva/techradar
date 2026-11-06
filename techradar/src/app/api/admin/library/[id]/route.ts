@@ -4,6 +4,7 @@ import { ApiError, handleRoute, jsonOk, parseBody } from "@/lib/api/response";
 import { cookies } from "next/headers";
 import { validateCsrfRequest } from "@/lib/security/csrf";
 import { updateLibraryItemSchema } from "@/lib/validations/library";
+import { deleteStoredFile } from "@/lib/upload";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -35,6 +36,8 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     const updated = await prisma.libraryItem.updateMany({
       where: { id },
       data: {
+        ...(input.title !== undefined ? { title: input.title } : {}),
+        ...(input.author !== undefined ? { author: input.author } : {}),
         ...(input.status !== undefined ? { status: input.status } : {}),
         ...(progress !== undefined ? { progress } : {}),
         ...(input.rating !== undefined ? { rating: input.rating } : {}),
@@ -70,11 +73,23 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
 
     const { id } = await params;
 
+    const item = await prisma.libraryItem.findUnique({
+      where: { id },
+      select: { fileKey: true },
+    });
+
+    if (!item) {
+      throw new ApiError(404, "Item não encontrado", { code: "NOT_FOUND" });
+    }
+
     const deleted = await prisma.libraryItem.deleteMany({ where: { id } });
 
     if (deleted.count === 0) {
       throw new ApiError(404, "Item não encontrado", { code: "NOT_FOUND" });
     }
+
+    // Remove o binário depois de confirmar a exclusão do registro.
+    await deleteStoredFile(item.fileKey);
 
     return jsonOk({ success: true });
   });

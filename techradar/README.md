@@ -13,26 +13,34 @@ Centralize sua busca por vagas, cursos, livros e audiobooks de tecnologia em um 
 - **Histórico**: Acompanhe suas buscas e receba recomendações personalizadas
 - **Admin**: Gerencie fontes de vagas e edite cursos, livros e audiobooks na página `/admin`
 
-## Admin
+## Admin (Etapa 4)
 
-A página `/admin` (protegida por autenticação) permite:
+A página `/admin` é restrita a usuários com `role = ADMIN` (verificada no banco no
+server component e em todas as rotas de API). Ela permite:
 
-- **Fontes de Vagas**: Adicionar sites (ex: Trampos.co, Coadesh) que passam a ser buscáveis no DevPath Hub via filtro de fonte. Inclui fontes padrão (Remotive, Arbeitnow).
-- **Cursos**: Editar cursos (título, provider, URL, preço, nível, duração, gratuito/pago, skills).
-- **Livros**: Editar livros (título, autores, URL, editora, páginas, gratuito/pago, skills).
-- **Audiobooks**: Editar audiobooks (título, autores, narrador, URL, duração, gratuito/pago, skills).
+- **Trilhas**: CRUD completo de qualquer trilha, com seleção do usuário dono na criação.
+- **Itens**: CRUD por trilha, incluindo status, tempo estimado, descrição e link oficial.
+- **Conteúdos teóricos**: CRUD inline por item (notas, links, vídeos, artigos e PDFs).
+- **Biblioteca**: upload e CRUD de PDFs/audiobooks de qualquer usuário, com edição de
+  metadados, progresso de leitura/escuta e exclusão do registro + arquivo físico.
+- **Uploads seguros**: o tipo real é detectado por *magic number* (não pela extensão),
+  com limites de 100 MB para PDF e 300 MB para áudio. Os arquivos ficam em `uploads/lib`
+  (fora de `public/`) e só são servidos por rota autenticada ao dono ou a um admin.
+- **CSRF**: todas as mutações administrativas exigem o header `X-CSRF-Token`, lido do
+  cookie `csrf_token` pelo helper `src/lib/api-client.ts`.
+- **Range requests**: `/api/library-files/[key]` suporta `Range` (206) para permitir
+  seek em audiobooks, além de `nosniff`, `Cross-Origin-Resource-Policy` e cache privado.
 
-As rotas de admin utilizam:
-- `GET /api/admin/sources` — lista fontes
-- `POST /api/admin/sources` — cria fonte
-- `PATCH /api/admin/sources/[id]` — atualiza fonte
-- `DELETE /api/admin/sources/[id]` — remove fonte
-- `GET /api/admin/courses` — lista cursos
-- `PUT /api/admin/courses/[id]` — atualiza curso
-- `GET /api/admin/books` — lista livros
-- `PUT /api/admin/books/[id]` — atualiza livro
-- `GET /api/admin/audiobooks` — lista audiobooks
-- `PUT /api/admin/audiobooks/[id]` — atualiza audiobook
+Rotas principais:
+- `GET/POST /api/admin/roadmaps`
+- `GET/PATCH/DELETE /api/admin/roadmaps/[id]`
+- `POST /api/admin/roadmaps/[id]/items`
+- `GET/PATCH/DELETE /api/admin/roadmap-items/[id]`
+- `POST /api/admin/roadmap-items/[id]/contents`
+- `PATCH/DELETE /api/admin/study-contents/[id]`
+- `GET /api/admin/library`, `PATCH/DELETE /api/admin/library/[id]`
+- `POST /api/admin/library/upload`
+- `GET /api/library-files/[key]`
 
 ## Roadmap (Etapa 3)
 
