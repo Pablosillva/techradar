@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { ConteudoManager } from "@/components/roadmap/conteudo-manager";
 
 export default async function ConteudoPage() {
   const session = await auth();
@@ -118,7 +117,7 @@ export default async function ConteudoPage() {
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                              {item.itemStatus === "COMPLETED" ? "Concluído" : item.itemStatus === "IN_PROGRESS" ? "Em andamento" : item.itemStatus === "NEEDS_REVIEW" ? "Revisar" : "Não iniciado"}
+                              {item.status === "COMPLETED" ? "Concluído" : item.status === "IN_PROGRESS" ? "Em andamento" : item.status === "NEEDS_REVIEW" ? "Revisar" : "Não iniciado"}
                             </span>
                           </div>
                         </div>
