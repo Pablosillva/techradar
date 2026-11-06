@@ -25,16 +25,13 @@ import type {
   RoadmapDto,
   RoadmapItemDto,
   RoadmapItemStatus,
-  StudyContentDto,
 } from "@/lib/roadmap/types";
 import { cn } from "@/lib/utils";
 import { Modal } from "./modal";
 import { RoadmapCard } from "./roadmap-card";
 import {
-  ContentForm,
   ItemForm,
   TrackForm,
-  type ContentFormPayload,
   type ItemFormPayload,
   type TrackFormPayload,
 } from "./roadmap-forms";
@@ -49,15 +46,9 @@ type ItemModalState =
   | { mode: "edit"; item: RoadmapItemDto }
   | null;
 
-type ContentModalState =
-  | { mode: "create"; item: RoadmapItemDto }
-  | { mode: "edit"; item: RoadmapItemDto; content: StudyContentDto }
-  | null;
-
 type DeleteTarget =
   | { kind: "roadmap"; roadmap: RoadmapDto }
   | { kind: "item"; item: RoadmapItemDto }
-  | { kind: "content"; item: RoadmapItemDto; content: StudyContentDto }
   | null;
 
 type ToastState = { tone: "success" | "error"; message: string } | null;
@@ -136,7 +127,6 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [trackModal, setTrackModal] = useState<TrackModalState>(null);
   const [itemModal, setItemModal] = useState<ItemModalState>(null);
-  const [contentModal, setContentModal] = useState<ContentModalState>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
   const [toast, setToast] = useState<ToastState>(null);
   const [pending, setPending] = useState<string | null>(null);
@@ -233,32 +223,6 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
     if (success) setItemModal(null);
   }
 
-  async function handleContentSubmit(payload: ContentFormPayload) {
-    const modal = contentModal;
-    if (!modal) return;
-
-    const editing = modal.mode === "edit";
-    const key = editing
-      ? `content-${modal.content.id}`
-      : `content-create-${modal.item.id}`;
-    const success = await run(
-      key,
-      () =>
-        requestData(
-          editing
-            ? `/api/study-contents/${modal.content.id}`
-            : `/api/roadmap-items/${modal.item.id}/contents`,
-          {
-            method: editing ? "PATCH" : "POST",
-            body: JSON.stringify(payload),
-          }
-        ),
-      editing ? "Conteúdo atualizado." : "Conteúdo adicionado ao item."
-    );
-
-    if (success) setContentModal(null);
-  }
-
   async function handleStatusChange(
     item: RoadmapItemDto,
     status: RoadmapItemStatus
@@ -287,9 +251,6 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
     } else if (target.kind === "item") {
       endpoint = `/api/roadmap-items/${target.item.id}`;
       successMessage = "Item excluído.";
-    } else {
-      endpoint = `/api/study-contents/${target.content.id}`;
-      successMessage = "Conteúdo excluído.";
     }
 
     const success = await run(
@@ -322,8 +283,8 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
               Roadmap de Estudos
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-400">
-              Organize suas trilhas, acompanhe o progresso e mantenha o conteúdo
-              teórico e os links oficiais sempre à mão.
+              Organize suas trilhas, acompanhe o progresso e gerencie o
+              conteúdo teórico na página de Conteúdo.
             </p>
           </div>
         </div>
@@ -416,7 +377,7 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
           </h2>
           <p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-slate-400">
             Crie uma trilha com objetivo e nível, adicione itens de estudo e
-            guarde resumos, links oficiais e o status de cada etapa.
+            gerencie o conteúdo teórico na página de Conteúdo.
           </p>
           <Button
             type="button"
@@ -443,15 +404,6 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
               }
               onEditItem={(item) => setItemModal({ mode: "edit", item })}
               onDeleteItem={(item) => setDeleteTarget({ kind: "item", item })}
-              onAddContent={(item) =>
-                setContentModal({ mode: "create", item })
-              }
-              onEditContent={(item, content) =>
-                setContentModal({ mode: "edit", item, content })
-              }
-              onDeleteContent={(item, content) =>
-                setDeleteTarget({ kind: "content", item, content })
-              }
               onStatusChange={handleStatusChange}
             />
           ))}
@@ -524,39 +476,6 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
         )}
       </Modal>
 
-      {/* Modal de conteúdo */}
-      <Modal
-        open={contentModal !== null}
-        onClose={() => setContentModal(null)}
-        title={
-          contentModal?.mode === "edit"
-            ? "Editar conteúdo"
-            : "Novo conteúdo teórico"
-        }
-        description={
-          contentModal
-            ? `Vinculado ao item “${contentModal.item.title}”.`
-            : undefined
-        }
-        size="lg"
-      >
-        {contentModal && (
-          <ContentForm
-            key={
-              contentModal.mode === "edit"
-                ? contentModal.content.id
-                : `new-${contentModal.item.id}`
-            }
-            initial={
-              contentModal.mode === "edit" ? contentModal.content : undefined
-            }
-            saving={pending?.startsWith("content-") ?? false}
-            onSubmit={handleContentSubmit}
-            onCancel={() => setContentModal(null)}
-          />
-        )}
-      </Modal>
-
       {/* Confirmação de exclusão */}
       <Modal
         open={deleteTarget !== null}
@@ -564,9 +483,7 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
         title={
           deleteTarget?.kind === "roadmap"
             ? "Excluir trilha?"
-            : deleteTarget?.kind === "item"
-              ? "Excluir item?"
-              : "Excluir conteúdo?"
+            : "Excluir item?"
         }
         description="Esta ação não pode ser desfeita."
         size="sm"
@@ -591,19 +508,6 @@ export function RoadmapWorkspace({ roadmaps }: RoadmapWorkspaceProps) {
                     “{deleteTarget.item.title}”
                   </strong>{" "}
                   e os conteúdos vinculados a ele serão removidos.
-                </>
-              )}
-              {deleteTarget.kind === "content" && (
-                <>
-                  O conteúdo{" "}
-                  <strong className="text-slate-200">
-                    “{deleteTarget.content.title}”
-                  </strong>{" "}
-                  será removido do item{" "}
-                  <strong className="text-slate-200">
-                    “{deleteTarget.item.title}”
-                  </strong>
-                  .
                 </>
               )}
             </p>
