@@ -56,7 +56,7 @@ export function RoadmapItemCard({
   onAddContent,
 }: RoadmapItemCardProps) {
   const [status, setStatus] = useState<RoadmapItemStatus>(item.status);
-  const meta = STATUS_META[status as keyof typeof STATUS_META];
+  const statusMeta = STATUS_META[status as keyof typeof STATUS_META];
   const resourceUrl = safeHttpUrl(item.resourceUrl);
 
   async function handleStatusChange(next: RoadmapItemStatus) {
@@ -82,7 +82,7 @@ export function RoadmapItemCard({
       <div className="flex items-start gap-2 p-3">
         <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-violet-400/10 text-violet-300">
           <FileText className="h-3 w-3" />
-        </span>
+        </div>
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-slate-200 truncate" title={item.title}>
             {item.title}
@@ -359,7 +359,6 @@ export function RoadmapColumns({ roadmaps }: RoadmapColumnsProps) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex items-start gap-3.5">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/10 text-cyan-300">
