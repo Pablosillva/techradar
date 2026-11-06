@@ -40,7 +40,7 @@ export async function GET() {
     }
 
     return Response.json({ success: true, message: "Seed executado com sucesso" });
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
     return Response.json({ error: error.message }, { status: 500 });
   }
