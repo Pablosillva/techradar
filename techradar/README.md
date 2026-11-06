@@ -288,4 +288,5 @@ Recomendado: a cada 6 horas (0 */6 * * *)
 
 MIT
 #   f i x :   f o r ç a   r e b u i l d   d o   r o a d m a p - c o l u m n s . t s x  
+ #   f i x :   f o r ç a   r e b u i l d   c o m p l e t o   d o   r o a d m a p - c o l u m n s . t s x  
  
