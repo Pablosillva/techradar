@@ -4,6 +4,7 @@ import { prisma } from "./prisma";
 import { compare } from "bcryptjs";
 import { generateCsrfToken, setCsrfTokenCookie } from "./security/csrf";
 import { rateLimit } from "./security/rate-limit";
+import { securityLog } from "./security/security-log";
 
 const AUTH_SECRET = process.env.AUTH_SECRET;
 
@@ -11,9 +12,19 @@ if (!AUTH_SECRET && process.env.NODE_ENV === "production") {
   throw new Error("AUTH_SECRET environment variable is required in production");
 }
 
-const SECRET = new TextEncoder().encode(
-  AUTH_SECRET || "dev-secret-only-change-in-production",
-);
+let SECRET: Uint8Array;
+
+if (AUTH_SECRET) {
+  SECRET = new TextEncoder().encode(AUTH_SECRET);
+} else {
+  // Desenvolvimento apenas: gera um segredo temporário por sessão. Nunca
+  // usar em produção; em produção a variável AUTH_SECRET é obrigatória.
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[auth] AUTH_SECRET não definida — usando segredo temporário (apenas desenvolvimento).",
+  );
+  SECRET = crypto.getRandomValues(new Uint8Array(32));
+}
 
 export async function auth() {
   try {
@@ -57,12 +68,22 @@ export async function signIn(formData: FormData) {
   });
 
   if (!user || !user.password) {
+    securityLog({
+      type: "AUTH_LOGIN_FAILED",
+      email,
+      reason: "usuario-nao-encontrado ou sem senha",
+    });
     return { error: "Credenciais inválidas" };
   }
 
   const isValid = await compare(password, user.password);
 
   if (!isValid) {
+    securityLog({
+      type: "AUTH_LOGIN_FAILED",
+      email,
+      reason: "senha-invalida",
+    });
     return { error: "Credenciais inválidas" };
   }
 
@@ -94,6 +115,11 @@ export async function signIn(formData: FormData) {
     sameSite: "strict",
     maxAge: 60 * 60 * 24 * 7,
     path: "/",
+  });
+
+  securityLog({
+    type: "AUTH_LOGIN_SUCCESS",
+    userId: user.id,
   });
 
   return { success: true, user };

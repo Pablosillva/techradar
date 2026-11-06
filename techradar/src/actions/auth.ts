@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
+import { rateLimit } from "@/lib/security/rate-limit";
+import { securityLog } from "@/lib/security/security-log";
 
 export async function loginAction(formData: FormData) {
   const email = formData.get("email") as string;
@@ -41,6 +43,16 @@ export async function registerAction(formData: FormData) {
   // Validação mínima no servidor (não confiar apenas no HTML).
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || password.length < 8) {
     redirect("/cadastrar?error=dados-invalidos");
+  }
+
+  // Rate limiting por email para prevenir registro em massa.
+  const rl = rateLimit(`auth:register:${email}`, { limit: 5, windowMs: 60_000 });
+  if (!rl.allowed) {
+    securityLog({
+      type: "AUTH_RATE_LIMITED",
+      identifier: `auth:register:${email}`,
+    });
+    redirect("/cadastrar?error=muitas-tentativas");
   }
 
   const existing = await prisma.user.findUnique({

@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/api/auth";
-import { handleRoute, jsonOk, parseBody } from "@/lib/api/response";
+import { handleRoute, jsonOk, parseBody, ApiError } from "@/lib/api/response";
 import { updateSettingsSchema } from "@/lib/validations/user";
+import { cookies } from "next/headers";
+import { validateCsrfRequest } from "@/lib/security/csrf";
 
 const SETTINGS_DEFAULTS = {
   theme: "dark",
@@ -32,6 +34,15 @@ export async function GET() {
 export async function PATCH(request: Request) {
   return handleRoute(async () => {
     const user = await requireUser();
+
+    // CSRF protection (double-submit cookie + header).
+    const cookieStore = await cookies();
+    const cookieToken = cookieStore.get("csrf_token")?.value ?? null;
+    const csrfValidation = validateCsrfRequest(request, cookieToken);
+    if (!csrfValidation.valid) {
+      throw new ApiError(403, csrfValidation.reason, { code: "CSRF_INVALID" });
+    }
+
     const input = await parseBody(request, updateSettingsSchema);
 
     const settings = await prisma.userSettings.upsert({

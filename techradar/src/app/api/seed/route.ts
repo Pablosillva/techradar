@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
+import { requireAdminUser } from "@/lib/api/auth";
+import { handleRoute, jsonOk } from "@/lib/api/response";
 
 export async function GET() {
-  try {
+  return handleRoute(async () => {
+    await requireAdminUser();
+
     const adminPassword = await hash("D3vP@th_2026!S3cure_Adm#91", 12);
     const demoPassword = await hash("D3vP@th_2026!Us3r_S3cure#82", 12);
 
@@ -39,9 +43,6 @@ export async function GET() {
       console.log(`Created roadmap: ${roadmap.title}`);
     }
 
-    return Response.json({ success: true, message: "Seed executado com sucesso" });
-  } catch (error: any) {
-    console.error(error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
+    return jsonOk({ success: true, message: "Seed executado com sucesso" });
+  });
 }

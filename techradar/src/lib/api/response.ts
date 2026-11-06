@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { ZodError, type ZodType } from "zod";
+import { securityLog } from "@/lib/security/security-log";
 
 /**
  * Erro de domínio da API. O status HTTP e o código são enviados ao cliente
@@ -35,6 +36,13 @@ export async function handleRoute(
     return await handler();
   } catch (error) {
     if (error instanceof ApiError) {
+      if (error.status === 401 || error.status === 403) {
+        securityLog({
+          type: "AUTH_ACCESS_DENIED",
+          path: "api",
+          status: error.status,
+        });
+      }
       return NextResponse.json(
         { error: error.message, code: error.code, details: error.details },
         { status: error.status }

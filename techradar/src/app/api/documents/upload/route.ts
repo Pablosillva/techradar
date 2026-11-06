@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { detectFileType, maxSizeFor } from "@/lib/upload";
+import { rateLimit } from "@/lib/security/rate-limit";
+import { getIP } from "@/lib/security/ip";
+import { securityLog } from "@/lib/security/security-log";
+import { cookies } from "next/headers";
+import { validateCsrfRequest } from "@/lib/security/csrf";
+import { ApiError } from "@/lib/api/response";
 
 /**
  * POST /api/documents/upload
@@ -16,6 +22,27 @@ export async function POST(request: Request) {
 
   if (!session?.user) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  // Rate limiting por usuário para prevenir abuso de upload.
+  const rl = rateLimit(`documents:upload:${session.user.id}`, {
+    limit: 30,
+    windowMs: 60_000,
+  });
+  if (!rl.allowed) {
+    securityLog({ type: "AUTH_RATE_LIMITED", identifier: `documents:upload:${session.user.id}`, ip: getIP(request) });
+    return NextResponse.json(
+      { error: "Muitos uploads. Tente novamente em 1 minuto.", code: "RATE_LIMITED" },
+      { status: 429 },
+    );
+  }
+
+  // CSRF protection (double-submit cookie + header).
+  const cookieStore = await cookies();
+  const cookieToken = cookieStore.get("csrf_token")?.value ?? null;
+  const csrfValidation = validateCsrfRequest(request, cookieToken);
+  if (!csrfValidation.valid) {
+    throw new ApiError(403, csrfValidation.reason, { code: "CSRF_INVALID" });
   }
 
   const formData = await request.formData();
@@ -75,6 +102,14 @@ export async function POST(request: Request) {
       fileSize: file.size,
       pageCount: null,
     },
+  });
+
+  securityLog({
+    type: "AUTH_UPLOAD",
+    userId: session.user.id as string,
+    fileName: file.name,
+    mime: file.type,
+    ip: getIP(request),
   });
 
   return NextResponse.json({ data: document }, { status: 201 });
