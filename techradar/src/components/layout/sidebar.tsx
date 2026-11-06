@@ -20,12 +20,14 @@ import {
   X,
   Sparkles,
   Shield,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Roadmap", href: "/roadmap", icon: Map },
+  { name: "Conteúdo", href: "/conteudo", icon: FileText },
   { name: "Caderno", href: "/caderno", icon: BookOpen },
   { name: "Laboratório", href: "/laboratorio", icon: FlaskConical },
   { name: "Exercícios", href: "/treino", icon: Code2 },
