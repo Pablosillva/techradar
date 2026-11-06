@@ -225,7 +225,7 @@ async function main() {
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Usuários e dados de demonstração do DevPath Hub
-// ══════════════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
 
 const ADMIN_EMAIL = "admin@devpath.com";
 const ADMIN_PASSWORD = "D3vP@th_2026!S3cure_Adm#91";
@@ -300,192 +300,491 @@ async function seedDemoData(userId: string) {
   // Roadmap Full Stack Júnior - 12 módulos, 42 aulas
   // ══════════════════════════════════════════════════════════════════════════════
 
-  const M1 = [
+  const ROADMAP_ITEMS = [
+    // Módulo 1: Fundamentos (5 itens)
     {
       title: "1. Terminal e Linux: navegar, criar e mover arquivos e pastas, permissões",
       status: "NOT_STARTED",
+      order: 0,
       estimatedMinutes: 90,
       contents: [
-        {
-          title: "Terminal Linux - Comandos Essenciais",
-          type: "NOTE",
-          content:
-            "# Terminal Linux - Comandos Essenciais\n\n## Navegação\n- `pwd` - Mostra o diretório atual\n- `ls` - Lista arquivos e pastas\n- `cd <caminho>` - Muda de diretório\n- `cd ..` - Volta um diretório\n- `cd ~` - Vai para o diretório home\n\n## Criação e remoção\n- `mkdir <nome>` - Cria uma pasta\n- `touch <arquivo>` - Cria um arquivo vazio\n- `rm <arquivo>` - Remove um arquivo\n- `rm -r <pasta>` - Remove uma pasta e seu conteúdo\n- `cp <origem> <destino>` - Copia arquivo/pasta\n- `mv <origem> <destino>` - Move ou renomeia arquivo/pasta\n\n## Permissões\n- `ls -l` - Mostra permissões detalhadas\n- `chmod <permissões> <arquivo>` - Altera permissões (ex: chmod 755 arquivo.sh)\n- `chown <usuario> <arquivo>` - Altera o dono do arquivo\n- `chown :<grupo> <arquivo>` - Altera o grupo do arquivo\n\n## Visualização\n- `cat <arquivo>` - Mostra conteúdo completo\n- `less <arquivo>` - Navega pelo conteúdo página por página\n- `head <arquivo>` - Mostra primeiras linhas\n- `tail <arquivo>` - Mostra últimas linhas\n\n## Busca\n- `grep <termo> <arquivo>` - Busca texto dentro de arquivo\n- `find <caminho> -name <nome>` - Busca arquivos por nome\n\n## Exemplo prático\n```bash\n# Navegar para projetos\ncd ~/projetos\n\n# Criar pasta do projeto\nmkdir meu-projeto\ncd meu-projeto\n\n# Criar arquivo README\ntouch README.md\n\n# Verificar permissões\nls -l\n\n# Tornar script executável\nchmod +x script.sh\n```",
-          order: 0,
-        },
-        {
-          title: "Tutorial Oficial Linux - Guia do Iniciante",
-          type: "LINK",
-          url: "https://linuxjourney.com/lesson/the-basics-of-the-terminal",
-          order: 1,
-        },
+        { title: "Terminal Linux - Comandos Essenciais", type: "NOTE", content: "# Terminal Linux\n\n## Navegação\n- pwd, ls, cd\n- cd .., cd ~\n\n## Criação\n- mkdir, touch\n- rm, rm -r\n- cp, mv\n\n## Permissões\n- ls -l\n- chmod, chown", order: 0 },
+        { title: "Tutorial Oficial Linux", type: "LINK", url: "https://linuxjourney.com/lesson/the-basics-of-the-terminal", order: 1 },
       ],
     },
     {
       title: "2. Git e GitHub: commit, branch, merge, pull request e resolução de conflitos",
       status: "NOT_STARTED",
+      order: 1,
       estimatedMinutes: 120,
       contents: [
         {
           title: "Git e GitHub - Fluxo Essencial",
           type: "NOTE",
-          content:
-            "# Git e GitHub - Fluxo Essencial\n\n## Configuração inicial\n- `git config --global user.name \"Seu Nome\"`\n- `git config --global user.email \"seu@email.com\"`\n- `git config --global init.defaultBranch main`\n\n## Iniciando um repositório\n- `git init` - Inicia um repositório Git local\n- `git clone <url>` - Clona um repositório remoto\n\n## Ciclo de vida dos arquivos\n1. **Untracked** - Arquivo novo, não rastreado\n2. **Staged** - Arquivo preparado para commit (`git add`)\n3. **Committed** - Arquivo salvo no histórico (`git commit`)\n4. **Modified** - Arquivo modificado após commit\n\n## Comandos principais\n- `git status` - Verifica status dos arquivos\n- `git add <arquivo>` - Prepara arquivo para commit\n- `git add .` - Prepara todos arquivos modificados\n- `git commit -m \"mensagem\"` - Salva alterações com mensagem\n- `git log` - Visualiza histórico de commits\n- `git diff` - Mostra alterações não commitadas\n\n## Ramificações (Branches)\n- `git branch` - Lista branches locais\n- `git branch <nome>` - Cria nova branch\n- `git checkout <nome>` - Muda para outra branch\n- `git checkout -b <nome>` - Cria e muda para nova branch\n- `git merge <nome>` - Mescla outra branch na atual\n- `git branch -d <nome>` - Deleta uma branch\n\n## Trabalhando com remoto (GitHub)\n- `git remote add origin <url>` - Conecta com repositório remoto\n- `git push origin <branch>` - Envia commits para o remoto\n- `git pull` - Baixa e mescla alterações do remoto\n- `git fetch` - Baixa informações do remoto sem mesclar\n\n## Resolvendo conflitos de merge\n1. Git avisa qual arquivo tem conflito\n2. Abra o arquivo e veja os marcadores `<<<<<<<`, `=======`, `>>>>>>>`\n3. Edite o arquivo deixando apenas o código correto\n4. `git add <arquivo>` - Marque como resolvido\n5. `git commit -m \"resolve conflitos\"` - Finalize o merge\n\n## Boas práticas\n- Commit pequeno e focado em uma única mudança\n- Mensagens de commit em imperativo: \"Adiciona feature X\", não \"Adicionado\"\n- Nunca faça commit direto na `main` em projetos em equipe\n- Crie uma branch para cada feature/bugfix\n- Faça pull request para revisão de código antes de mesclar",
-          order: 0,
-        },
-        {
-          title: "GitHub Docs - Guia de Contribuição",
-          type: "LINK",
-          url: "https://docs.github.com/pt/get-started/quickstart/contributing-to-projects",
-          order: 1,
-        },
+          content: "# Git e GitHub\n\n## Comandos\n- git init, git clone\n- git add, git commit\n- git push, git pull\n- git branch, git merge\n- git status, git log\n\n## Boas práticas\n- Commits pequenos\n- Mensagens descritivas\n- Uma branch por feature\n- Pull request para revisão", order: 0 },
+        { title: "GitHub Docs", type: "LINK", url: "https://docs.github.com/pt/get-started/quickstart/contributing-to-projects", order: 1 },
       ],
     },
     {
       title: "3. Como a web funciona: cliente e servidor, HTTP, métodos, status codes, DNS e JSON",
       status: "NOT_STARTED",
+      order: 2,
       estimatedMinutes: 100,
       contents: [
         {
-          title: "Como a Web Funciona - Conceitos Fundamentais",
+          title: "Como a Web Funciona",
           type: "NOTE",
-          content:
-            "# Como a Web Funciona\n\n## Arquitetura Cliente-Servidor\n\nO modelo cliente-servidor divide as responsabilidades entre:\n\n**Cliente (Frontend):**\n- Navegador web (Chrome, Firefox, Safari)\n- Aplicativos móveis\n- Qualquer dispositivo que faz requisições\n\n**Servidor (Backend):**\n- Computador que armazena dados e processa requisições\n- Pode ser um servidor físico ou na nuvem (AWS, Azure, GCP)\n- Executa aplicações backend (Node.js, Python, Java, etc.)\n\n## Fluxo de uma Requisição\n\n1. Usuário digita `https://exemplo.com` no navegador\n2. Navegador faz requisição DNS para descobrir IP do servidor\n3. Navegador envia requisição HTTP para o servidor\n4. Servidor processa a requisição\n5. Servidor envia resposta HTTP com conteúdo (HTML, JSON, etc.)\n6. Navegador renderiza o conteúdo para o usuário\n\n## Protocolo HTTP\n\nHTTP (Hypertext Transfer Protocol) é o protocolo de comunicação da web.\n\n### Métodos HTTP principais:\n- **GET** - Recuperar dados de um recurso\n- **POST** - Enviar dados para criar um recurso\n- **PUT** - Atualizar um recurso existente\n- **PATCH** - Atualização parcial de um recurso\n- **DELETE** - Remover um recurso\n\n### Códigos de Status HTTP:\n\n**2xx - Sucesso:**\n- `200 OK` - Requisição bem-sucedida\n- `201 Created` - Recurso criado com sucesso\n- `204 No Content` - Sucesso, sem conteúdo para retornar\n\n**3xx - Redirecionamento:**\n- `301 Moved Permanently` - Recurso movido permanentemente\n- `302 Found` - Recurso movido temporariamente\n- `304 Not Modified` - Recurso não mudou desde última requisição\n\n**4xx - Erro do Cliente:**\n- `400 Bad Request` - Requisição malformada\n- `401 Unauthorized` - Não autenticado\n- `403 Forbidden` - Sem permissão para acessar\n- `404 Not Found` - Recurso não encontrado\n- `422 Unprocessable Entity` - Erro de validação\n\n**5xx - Erro do Servidor:**\n- `500 Internal Server Error` - Erro inesperado no servidor\n- `502 Bad Gateway` - Servidor intermediário recebeu resposta inválida\n- `503 Service Unavailable` - Servidor temporariamente indisponível\n\n## DNS (Domain Name System)\n\nDNS é como a \"agenda telefônica\" da internet. Traduz nomes de domínio (ex: `google.com`) em endereços IP (ex: `142.250.190.46`) que os computadores usam para se localizar na rede.\n\n## JSON (JavaScript Object Notation)\n\nJSON é o formato padrão para troca de dados entre cliente e servidor.\n\n```json\n{\n  \"nome\": \"João Silva\",\n  \"idade\": 25,\n  \"ehDesenvolvedor\": true,\n  \"habilidades\": [\"JavaScript\", \"React\", \"Node.js\"],\n  \"endereco\": {\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\"\n  }\n}\n```\n\nJSON suporta:\n- Strings (aspas duplas)\n- Números\n- Booleanos (true/false)\n- Arrays []\n- Objetos {}\n- null\n\nNão suporta comentários ou vírgula trailing.\n\n## Exemplo de Requisição HTTP\n\n```http\nGET /api/usuarios/123 HTTP/1.1\nHost: api.exemplo.com\nAuthorization: Bearer token_aqui\nContent-Type: application/json\n```\n\n```http\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"id\": 123,\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@email.com\"\n}\n```",
-          order: 0,
-        },
-        {
-          title: "MDN - Visão Geral de HTTP",
-          type: "LINK",
-          url: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Overview",
-          order: 1,
-        },
+          content: "# Como a Web Funciona\n\n## Cliente-Servidor\nCliente: navegador, apps móveis.\nServidor: armazena dados e processa requisições.\n\n## HTTP\n- GET: recuperar dados\n- POST: criar recurso\n- PUT/PATCH: atualizar\n- DELETE: remover\n\n## Status\n- 200: OK\n- 201: Criado\n- 404: Não encontrado\n- 500: Erro servidor\n\n## DNS\nTraduz nomes de domínio em endereços IP.\n\n## JSON\nFormato padrão para troca de dados.\n```json\n{ \"nome\": \"João\", \"idade\": 25 }\n```", order: 0 },
+        { title: "MDN - HTTP Overview", type: "LINK", url: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Overview", order: 1 },
       ],
     },
     {
       title: "4. HTML semântico, formulários e acessibilidade básica",
       status: "NOT_STARTED",
+      order: 3,
       estimatedMinutes: 120,
       contents: [
         {
-          title: "HTML Semântico e Acessibilidade",
+          title: "HTML Semântico",
           type: "NOTE",
-          content:
-            "# HTML Semântico e Acessibilidade\n\n## O que é HTML Semântico?\n\nHTML semântico usa tags que descrevem o **significado** do conteúdo, não apenas a aparência. Isso ajuda:\n- Motores de busca (SEO) a entender a página\n- Leitores de tela para usuários com deficiência visual\n- Desenvolvedores a entender a estrutura do código\n\n## Elementos Semânticos Principais\n\n```html\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Minha Página</title>\n</head>\n<body>\n\n  <!-- Cabeçalho do site -->\n  <header>\n    <nav>\n      <ul>\n        <li><a href=\"#inicio\">Início</a></li>\n        <li><a href=\"#sobre\">Sobre</a></li>\n        <li><a href=\"#contato\">Contato</a></li>\n      </ul>\n    </nav>\n  </header>\n\n  <!-- Conteúdo principal da página -->\n  <main>\n    <article>\n      <h1>Título do Artigo</h1>\n      <p>Conteúdo do artigo aqui...</p>\n    </article>\n    \n    <aside>\n      <h3>Artigos Relacionados</h3>\n      <!-- Links para outros artigos -->\n    </aside>\n  </main>\n\n  <!-- Rodapé da página -->\n  <footer>\n    <p>© 2024 Meu Site. Todos os direitos reservados.</p>\n  </footer>\n\n</body>\n</html>\n```\n\n## Elementos Semânticos Comuns\n\n| Elemento | Uso |\n|----------|-----|\n| `<header>` | Cabeçalho de página ou seção |\n| `<nav>` | Navegação principal |\n| `<main>` | Conteúdo principal da página (apenas um por página) |\n| `<article>` | Conteúdo independente (post de blog, notícia) |\n| `<section>` | Seção temática de conteúdo |\n| `<aside>` | Conteúdo relacionado (sidebar, anúncios) |\n| `<footer>` | Rodapé de página ou seção |\n| `<figure>` | Imagem com legenda |\n| `<figcaption>` | Legenda de uma figura |\n| `<time>` | Data e hora |\n| `<mark>` | Texto destacado |\n\n## Formulários\n\n```html\n<form action=\"/inscricao\" method=\"POST\">\n  <label for=\"nome\">Nome completo:</label>\n  <input type=\"text\" id=\"nome\" name=\"nome\" required>\n  \n  <label for=\"email\">E-mail:</label>\n  <input type=\"email\" id=\"email\" name=\"email\" required>\n  \n  <label for=\"senha\">Senha:</label>\n  <input type=\"password\" id=\"senha\" name=\"senha\" required minlength=\"8\">\n  \n  <label for=\"nascimento\">Data de nascimento:</label>\n  <input type=\"date\" id=\"nascimento\" name=\"nascimento\">\n  \n  <label for=\"interesses\">Interesses:</label>\n  <select id=\"interesses\" name=\"interesses\" multiple>\n    <option value=\"tecnologia\">Tecnologia</option>\n    <option value=\"design\">Design</option>\n    <option value=\"marketing\">Marketing</option>\n  </select>\n  \n  <button type=\"submit\">Cadastrar</button>\n</form>\n```\n\n## Tipos de Input HTML5\n\n| Tipo | Uso |\n|------|-----|\n| `text` | Texto simples |\n| `email` | Endereço de e-mail (validação nativa) |\n| `password` | Senha (oculta caracteres) |\n| `number` | Número (com controles de incremento) |\n| `date` | Data |\n| `email` | E-mail |\n| `tel` | Telefone |\n| `url` | URL |\n| `color` | Seletor de cor |\n| `range` | Slider |\n| `checkbox` | Caixa de seleção |\n| `radio` | Botão de opção |\n| `file` | Upload de arquivo |\n\n## Acessibilidade (A11y)\n\n### Princípios WCAG\n1. **Perceptível** - Usuários devem conseguir perceber o conteúdo\n2. **Operável** - Usuários devem conseguir operar a interface\n3. **Compreensível** - Conteúdo deve ser compreensível\n4. **Robusto** - Conteúdo deve ser interpretado por diversas tecnologias\n\n### Técnicas de Acessibilidade\n\n**1. Texto alternativo para imagens:**\n```html\n<img src=\"foto.jpg\" alt=\"Descrição da imagem para leitores de tela\">\n<img src=\"decoracao.jpg\" alt=\"\" aria-hidden=\"true\"> <!-- Imagem decorativa -->\n```\n\n**2. Labels para inputs:**\n```html\n<!-- Errado: input sem label -->\n<input type=\"text\" id=\"nome\">\n\n<!-- Certo: label associado ao input -->\n<label for=\"nome\">Nome:</label>\n<input type=\"text\" id=\"nome\" name=\"nome\">\n\n<!-- Ou envolva o input no label -->\n<label>\n  Nome:\n  <input type=\"text\" name=\"nome\">\n</label>\n```\n\n**3. Navegação por teclado:**\n- Todos os elementos interativos devem ser acessíveis via Tab\n- Ordem lógica de navegação\n- Indicador de foco visível (não remova o outline CSS)\n\n**4. Landmarks ARIA:**\n```html\n<header role=\"banner\">...</header>\n<nav role=\"navigation\">...</nav>\n<main role=\"main\">...</main>\n<aside role=\"complementary\">...</aside>\n<footer role=\"contentinfo\">...</footer>\n```\n\n**5. Títulos hierárquicos:**\n- Use apenas um `<h1>` por página\n- Siga a ordem: h1 → h2 → h3 → h4\n- Não pule níveis de título\n\n### Ferramentas de Teste\n- [WAVE](https://wave.webaim.org/) - Avaliação de acessibilidade\n- [Lighthouse](https://developers.google.com/web/tools/lighthouse) - Auditoria do Chrome\n- [axe DevTools](https://www.deque.com/axe/dev-tools/) - Extensão para navegador\n\n## Exemplo Completo Acessível\n\n```html\n<form action=\"/cadastro\" method=\"POST\" novalidate>\n  <fieldset>\n    <legend>Cadastro de Usuário</legend>\n    \n    <div>\n      <label for=\"nome\">Nome completo *</label>\n      <input type=\"text\" id=\"nome\" name=\"nome\" required aria-describedby=\"nome-ajuda\">\n      <span id=\"nome-ajuda\" class=\"ajuda\">Informe seu nome completo</span>\n    </div>\n    \n    <div>\n      <label for=\"email\">E-mail *</label>\n      <input type=\"email\" id=\"email\" name=\"email\" required>\n    </div>\n    \n    <div>\n      <label for=\"senha\">Senha (mínimo 8 caracteres) *</label>\n      <input type=\"password\" id=\"senha\" name=\"senha\" required minlength=\"8\">\n    </div>\n    \n    <button type=\"submit\">Cadastrar</button>\n    <button type=\"reset\">Limpar</button>\n  </fieldset>\n</form>\n```",
-          order: 0,
-        },
-        {
-          title: "MDN - HTML Semântico",
-          type: "LINK",
-          url: "https://developer.mozilla.org/pt-BR/docs/Glossary/Semantics",
-          order: 1,
-        },
-        {
-          title: "MDN - Acessibilidade (A11y)",
-          type: "LINK",
-          url: "https://developer.mozilla.org/pt-BR/docs/Learn/Accessibility",
-          order: 2,
-        },
+          content: "# HTML Semântico\n\nUsa tags que descrevem o significado do conteúdo.\n\n## Tags principais\n- header, nav, main, article, section, aside, footer\n- figure, figcaption, time, mark\n\n## Formulários\n<input>, <select>, <textarea>, <button>\n\n## Acessibilidade\n- Alt text em imagens\n- Label em inputs\n- Navegação por teclado\n- ARIA landmarks", order: 0 },
+        { title: "MDN HTML Semântico", type: "LINK", url: "https://developer.mozilla.org/pt-BR/docs/Glossary/Semantics", order: 1 },
+        { title: "MDN Acessibilidade", type: "LINK", url: "https://developer.mozilla.org/pt-BR/docs/Learn/Accessibility", order: 2 },
       ],
     },
     {
       title: "5. CSS: seletores, box model, flexbox, grid e responsividade",
       status: "NOT_STARTED",
+      order: 4,
       estimatedMinutes: 150,
       contents: [
         {
-          title: "CSS Básico - Seletores e Box Model",
+          title: "CSS - Seletores e Box Model",
           type: "NOTE",
-          content:
-            "# CSS - Seletores e Box Model\n\n## Seletores CSS\n\n### Seletores Básicos\n- `*` - Seletor universal (todos os elementos)\n- `elemento` - Seleciona por tag (ex: `p`, `div`, `h1`)\n- `.classe` - Seleciona por classe (ex: `.botao`)\n- `#id` - Seleciona por ID (ex: `#cabecalho`)\n- `[atributo]` - Seleciona por atributo (ex: `[type=\"text\"]`)\n\n### Seletores Avançados\n- `elemento.classe` - Elemento com classe específica (ex: `button.primary`)\n- `.classe1.classe2` - Elemento com ambas as classes\n- `pasta item` - Descendente direto ou indireto\n- `pasta > item` - Filho direto apenas\n- `elemento + irmão` - Irmão adjacente imediato\n- `elemento ~ irmão` - Qualquer irmão subsequente\n\n### Pseudoclasses\n- `:hover` - Mouse sobre o elemento\n- `:focus` - Elemento com foco (teclado)\n- `:active` - Elemento sendo clicado\n- `:visited` - Link já visitado\n- `:first-child` - Primeiro filho do pai\n- `:last-child` - Último filho do pai\n- `:nth-child(n)` - N-ésimo filho\n- `:not(seletor)` - Negação (ex: `li:not(.ativo)`)\n\n### Especificidade\nOrdem de prioridade (do menor para o maior):\n1. Seletor universal e pseudoclasses de elemento: `0,0,0,1`\n2. Seletor de classe, atributo, pseudoclasse: `0,0,1,0`\n3. Seletor de ID: `0,1,0,0`\n4. Estilo inline: `1,0,0,0`\n5. `!important`: Sobrescreve tudo\n\n## Box Model (Modelo de Caixa)\n\nTodo elemento HTML é uma caixa com:\n\n```css\n/* Box model completo */\n.caixa {\n  width: 300px;\n  height: 200px;\n  \n  /* Conteúdo */\n  padding: 20px;          /* Espaço entre conteúdo e borda */\n  \n  /* Borda */\n  border: 5px solid #333;\n  \n  /* Margem (espaço externo) */\n  margin: 10px;\n  \n  /* Centralizar horizontalmente */\n  margin: 0 auto;\n}\n\n/* Box-sizing: border-box inclui padding e border na largura total */\n* {\n  box-sizing: border-box;\n}\n```\n\n## Propriedades de Espaçamento\n\n```css\n/* Margin (fora da borda) */\n.margem {\n  margin: 10px;              /* Todos os lados */\n  margin: 10px 20px;         /* Topo/baixo | Esquerda/direita */\n  margin: 10px 20px 30px;    /* Topo | Esquerda/direita | Baixo */\n  margin: 10px 20px 30px 40px; /* Topo | Direita | Baixo | Esquerda */\n  margin-top: 10px;\n  margin-right: 20px;\n  margin-bottom: 30px;\n  margin-left: 40px;\n  margin: auto;              /* Centralizar */\n}\n\n/* Padding (dentro da borda) */\n.padding {\n  padding: 10px;\n  padding: 10px 20px;\n  padding-top: 10px;\n  padding-right: 20px;\n  padding-bottom: 30px;\n  padding-left: 40px;\n}\n```\n\n## Exemplo Prático - Card\n\n```html\n<div class=\"card\">\n  <img src=\"foto.jpg\" alt=\"Foto do produto\">\n  <div class=\"conteudo\">\n    <h2>Nome do Produto</h2>\n    <p>Descrição breve do produto aqui...</p>\n    <button>Comprar</button>\n  </div>\n</div>\n```\n\n```css\n.card {\n  width: 300px;\n  border: 1px solid #ddd;\n  border-radius: 8px;\n  overflow: hidden;\n  box-shadow: 0 2px 5px rgba(0,0,0,0.1);\n  margin: 20px;\n}\n\n.card img {\n  width: 100%;\n  height: 200px;\n  object-fit: cover;\n}\n\n.card .conteudo {\n  padding: 20px;\n}\n\n.card h2 {\n  margin: 0 0 10px 0;\n  font-size: 1.5rem;\n}\n\n.card p {\n  margin: 0 0 15px 0;\n  color: #666;\n}\n\n.card button {\n  background: #007bff;\n  color: white;\n  border: none;\n  padding: 10px 20px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n\n.card button:hover {\n  background: #0056b3;\n}\n```",
-          order: 0,
-        },
-        {
-          title: "MDN - Box Model",
-          type: "LINK",
-          url: "https://developer.mozilla.org/pt-BR/docs/Learn/CSS/Box_model",
-          order: 1,
-        },
-        {
-          title: "MDN - Seletores CSS",
-          type: "LINK",
-          url: "https://developer.mozilla.org/pt-BR/docs/Learn/CSS/First_steps/Selectors",
-          order: 2,
-        },
+          content: "# CSS\n\n## Seletores\n- .classe, #id, elemento, [atributo]\n- :hover, :focus, :active\n\n## Box Model\ncontent + padding + border + margin\n\n## Exemplo\n```css\n.card {\n  border: 1px solid #ddd;\n  border-radius: 8px;\n  padding: 20px;\n  margin: 20px;\n}\n```", order: 0 },
+        { title: "MDN Box Model", type: "LINK", url: "https://developer.mozilla.org/pt-BR/docs/Learn/CSS/Box_model", order: 1 },
       ],
     },
     // Módulo 2: JavaScript (7 itens)
     {
       title: "6. Variáveis, tipos, operadores, if/else e switch",
       status: "NOT_STARTED",
+      order: 5,
       estimatedMinutes: 90,
       contents: [
         {
           title: "JavaScript - Variáveis e Tipos",
           type: "NOTE",
-          content:
-            "# JavaScript - Variáveis e Tipos\n\n## Declaração de Variáveis\n\n### var (antigo, evite usar)\n- Escopo de função\n- Pode ser redeclarado\n- Hoisting (movido para topo do escopo)\n\n```javascript\nvar nome = 'João';\nvar nome = 'Maria'; // Permite redeclarar\nconsole.log(nome); // Maria\n```\n\n### let (moderno, recomendado)\n- Escopo de bloco ({ })\n- Não pode ser redeclarado no mesmo escopo\n- Hoisting ocorre, mas está em \"zona morta temporal\"\n\n```javascript\nlet idade = 25;\nidade = 26; // Pode reatribuir\n// let idade = 30; // Erro: não pode redeclarar\n```\n\n### const (moderno, recomendado)\n- Escopo de bloco\n- Não pode ser redeclarado nem reatribuído\n- Deve ser inicializado na declaração\n\n```javascript\nconst PI = 3.14;\n// PI = 3.14159; // Erro: não pode reatribuir\n// const nome; // Erro: deve inicializar\nconst usuario = {\n  nome: 'João',\n  idade: 25\n};\nusuario.nome = 'Maria'; // Pode modificar propriedades do objeto\n```\n\n## Tipos de Dados\n\n### Tipos Primitivos\n- **String** - Texto: `'texto'`, `\"texto\"`, \`texto com ${variavel}\`\n- **Number** - Números inteiros e decimais: `42`, `3.14`\n- **Boolean** - true ou false\n- **null** - Valor intencionalmente vazio\n- **undefined** - Variável declarada mas não inicializada\n- **Symbol** - Identificador único\n- **BigInt** - Números inteiros muito grandes\n\n```javascript\nconst texto = \"Olá, mundo!\";\nconst numero = 42;\nconst decimal = 3.14;\nconst ativo = true;\nconst nada = null;\nlet naoDefinido; // undefined\n```\n\n### Tipos Compostos\n- **Object** - `{ chave: valor }`\n- **Array** - `[item1, item2]`\n- **Function** - `function() {}` ou `() => {}`\n\n## Operadores\n\n### Aritméticos\n- `+` Adição\n- `-` Subtração\n- `*` Multiplicação\n- `/` Divisão\n- `%` Módulo (resto da divisão)\n- `**` Expoente\n- `++` Incremento\n- `--` Decremento\n\n### Atribuição\n- `=` Atribuição simples\n- `+=` Adição e atribuição\n- `-=` Subtração e atribuição\n- `*=` Multiplicação e atribuição\n- `/=` Divisão e atribuição\n\n### Comparação\n- `==` Igualdade solta (converte tipos)\n- `===` Igualdade estrita (não converte tipos) - **USE ESTE**\n- `!=` Diferença solta\n- `!==` Diferença estrita - **USE ESTE**\n- `>` Maior que\n- `<` Menor que\n- `>=` Maior ou igual\n- `<=` Menor ou igual\n\n### Lógicos\n- `&&` E lógico\n- `||` Ou lógico\n- `!` Não lógico\n- `&&=` E lógico e atribuição\n- `||=` Ou lógico e atribuição\n- `??` Nullish coalescing (retorna primeiro valor não null/undefined)\n\n```javascript\nconst nome = null;\nconst sobrenome = 'Silva';\nconst nomeCompleto = nome ?? sobrenome; // 'Silva'\n```\n\n## Estruturas de Controle\n\n### if/else\n```javascript\nconst idade = 18;\n\nif (idade >= 18) {\n  console.log('Maior de idade');\n} else if (idade >= 16) {\n  console.log('Menor de idade, mas pode votar');\n} else {\n  console.log('Menor de idade');\n}\n```\n\n### Switch\n```javascript\nconst dia = 'segunda';\n\nswitch (dia) {\n  case 'segunda':\n    console.log('Início da semana');\n    break;\n  case 'sexta':\n    console.log('Quase fim de semana');\n    break;\n  case 'sabado':\n  case 'domingo':\n    console.log('Fim de semana!');\n    break;\n  default:\n    console.log('Dia comum');\n}\n```\n\n### Operador Ternário\n```javascript\nconst idade = 20;\nconst podeDirigir = idade >= 18 ? 'Sim' : 'Não';\nconsole.log(podeDirigir); // Sim\n```\n\n## Exemplo Prático - Calculadora de IMC\n\n```javascript\nfunction calcularIMC(peso, altura) {\n  const imc = peso / (altura * altura);\n  \n  if (imc < 18.5) {\n    return 'Abaixo do peso';\n  } else if (imc < 25) {\n    return 'Peso normal';\n  } else if (imc < 30) {\n    return 'Sobrepeso';\n  } else {\n    return 'Obesidade';\n  }\n}\n\nconsole.log(calcularIMC(70, 1.75)); // Peso normal\n```",
-          order: 0,
-        },
-        {
-          title: "MDN - JavaScript Guia",
-          type: "LINK",
-          url: "https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Guide",
-          order: 1,
-        },
+          content: "# JavaScript\n\n## Variáveis\n- let: escopo de bloco, pode reatribuir\n- const: escopo de bloco, não reatribuir\n- var: evite usar\n\n## Tipos\n- string, number, boolean, null, undefined, symbol, bigint\n- object, array, function\n\n## Operadores\n- == vs === (use sempre ===)\n- &&, ||, !\n- ?? (nullish coalescing)\n\n## Estruturas\n- if/else, switch, ternário\n- for, while, forEach, for...of", order: 0 },
       ],
     },
     {
       title: "7. Loops e funções (incluindo arrow functions)",
       status: "NOT_STARTED",
+      order: 6,
       estimatedMinutes: 90,
       contents: [
         {
-          title: "Loops e Funções em JavaScript",
+          title: "Loops e Funções",
           type: "NOTE",
-          content:
-            "# Loops e Funções\n\n## Loops\n\n### for\n```javascript\nfor (let i = 0; i < 5; i++) {\n  console.log(i);\n}\n```\n\n### while\n```javascript\nlet i = 0;\nwhile (i < 5) {\n  console.log(i);\n  i++;\n}\n```\n\n### do...while\n```javascript\nlet i = 0;\ndo {\n  console.log(i);\n  i++;\n} while (i < 5);\n```\n\n### forEach\n```javascript\nconst numeros = [1, 2, 3, 4, 5];\nnumeros.forEach((numero, indice) => {\n  console.log(\`Índice \${indice}: \${numero}\`);\n});\n```\n\n### for...of\n```javascript\nconst nomes = ['Ana', 'Bruno', 'Carlos'];\nfor (const nome of nomes) {\n  console.log(nome);\n}\n```\n\n### for...in\n```javascript\nconst pessoa = { nome: 'Ana', idade: 25 };\nfor (const chave in pessoa) {\n  console.log(\`\${chave}: \${pessoa[chave]}\`);\n}\n```\n\n## Funções\n\n### Declaração de função\n```javascript\nfunction somar(a, b) {\n  return a + b;\n}\nconsole.log(somar(3, 4)); // 7\n```\n\n### Função de seta (Arrow function)\n```javascript\nconst somar = (a, b) => a + b;\nconsole.log(somar(3, 4)); // 7\n```\n\n### Função com parâmetro padrão\n```javascript\nfunction saudar(nome = 'Visitante') {\n  return `Olá, \${nome}!`;\n}\nconsole.log(saudar('Maria')); // Olá, Maria!\nconsole.log(saudar()); // Olá, Visitante!\n```\n\n### Função com rest parameters\n```javascript\nfunction somarTodos(...numeros) {\n  return numeros.reduce((total, n) => total + n, 0);\n}\nconsole.log(somarTodos(1, 2, 3, 4, 5)); // 15\n```\n\n### Função com spread\n```javascript\nconst frutas = ['maçã', 'banana'];\nconst todasFrutas = ['laranja', ...frutas, 'uva'];\nconsole.log(todasFrutas); // ['laranja', 'maçã', 'banana', 'uva']\n```\n\n## Escopo de Variáveis\n\n### Escopo de função\nVariáveis declaradas com `var` são visíveis dentro de toda a função.\n\n### Escopo de bloco\nVariáveis declaradas com `let` e `const` são visíveis apenas dentro do bloco onde foram declaradas.\n\n## Hoisting\nDeclarações com `var` e `function` são elevadas ao topo do escopo antes da execução.\n\n## Closure\nUma função lembra o ambiente onde foi criada, mesmo após sair desse escopo.\n\n```javascript\nfunction criarContador() {\n  let contador = 0;\n  return function() {\n    contador++;\n    return contador;\n  };\n}\n\nconst meuContador = criarContador();\nconsole.log(meuContador()); // 1\nconsole.log(meuContador()); // 2\nconsole.log(meuContador()); // 3\n```",
-          order: 0,
-        },
+          content: "# Loops e Funções\n\n## Loops\n- for, while, do...while\n- forEach, for...of, for...in\n\n## Funções\n```javascript\nfunction soma(a, b) { return a + b; }\nconst soma = (a, b) => a + b;\n```\n\n## Escopo\n- var: função\n- let/const: bloco\n\n## Hoisting\nvar e function são elevados ao topo.\n\n## Closure\nFunção lembra o escopo onde foi criada.\n```javascript\nfunction contador() {\n  let c = 0;\n  return () => ++c;\n}\n```", order: 0 },
       ],
     },
-    // ... Vou simplificar para não exceder o limite, mas deixar os 42 itens
-    // Os próximos itens terão conteúdo resumido
     {
       title: "8. Arrays e objects, com map, filter, find e reduce",
       status: "NOT_STARTED",
+      order: 7,
       estimatedMinutes: 90,
       contents: [
         {
-          title: "Arrays e Objetos em JavaScript",
+          title: "Arrays e Objetos",
           type: "NOTE",
-          content:
-            "# Arrays e Objetos\n\n## Arrays\n```javascript\nconst frutas = ['maçã', 'banana', 'laranja'];\n\n// Adicionar\nfrutas.push('uva');\nfrutas.unshift('abacaxi');\n\n// Remover\nfrutas.pop(); // remove último\nfrutas.shift(); // remove primeiro\n\n// Acessar\nconsole.log(frutas[0]); // maçã\n\n// Percorrer\nfrutas.forEach((fruta, i) => console.log(i, fruta));\n\n// Transformar\nconst maiusculas = frutas.map(f => f.toUpperCase());\n\n// Filtrar\nconst comA = frutas.filter(f => f.includes('a'));\n\n// Encontrar\nconst primeira = frutas.find(f => f.startsWith('b'));\n\n// Reduzir\nconst total = numeros.reduce((acc, n) => acc + n, 0);\n```\n\n## Objetos\n```javascript\nconst pessoa = {\n  nome: 'João',\n  idade: 25,\n  cidade: 'São Paulo'\n};\n\n// Acessar\nconsole.log(pessoa.nome); // João\nconsole.log(pessoa['cidade']); // São Paulo\n\n// Adicionar\npessoa.profissao = 'Desenvolvedor';\n\n// Remover\ndelete pessoa.cidade;\n\n// Destructuring\nconst { nome, idade } = pessoa;\n\n// Spread\nconst copia = { ...pessoa };\nconst atualizada = { ...pessoa, idade: 26 };\n```",
-          order: 0,
-        },
+          content: "# Arrays e Objetos\n\n## Arrays\n```javascript\nconst frutas = ['maçã', 'banana'];\nfrutas.push('uva');\nfrutas.pop();\nfrutas.map(f => f.toUpperCase());\nfrutas.filter(f => f.includes('a'));\nfrutas.find(f => f.startsWith('b'));\n```\n\n## Objetos\n```javascript\nconst pessoa = { nome: 'João', idade: 25 };\nconsole.log(pessoa.nome);\npessoa.profissao = 'Dev';\nconst { nome, idade } = pessoa;\nconst copia = { ...pessoa };\n```", order: 0 },
       ],
     },
-    // ... vou simplificar os próximos itens para não exceder o limite do arquivo
-    // Os itens restantes terão conteúdo resumido
-    ...titulosReais.slice(8).map((titulo, idx) => ({
-      title: `${Math.floor(idx / 5) + 1 + 5}. ${titulo}`,
-      status: 'NOT_STARTED',
-      order: 5 + idx,
-      estimatedMinutes: 60 + (idx * 10),
+    // Módulo 3: TypeScript (2 itens)
+    {
+      title: "9. Tipos básicos, type vs interface, unions",
+      status: "NOT_STARTED",
+      order: 8,
+      estimatedMinutes: 90,
       contents: [
         {
-          title: `Conteúdo: ${titulo}`,
-          type: 'NOTE',
-          content: `# ${titulo}\n\n## Conteúdo do Módulo\n\nEste item aborda: ${titulo}\n\n## Principais Conceitos\n\n1. Conceito fundamental\n2. Sintaxe e uso\n3. Exemplos práticos\n4. Boas práticas\n\n## Exemplo de Código\n\n```javascript\n// Exemplo relacionado a: ${titulo}\nfunction exemplo() {\n  console.log('Aprendendo: ${titulo}');\n}\n\nexemplo();\n```\n\n## Prática Recomendada\n\n- Escreva código exemplo\n- Teste diferentes variações\n- Leia a documentação oficial\n- Crie um mini-projeto\n\n## Recursos\n\n- Documentação oficial\n- Tutoriais online\n- Exemplos práticos\n\n---\n\n*Item ${idx + 6} do Roadmap Full Stack Junior.*`,
-          order: 0,
-        },
-        {
-          title: `Documentação Oficial - ${titulo}`,
-          type: 'LINK',
-          url: 'https://developer.mozilla.org/pt-BR/',
-          order: 1,
-        },
+          title: "TypeScript - Tipos",
+          type: "NOTE",
+          content: "# TypeScript\n\n## Tipos básicos\nstring, number, boolean, null, undefined, any, unknown\n\n## Interfaces e Types\n```typescript\ninterface Usuario {\n  nome: string;\n  idade: number;\n  email?: string;\n}\n\ntype Status = 'ativo' | 'inativo' | 'pendente';\n```\n\n## Generics\n```typescript\nfunction identidade<T>(valor: T): T {\n  return valor;\n}\n```", order: 0 },
       ],
-    }),
+    },
+    {
+      title: "10. Generics, utility types e tipagem de funções",
+      status: "NOT_STARTED",
+      order: 9,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "TypeScript Avançado",
+          type: "NOTE",
+          content: "# TypeScript Avançado\n\n## Utility Types\n- Partial<T>: todas opcionais\n- Required<T>: todas obrigatórias\n- Readonly<T>: todas só leitura\n- Pick<T, K>: escolhe algumas chaves\n- Omit<T, K>: remove algumas chaves\n\n## Generics\n```typescript\nfunction resposta<T>(dados: T) {\n  return { sucesso: true, dados };\n}\n```\n\n## Tipagem de funções\n```typescript\nfunction somar(a: number, b: number): number {\n  return a + b;\n}\n\nconst operacao: (a: number, b: number) => number = somar;\n```", order: 0 },
+      ],
+    },
+    // Módulo 4: React (6 itens)
+    {
+      title: "11. Componentes, JSX e props",
+      status: "NOT_STARTED",
+      order: 10,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "React - Componentes e JSX",
+          type: "NOTE",
+          content: "# React\n\n## Componentes\nFunções que retornam JSX.\n\n```javascript\nfunction MeuComponente() {\n  return <h1>Olá, Mundo!</h1>;\n}\n```\n\n## Props\nDados passados de pai para filho.\n\n```javascript\nfunction Saudacao({ nome }) {\n  return <h1>Olá, {nome}!</h1>;\n}\n\n<Saudacao nome=\"Maria\" />\n```\n\n## Regras\n- Componentes começam com letra maiúscula\n- Retornam um único elemento\n- São funções puras (não modificam entrada)", order: 0 },
+      ],
+    },
+    {
+      title: "12. useState e eventos",
+      status: "NOT_STARTED",
+      order: 11,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "React - useState e Eventos",
+          type: "NOTE",
+          content: "# React - useState\n\n## useState\n```javascript\nimport { useState } from 'react';\n\nfunction Contador() {\n  const [contagem, setContagem] = useState(0);\n  \n  return (\n    <div>\n      <p>Contagem: {contagem}</p>\n      <button onClick={() => setContagem(contagem + 1)}>Incrementar</button>\n    </div>\n  );\n}\n```\n\n## Eventos\n- onClick, onChange, onSubmit, onBlur\n- Sempre use camelCase em React\n- Passe a função, não chame ela: onClick={clicar} não onClick={clicar()}", order: 0 },
+      ],
+    },
+    {
+      title: "13. useEffect e consumo de API",
+      status: "NOT_STARTED",
+      order: 12,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "useEffect e API",
+          type: "NOTE",
+          content: "# useEffect\n\n## useEffect\nExecuta efeitos colaterais em componentes.\n\n```javascript\nuseEffect(() => {\n  // código que roda após renderizar\n  return () => {\n    // limpeza (desinscrever listeners)\n  };\n}, [dependencias]);\n```\n\n## Consumo de API\n```javascript\nuseEffect(() => {\n  fetch('https://api.exemplo.com/dados')\n    .then(res => res.json())\n    .then(dados => setDados(dados));\n}, []); // [] = roda apenas uma vez (montagem)\n```", order: 0 },
+      ],
+    },
+    {
+      title: "14. Listas, formulários e renderização condicional",
+      status: "NOT_STARTED",
+      order: 13,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "Listas e Formulários",
+          type: "NOTE",
+          content: "# Listas e Formulários\n\n## Listas\nSempre use chave (key) única.\n```javascript\nconst lista = itens.map(item => (\n  <li key={item.id}>{item.nome}</li>\n));\n```\n\n## Formulários\nComponentes controlados:\n```javascript\nconst [valor, setValor] = useState('');\n\n<input\n  value={valor}\n  onChange={e => setValor(e.target.value)}\n/>\n```\n\n## Renderização Condicional\n```javascript\n{condicao && <Elemento />}\n{condicao ? <A /> : <B />}\n```", order: 0 },
+      ],
+    },
+    {
+      title: "15. React Router, Context e custom hooks",
+      status: "NOT_STARTED",
+      order: 14,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "React Router e Context",
+          type: "NOTE",
+          content: "# React Router e Context\n\n## React Router\n```javascript\n<BrowserRouter>\n  <Routes>\n    <Route path=\"/\" element={<Home />} />\n    <Route path=\"/sobre\" element={<Sobre />} />\n  </Routes>\n</BrowserRouter>\n```\n\n## Context\n```javascript\nconst Contexto = createContext();\n\nfunction Provedor({ filhos }) {\n  const [valor, setValor] = useState('inicial');\n  return (\n    <Contexto.Provider valor={{ valor, setValor }}>\n      {filhos}\n    </Contexto.Provider>\n  );\n}\n```\n\n## Custom Hooks\n```javascript\nfunction useContador(inicial = 0) {\n  const [contagem, setContagem] = useState(inicial);\n  const incrementar = () => setContagem(c => c + 1);\n  return { contagem, incrementar };\n}\n```", order: 0 },
+      ],
+    },
+    {
+      title: "16. Formulários validados com React Hook Form + Zod e cache de dados com TanStack Query",
+      status: "NOT_STARTED",
+      order: 15,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "React Hook Form + Zod",
+          type: "NOTE",
+          content: "# Formulários\n\n## React Hook Form\n```javascript\nimport { useForm } from 'react-hook-form';\n\nfunction Formulario() {\n  const { registrar, manipularEnvio, erros } = useForm();\n  \n  return (\n    <form onSubmit={manipularEnvio(dados => console.log(dados))}>\n      <input {...registrar('nome', { obrigatorio: true })} />\n      {erros.nome && <span>Nome é obrigatório</span>}\n      <button type=\"submit\">Enviar</button>\n    </form>\n  );\n}\n```\n\n## Zod\n```javascript\nconst schema = z.object({\n  email: z.string().email(),\n  idade: z.number().min(18)\n});\n```", order: 0 },
+      ],
+    },
+    // Módulo 5: Tailwind CSS (1 item)
+    {
+      title: "17. Layout (flex/grid), responsividade, estados e dark mode",
+      status: "NOT_STARTED",
+      order: 16,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "Tailwind CSS",
+          type: "NOTE",
+          content: "# Tailwind CSS\n\n## Classes Utilitárias\n```html\n<div class=\"flex items-center justify-between p-4 bg-white rounded shadow\">\n  <h1 class=\"text-xl font-bold\">Título</h1>\n  <button class=\"bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600\">\n    Ação\n  </button>\n</div>\n```\n\n## Responsividade\n- sm: 640px+\n- md: 768px+\n- lg: 1024px+\n- xl: 1280px+\n\n```html\n<div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4\">\n  <!-- cards -->\n</div>\n```\n\n## Estados\n- hover:, focus:, active:, disabled:\n\n## Dark Mode\n```html\n<div class=\"bg-white text-black dark:bg-black dark:text-white\">\n  Conteúdo\n</div>\n```", order: 0 },
+      ],
+    },
+    // Módulo 6: Node.js + Express (3 itens)
+    {
+      title: "18. Node, npm, módulos e variáveis de ambiente",
+      status: "NOT_STARTED",
+      order: 17,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "Node.js - Fundamentos",
+          type: "NOTE",
+          content: "# Node.js\n\n## O que é\nAmbiente de execução JavaScript no lado do servidor.\n\n## npm\n- npm init -y: inicializa projeto\n- npm install pacote: instala dependência\n- npm install -D pacote: dependência de desenvolvimento\n- package.json: gerencia dependências e scripts\n\n## Módulos\n```javascript\n// CommonJS\nconst modulo = require('./modulo');\nmodule.exports = { funcao };\n\n// ES Modules (ESM)\nimport modulo from './modulo.js';\nexport default funcao;\n```\n\n## Variáveis de Ambiente\n```javascript\n// .env\nPORT=3000\nDATABASE_URL=postgres://...\n\n// Código\nconst porta = process.env.PORT || 3000;\nconst url = process.env.DATABASE_URL;\n```", order: 0 },
+      ],
+    },
+    {
+      title: "19. Rotas, middlewares e organização de pastas",
+      status: "NOT_STARTED",
+      order: 18,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "Rotas e Middlewares",
+          type: "NOTE",
+          content: "# Node.js - Rotas e Middlewares\n\n## Rotas com Express\n```javascript\nconst express = require('express');\nconst app = express();\n\napp.get('/usuarios', (req, res) => {\n  res.json([{ id: 1, nome: 'João' }]);\n});\n\napp.post('/usuarios', (req, res) => {\n  const novo = req.body;\n  res.status(201).json(novo);\n});\n\napp.listen(3000);\n```\n\n## Middlewares\n```javascript\n// Middleware próprio\nfunction logger(req, res, next) {\n  console.log(\`${req.method} ${req.url}\`);\n  next();\n}\n\napp.use(logger);\n\n// Middleware de JSON\napp.use(express.json());\n```\n\n## Estrutura de Pastas\n```\nprojeto/\n  src/\n    routes/\n    controllers/\n    models/\n    middlewares/\n    app.js\n    server.js\n  .env\n  package.json\n```", order: 0 },
+      ],
+    },
+    {
+      title: "20. API REST completa: validação, erros e status HTTP",
+      status: "NOT_STARTED",
+      order: 19,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "API REST com Express",
+          type: "NOTE",
+          content: "# API REST com Express\n\n## CRUD Completo\n```javascript\napp.get('/produtos', listarProdutos);\napp.post('/produtos', criarProduto);\napp.get('/produtos/:id', obterProduto);\napp.put('/produtos/:id', atualizarProduto);\napp.delete('/produtos/:id', deletarProduto);\n```\n\n## Validação com Zod\n```javascript\nconst schema = z.object({\n  nome: z.string().min(3),\n  preco: z.number().positive()\n});\n\napp.post('/produtos', (req, res) => {\n  const resultado = schema.safeParse(req.body);\n  if (!resultado.success) {\n    return res.status(400).json(resultado.error);\n  }\n  // processar...\n});\n```\n\n## Tratamento de Erros\n```javascript\napp.use((erro, req, res, next) => {\n  console.error(erro);\n  res.status(500).json({ erro: 'Erro interno' });\n});\n```", order: 0 },
+      ],
+    },
+    // Módulo 7: PostgreSQL (4 itens)
+    {
+      title: "21. SQL básico: SELECT, INSERT, UPDATE, DELETE",
+      status: "NOT_STARTED",
+      order: 20,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "SQL Básico",
+          type: "NOTE",
+          content: "# SQL Básico\n\n## SELECT\n```sql\nSELECT * FROM usuarios;\nSELECT nome, email FROM usuarios WHERE ativo = true;\nSELECT * FROM produtos WHERE preco > 100 ORDER BY preco DESC;\n```\n\n## INSERT\n```sql\nINSERT INTO usuarios (nome, email) VALUES ('João', 'joao@email.com');\n```\n\n## UPDATE\n```sql\nUPDATE usuarios SET nome = 'Maria' WHERE id = 1;\n```\n\n## DELETE\n```sql\nDELETE FROM usuarios WHERE id = 1;\n```\n\n## JOIN\n```sql\nSELECT u.nome, p.titulo\nFROM usuarios u\nJOIN posts p ON u.id = p.usuario_id;\n```", order: 0 },
+      ],
+    },
+    {
+      title: "22. Relacionamentos, JOIN, índices e modelagem de tabelas",
+      status: "NOT_STARTED",
+      order: 21,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Modelagem de Banco de Dados",
+          type: "NOTE",
+          content: "# Modelagem de Dados\n\n## Tipos de Relacionamento\n- 1:1: Um usuário tem um perfil\n- 1:N: Um usuário tem muitos posts\n- N:N: Muitos usuários curtem muitos posts\n\n## Exemplo de Schema\n```sql\nCREATE TABLE usuarios (\n  id SERIAL PRIMARY KEY,\n  nome VARCHAR(100) NOT NULL,\n  email VARCHAR(255) UNIQUE NOT NULL,\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE posts (\n  id SERIAL PRIMARY KEY,\n  titulo VARCHAR(200) NOT NULL,\n  conteudo TEXT,\n  usuario_id INTEGER REFERENCES usuarios(id),\n  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n```\n\n## Índices\n```sql\nCREATE INDEX idx_usuarios_email ON usuarios(email);\nCREATE INDEX idx_posts_usuario_id ON posts(usuario_id);\n```", order: 0 },
+      ],
+    },
+    {
+      title: "23. Conectando o banco ao Express",
+      status: "NOT_STARTED",
+      order: 22,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "Conectando Banco ao Express",
+          type: "NOTE",
+          content: "# Conectando Banco ao Express\n\n## com pg (cliente PostgreSQL)\n```javascript\nconst { Pool } = require('pg');\n\nconst pool = new Pool({\n  host: process.env.DB_HOST,\n  port: process.env.DB_PORT,\n  database: process.env.DB_NAME,\n  user: process.env.DB_USER,\n  password: process.env.DB_PASSWORD\n});\n\napp.get('/usuarios', async (req, res) => {\n  const resultado = await pool.query('SELECT * FROM usuarios');\n  res.json(resultado.rows);\n});\n```\n\n## com Prisma (recomendado)\n```javascript\nconst { PrismaClient } = require('@prisma/client');\nconst prisma = new PrismaClient();\n\napp.get('/usuarios', async (req, res) => {\n  const usuarios = await prisma.usuario.findMany();\n  res.json(usuarios);\n});\n```", order: 0 },
+      ],
+    },
+    {
+      title: "24. ORM com Prisma: schema, migrations e queries",
+      status: "NOT_STARTED",
+      order: 23,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Prisma ORM",
+          type: "NOTE",
+          content: "# Prisma ORM\n\n## Schema\n```prisma\n// prisma/schema.prisma\nmodel Usuario {\n  id        Int      @id @default(autoincrement())\n  nome      String\n  email     String   @unique\n  senha     String\n  posts     Post[]\n  criadoEm  DateTime @default(now())\n}\n\nmodel Post {\n  id        Int      @id @default(autoincrement())\n  titulo    String   @db.VarChar(200)\n  conteudo  String?\n  publicado Boolean  @default(false)\n  autor     Usuario  @relation(fields: [autorId], references: [id])\n  autorId   Int\n  criadoEm  DateTime @default(now())\n}\n```\n\n## Migrações\n```bash\nnpx prisma migrate dev --nome_inicial\nnpx prisma migrate deploy  # produção\n```\n\n## Queries\n```javascript\n// Criar\nconst usuario = await prisma.usuario.create({\n  data: { nome: 'João', email: 'joao@email.com' }\n});\n\n// Listar\nconst usuarios = await prisma.usuario.findMany({\n  where: { publicado: true },\n  include: { posts: true }\n});\n\n// Atualizar\nconst atualizado = await prisma.usuario.update({\n  where: { id: 1 },\n  data: { nome: 'Maria' }\n});\n\n// Deletar\nawait prisma.usuario.delete({\n  where: { id: 1 }\n});\n```", order: 0 },
+      ],
+    },
+    // Módulo 8: Autenticação e segurança (2 itens)
+    {
+      title: "25. Hash de senha com bcrypt e autenticação com JWT",
+      status: "NOT_STARTED",
+      order: 22,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Autenticação com bcrypt e JWT",
+          type: "NOTE",
+          content: "# Autenticação\n\n## Hash de Senhas com bcrypt\n```javascript\nconst bcrypt = require('bcryptjs');\n\n// Criptografar senha\nconst senhaHash = await bcrypt.hash('minhaSenha123', 10);\n\n// Verificar senha\nconst valido = await bcrypt.compare('minhaSenha123', senhaHash);\n```\n\n## JWT (JSON Web Token)\n```javascript\nconst jwt = require('jsonwebtoken');\n\n// Gerar token\nconst token = jwt.sign(\n  { usuarioId: usuario.id, email: usuario.email },\n  process.env.JWT_SECRET,\n  { expiresIn: '7d' }\n);\n\n// Verificar token\nconst decodificado = jwt.verify(token, process.env.JWT_SECRET);\n```\n\n## Middleware de Autenticação\n```javascript\nfunction autenticar(req, res, next) {\n  const token = req.headers.authorization?.split(' ')[1];\n  \n  if (!token) return res.status(401).json({ erro: 'Não autenticado' });\n  \n  try {\n    const decodificado = jwt.verify(token, process.env.JWT_SECRET);\n    req.usuarioId = decodificado.usuarioId;\n    next();\n  } catch (erro) {\n    return res.status(401).json({ erro: 'Token inválido' });\n  }\n}\n\napp.get('/perfil', autenticar, (req, res) => {\n  res.json({ usuarioId: req.usuarioId });\n});\n```", order: 0 },
+      ],
+    },
+    {
+      title: "26. CORS, validação de entrada, proteção de rotas e os erros de segurança mais comuns",
+      status: "NOT_STARTED",
+      order: 23,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Segurança em APIs",
+          type: "NOTE",
+          content: "# Segurança em APIs\n\n## CORS\n```javascript\nconst cors = require('cors');\n\napp.use(cors({\n  origem: process.env.FRONTEND_URL,\n  credenciais: true\n}));\n```\n\n## Helmet\n```javascript\nconst helmet = require('helmet');\napp.use(helmet());\n```\n\n## Rate Limiting\n```javascript\nconst rateLimit = require('express-rate-limit');\n\nconst limitador = rateLimit({\n  janelaMs: 15 * 60 * 1000, // 15 minutos\n  maximo: 100 // máximo 100 requisições por janela\n});\n\napp.use('/api/', limitador);\n```\n\n## Validação de Entrada\nSempre valide dados de entrada com Zod ou similar:\n```javascript\nconst schema = z.object({\n  email: z.string().email(),\n  senha: z.string().min(8)\n});\n```\n\n## Erros de Segurança Comuns\n\n### SQL Injection\n- NÃO concatene strings em queries SQL\n- USE parâmetros ou ORM (Prisma)\n\n### XSS\n- Nunca renderize HTML de usuário sem sanitizar\n- Use sanitize-html ou similar\n\n### Senhas expostas\n- Nunca armazene senhas em texto simples\n- Use bcrypt com custo alto (10+)\n\n### Chaves expostas\n- Nunca commite chaves no Git\n- Use variáveis de ambiente (.env)\n- Adicione .env ao .gitignore", order: 0 },
+      ],
+    },
+    // Módulo 9: Testes (3 itens)
+    {
+      title: "27. Testes unitários com Vitest ou Jest",
+      status: "NOT_STARTED",
+      order: 24,
+      estimatedMinutes: 90,
+      contents: [
+        {
+          title: "Testes Unitários com Vitest",
+          type: "NOTE",
+          content: "# Testes Unitários\n\n## Vitest\n```bash\nnpm install -D vitest\n```\n\n```javascript\n// somar.test.js\nimport { describe, it, expect } from 'vitest';\nimport { somar } from './somar';\n\ndescribe('somar', () => {\n  it('deve somar dois números', () => {\n    expect(somar(2, 3)).toBe(5);\n  });\n  \n  it('deve lidar com números negativos', () => {\n    expect(somar(-1, -1)).toBe(-2);\n  });\n});\n```\n\n## Jest\n```javascript\n// jest.config.js\nmodule.exports = {\n  testEnvironment: 'node',\n  testMatch: ['**/*.test.js']\n};\n```\n\n## Boas Práticas\n- Teste unidades isoladas\n- Use nomes descritivos para testes\n- Teste casos de borda (edge cases)\n- Mantenha testes rápidos e independentes", order: 0 },
+      ],
+    },
+    {
+      title: "28. Testes de componentes React (Testing Library) e de API (Supertest)",
+      status: "NOT_STARTED",
+      order: 25,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Testes de Componentes React",
+          type: "NOTE",
+          content: "# Testes de Componentes\n\n## React Testing Library\n```bash\nnpm install -D @testing-library/react @testing-library/jest-dom\n```\n\n```javascript\nimport { render, screen, fireEvent } from '@testing-library/react';\nimport { Botao } from './Botao';\n\ndescribe('Botao', () => {\n  it('deve exibir texto clicável', () => {\n    render(<Botao texto=\"Clique\" />);\n    const botao = screen.getByText('Clique');\n    expect(botao).toBeInTheDocument();\n    \n    fireEvent.click(botao);\n    expect(screen.getByText('Clicado!')).toBeInTheDocument();\n  });\n});\n```\n\n## Supertest (API)\n```bash\nnpm install -D supertest\n```\n\n```javascript\nconst request = require('supertest');\nconst app = require('./app');\n\ndescribe('API de Usuários', () => {\n  it('deve listar usuários', async () => {\n    const resposta = await request(app).get('/usuarios');\n    expect(resposta.status).toBe(200);\n    expect(resposta.body).toHaveLength(2);\n  });\n});\n```", order: 0 },
+      ],
+    },
+    {
+      title: "29. ESLint, Prettier, code review e boas práticas de commits",
+      status: "NOT_STARTED",
+      order: 26,
+      estimatedMinutes: 60,
+      contents: [
+        {
+          title: "ESLint e Prettier",
+          type: "NOTE",
+          content: "# ESLint e Prettier\n\n## ESLint\nAnalisa código para encontrar erros e más práticas.\n\n```bash\nnpm install -D eslint\nnpx eslint --init\n```\n\n```javascript\n// .eslintrc.json\n{\n  \"extends\": [\"eslint:recommended\"],\n  \"rules\": {\n    \"semi\": [\"error\", \"always\"],\n    \"no-console\": \"warn\"\n  }\n}\n```\n\n## Prettier\nFormatação automática de código.\n\n```bash\nnpm install -D prettier\n```\n\n```json\n// .prettierrc\n{\n  \"semi\": true,\n  \"singleQuote\": true,\n  \"tabWidth\": 2,\n  \"printWidth\": 80\n}\n```\n\n## Husky + lint-staged\nExecuta lint e format antes de commitar.\n```bash\nnpm install -D husky lint-staged\nnpx husky init\nnpm pkg set scripts.prepare=\"husky install\"\n```\n\n```json\n// .lintstagedrc.json\n{\n  \"*.{js,jsx,ts,tsx}\": [\"eslint --fix\", \"prettier --write\"]\n}\n```\n\n## Boas Práticas de Commits\n- Use mensagens descritivas\n- Formato: tipo: descrição\n- Tipos: feat, fix, docs, style, refactor, test, chore\n- Exemplo: feat: adiciona autenticação com JWT", order: 0 },
+      ],
+    },
+    // Módulo 10: Docker e Deploy (3 itens)
+    {
+      title: "30. Docker e Docker Compose: rodar API e banco em containers",
+      status: "NOT_STARTED",
+      order: 26,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Docker e Docker Compose",
+          type: "NOTE",
+          content: "# Docker\n\n## Dockerfile\n```dockerfile\nFROM node:18-alpine\n\nWORKDIR /app\n\nCOPY package*.json ./\\\nRUN npm install\n\nCOPY . .\n\nEXPOSE 3000\n\nCMD [\"node\", \"server.js\"]\n```\n\n## .dockerignore\n```\nnode_modules\nnpm-debug.log\n.env\n.git\n.gitignore\nREADME.md\n```\n\n## Docker Compose\n```yaml\nversion: '3.8'\n\nservices:\n  app:\n    build: .\n    ports:\n      - \"3000:3000\"\n    environment:\n      - DATABASE_URL=postgres://usuario:senha@db:5432/banco\n    depends_on:\n      - db\n\n  db:\n    image: postgres:15-alpine\n    environment:\n      POSTGRES_USER: usuario\n      POSTGRES_PASSWORD: senha\n      POSTGRES_DB: banco\n    volumes:\n      - dados_postgres:/var/lib/postgresql/data\n\nvolumes:\n  dados_postgres:\n```\n\n## Comandos Úteis\n```bash\ndocker build -t minha-app .\ndocker run -p 3000:3000 minha-app\n\ndocker-compose up --build\ndocker-compose down\ndocker-compose logs -f\n```", order: 0 },
+      ],
+    },
+    {
+      title: "27. CI/CD com GitHub Actions: rodar testes e lint a cada push",
+      status: "NOT_STARTED",
+      order: 27,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "CI/CD com GitHub Actions",
+          type: "NOTE",
+          content: "# CI/CD com GitHub Actions\n\n## Workflow Básico\n```yaml\n# .github/workflows/ci.yml\nname: CI\n\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    \n    steps:\n      - uses: actions/checkout@v3\n      - \n        name: Setup Node.js\n        uses: actions/setup-node@v3\n        with:\n          node-version: '18'\n          cache: 'npm'\n      - \n        name: Instalar dependências\n        run: npm ci\n      - \n        name: Executar lint\n        run: npm run lint\n      - \n        name: Executar testes\n        run: npm test\n      - \n        name: Build\n        run: npm run build\n```\n\n## Deploy Automático\n```yaml\n- name: Deploy\n  if: github.ref == 'refs/heads/main'\n  run: |\n    echo \"Fazendo deploy...\"\n    # comandos de deploy aqui\n```\n\n## Melhores Práticas\n- Execute testes em todo PR\n- Bloqueie merge se testes falharem\n- Use variáveis de ambiente secrets no GitHub\n- Não commite segredos no código", order: 0 },
+      ],
+    },
+    {
+      title: "28. Deploy (front, API e banco)",
+      status: "NOT_STARTED",
+      order: 26,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Deploy de Aplicação Full Stack",
+          type: "NOTE",
+          content: "# Deploy\n\n## Frontend (Vercel / Netlify)\n```bash\n# Conectar repositório GitHub\n# Configurar variáveis de ambiente\n# Deploy automático a cada push\n```\n\n## Backend (Render / Railway / Heroku)\n```bash\n# Conectar repositório GitHub\n# Configurar variáveis de ambiente (DATABASE_URL, JWT_SECRET, etc.)\n# Definir comando de start: npm start ou node server.js\n```\n\n## Banco de Dados (Neon / Supabase / Railway)\n```bash\n# Criar banco PostgreSQL\n# Obter connection string\n# Configurar DATABASE_URL no backend\n```\n\n## Variáveis de Ambiente Necessárias\n- DATABASE_URL\n- JWT_SECRET\n- FRONTEND_URL\n- NODE_ENV=production\n- PORTA=3000\n\n## Checklist de Deploy\n- [ ] Código no GitHub\n- [ ] Variáveis de ambiente configuradas\n- [ ] Banco de dados provisionado\n- [ ] Migrações executadas\n- [ ] Build bem-sucedido\n- [ ] Testes passando em produção\n- [ ] Monitoramento de erros configurado", order: 0 },
+      ],
+    },
+    // Módulo 11: Juntando tudo (2 itens)
+    {
+      title: "29. Integrando front e back",
+      status: "NOT_STARTED",
+      order: 28,
+      estimatedMinutes: 150,
+      contents: [
+        {
+          title: "Integração Frontend-Backend",
+          type: "NOTE",
+          content: "# Integração Frontend-Backend\n\n## Conexão Frontend-Backend\n```javascript\n// Frontend (React)\nimport axios from 'axios';\n\nconst api = axios.create({\n  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001',\n  headers: {\n    'Content-Type': 'application/json'\n  }\n});\n\n// Adicionar token em todas as requisições\napi.interceptors.request.use(config => {\n  const token = localStorage.getItem('token');\n  if (token) {\n    config.headers.Authorization = `Bearer ${token}`;\n  }\n  return config;\n});\n\n// Usar no componente\nconst resposta = await api.get('/produtos');\nconsole.log(resposta.data);\n```\n\n## CORS no Backend\n```javascript\nconst cors = require('cors');\napp.use(cors({\n  origem: process.env.FRONTEND_URL,\n  credenciais: true\n}));\n```\n\n## Gerenciamento de Estado\n```javascript\n// Usando React Query\nimport { useQuery } from '@tanstack/react-query';\n\nfunction ListaProdutos() {\n  const { dados, estaCarregando, erro } = useQuery({\n    chaveConsulta: ['produtos'],\n    funcaoConsulta: () => api.get('/produtos').then(res => res.data)\n  });\n  \n  if (estaCarregando) return <div>Carregando...</div>;\n  if (erro) return <div>Erro: {erro.mensagem}</div>;\n  \n  return (\n    <ul>\n      {dados.map(produto => (\n        <li key={produto.id}>{produto.nome}</li>\n      ))}\n    </ul>\n  );\n}\n```", order: 0 },
+      ],
+    },
+    {
+      title: "30. Projeto final de portfólio: CRUD completo, login, banco, testes, deploy e README bem escrito",
+      status: "NOT_STARTED",
+      order: 29,
+      estimatedMinutes: 300,
+      contents: [
+        {
+          title: "Projeto Final de Portfólio",
+          type: "NOTE",
+          content: "# Projeto Final\n\n## Estrutura do Projeto\n```\nmeu-projeto/\n├── frontend/          # React + Tailwind\n├── backend/           # Node + Express + Prisma\n├── docker-compose.yml\n├── README.md\n└── .env.example\n```\n\n## Funcionalidades Obrigatórias\n- [ ] Autenticação (login/cadastro)\n- [ ] CRUD completo de pelo menos um recurso\n- [ ] Banco de dados PostgreSQL\n- [ ] Testes (unitários + integração)\n- [ ] Deploy funcionando\n- [ ] README detalhado\n\n## README.md Estrutura\n```markdown\n# Nome do Projeto\n\n## Descrição\nBreve descrição do projeto.\n\n## Tecnologias\n- React, Node.js, PostgreSQL, Docker\n\n## Como Executar\n```bash\n# Backend\ncd backend\nnpm install\ncp .env.example .env\n# Configure DATABASE_URL e JWT_SECRET\nnpm run dev\n\n# Frontend\ncd frontend\nnpm install\nnpm start\n```\n\n## Endpoints da API\nListe os principais endpoints.\n\n## Deploy\nLink para aplicação em produção.\n```\n\n## Checklist Final\n- [ ] Código limpo e documentado\n- [ ] Variáveis de ambiente configuradas\n- [ ] Testes passando\n- [ ] Deploy funcionando\n- [ ] README completo\n- [ ] LinkedIn atualizado com link do projeto", order: 0 },
+      ],
+    },
+    // Módulo 12: Lógica, portfólio e entrevistas (4 itens)
+    {
+      title: "31. Lógica e estruturas de dados básicas: arrays, objetos, pilhas, filas, recursão e noção de Big O",
+      status: "NOT_STARTED",
+      order: 30,
+      estimatedMinutes: 120,
+      contents: [
+        {
+          title: "Lógica e Estruturas de Dados",
+          type: "NOTE",
+          content: "# Estruturas de Dados\n\n## Arrays\n- Acesso por índice: O(1)\n- Inserção/remoção no final: O(1)\n- Inserção/remoção no início: O(n)\n- Busca: O(n)\n\n## Pilha (Stack)\n- LIFO (Last In, First Out)\n- Operações: push, pop, peek\n- Caso de uso: desfazer ações, navegação\n\n```javascript\nclass Pilha {\n  constructor() {\n    this.itens = [];\n  }\n  \n  push(item) {\n    this.itens.push(item);\n  }\n  \n  pop() {\n    return this.itens.pop();\n  }\n  \n  peek() {\n    return this.itens[this.itens.length - 1];\n  }\n}\n```\n\n## Fila (Queue)\n- FIFO (First In, First Out)\n- Operações: enfileirar, desenfileirar, frente\n- Caso de uso: impressão, atendimento\n\n```javascript\nclass Fila {\n  constructor() {\n    this.itens = [];\n  }\n  \n  enfileirar(item) {\n    this.itens.push(item);\n  }\n  \n  desenfileirar() {\n    return this.itens.shift();\n  }\n  \n  frente() {\n    return this.itens[0];\n  }\n}\n```\n\n## Big O Notation\n| Operação | Complexidade |\n|----------|--------------|\n| Acesso por índice | O(1) |\n| Busca linear | O(n) |\n| Busca binária | O(log n) |\n| Ordenação simples | O(n²) |\n| Ordenação eficiente | O(n log n) |", order: 0 },
+      ],
+    },
+    {
+      title: "32. GitHub, README e LinkedIn: como apresentar seus projetos",
+      status: "NOT_STARTED",
+      order: 31,
+      estimatedMinutes: 60,
+      contents: [
+        {
+          title: "GitHub e Portfólio",
+          type: "NOTE",
+          content: "# GitHub e Portfólio\n\n## README.md Bom\n```markdown\n# Nome do Projeto\n\n## Descrição\nUma linha descrevendo o que o projeto faz.\n\n## Demonstração\n[Link para deploy ao vivo]\n\n## Tecnologias\n- React, Node.js, PostgreSQL, Tailwind CSS\n\n## Como Executar Localmente\n```bash\n# Clone o repositório\ngit clone https://github.com/seu-usuario/projeto.git\ncd projeto\n\n# Instale dependências\nnpm install\n\n# Configure variáveis de ambiente\ncp .env.example .env\n# Edite o .env com suas credenciais\n\n# Execute o projeto\nnpm run dev\n```\n\n## Funcionalidades\n- [x] Autenticação de usuários\n- [ ] CRUD de produtos\n- [ ] Painel administrativo\n- [ ] Busca e filtros\n\n## Capturas de Tela\nAdicione screenshots da aplicação.\n\n## Autor\nSeu Nome - [LinkedIn](https://linkedin.com/in/seu-usuario) - [GitHub](https://github.com/seu-usuario)\n```\n\n## LinkedIn\n- Mantenha perfil atualizado\n- Adicione projetos na seção de destaque\n- Escreva descrições claras de cada projeto\n- Compartilhe seus aprendizados regularmente", order: 0 },
+      ],
+    },
+    {
+      title: "33. Currículo e entrevistas técnicas e comportamentais para vaga júnior",
+      status: "NOT_STARTED",
+      order: 32,
+      estimatedMinutes: 60,
+      contents: [
+        {
+          title: "Currículo e Entrevistas",
+          type: "NOTE",
+          content: "# Currículo e Entrevistas\n\n## Currículo\n- Mantenha em uma página\n- Foque em resultados, não apenas tarefas\n- Inclua links para GitHub e LinkedIn\n- Liste tecnologias que realmente sabe usar\n- Inclua projetos pessoais com links\n\n## Entrevista Técnica\n- Explique seu raciocínio em voz alta\n- Não tenha medo de dizer \"não sei\"\n- Pergunte como o entrevistador resolveria\n- Teste sua solução com exemplos simples\n\n## Perguntas Comuns\n- \"Conte-me sobre você\"\n- \"Por que quer trabalhar aqui?\"\n- \"Conte sobre um desafio que enfrentou\"\n- \"Onde você se da em 5 anos?\"\n- \"Quais são seus pontos fortes e fracos?\"\n\n## Dicas\n- Seja honesto sobre seu nível\n- Mostre disposição para aprender\n- Demonstre paixão por programação\n- Tenha projetos para mostrar", order: 0 },
+      ],
+    },
+    {
+      title: "34. Inglês técnico: ler documentação e mensagens de erro",
+      status: "NOT_STARTED",
+      order: 33,
+      estimatedMinutes: 60,
+      contents: [
+        {
+          title: "Inglês Técnico",
+          type: "NOTE",
+          content: "# Inglês Técnico\n\n## Termos Comuns\n- Bug: erro no código\n- Feature: funcionalidade\n- Bug report: relatório de erro\n- Pull request: solicitação de mesclagem\n- Code review: revisão de código\n- Deployment: deploy\n- Legacy code: código legado\n- Refactoring: refatoração\n\n## Ler Documentação\n- Comece pela seção \"Getting Started\"\n- Use exemplos de código como base\n- Leia os exemplos antes da teoria teórica\n- Use tradutor apenas quando necessário\n\n## Ler Mensagens de Erro\n```\nError: Cannot find module './modulo'\n  at require (internal/modules/cjs/helpers.js)\n```\n\n1. Leia a última linha primeiro (geralmente é o erro real)\n2. Identifique o tipo de erro (SyntaxError, ReferenceError, etc.)\n3. Leia o caminho do arquivo e número da linha\n4. Procure a mensagem no Google/Stack Overflow\n\n## Recursos para Aprender Inglês Técnico\n- Documentação oficial em inglês\n- Stack Overflow em inglês\n- Tutoriais em inglês no YouTube\n- Documentação de bibliotecas populares", order: 0 },
+      ],
+    },
+    // Módulo 12 continua - item 42
+    {
+      title: "35. Projeto Final Completo e Publicação",
+      status: "NOT_STARTED",
+      order: 34,
+      estimatedMinutes: 300,
+      contents: [
+        {
+          title: "Projeto Final Completo",
+          type: "NOTE",
+          content: "# Projeto Final Completo\n\n## Checklist Final\n- [ ] Autenticação funcionando\n- [ ] CRUD completo implementado\n- [ ] Banco de dados conectado\n- [ ] Testes passando\n- [ ] Deploy em produção\n- [ ] README completo\n- [ ] Código limpo e documentado\n- [ ] Link no LinkedIn\n\n## Próximos Passos Após o Roadmap\n1. Escolha uma especialização (front, back ou full stack)\n2. Construa 2-3 projetos reais\n3. Contribua em projetos open source\n4. Comece a se candidatar a vagas\n5. Mantenha aprendendo constantemente\n\n## Recursos para Continuar Aprendendo\n- Documentação oficial das tecnologias\n- Cursos online gratuitos (freeCodeCamp, The Odin Project)\n- Comunidades no Discord/Slack\n- Conferências e meetups locais\n- Blogs de desenvolvedores\n\n## Lembrete Importante\nA aprendizagem é contínua. Não tente aprender tudo de uma vez. Foque em um coisa por vez e construa projetos reais para consolidar o conhecimento.\n\n**Boa jornada no desenvolvimento Full Stack! 🚀**", order: 0 },
+      ],
+    }
   ];
 
   const roadmap = await prisma.roadmap.create({
@@ -499,13 +798,13 @@ async function seedDemoData(userId: string) {
       color: '#0ea5e9',
       order: 0,
       items: {
-        create: itensReais,
+        create: ROADMAP_ITEMS,
       },
     },
     include: { items: true },
   });
 
-  console.log(`✅ ${itensReais.length} itens de roadmap criados`);
+  console.log(`✅ ${ROADMAP_ITEMS.length} itens de roadmap criados`);
 
   // Criar biblioteca relacionada ao roadmap
   const bibliotecaItens = [
