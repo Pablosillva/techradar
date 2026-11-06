@@ -39,20 +39,29 @@ export default async function RoadmapPage() {
       id: item.id,
       title: item.title,
       description: item.description,
-      status: item.status as "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "NEEDS_REVIEW",
+      status: item.status as
+        | "NOT_STARTED"
+        | "IN_PROGRESS"
+        | "COMPLETED"
+        | "NEEDS_REVIEW",
       order: item.order,
       estimatedMinutes: item.estimatedMinutes,
       resourceUrl: item.resourceUrl,
       contents: item.contents.map((content) => ({
         id: content.id,
         title: content.title,
-        type: content.type as "NOTE" | "LINK" | "VIDEO" | "ARTICLE" | "PDF",
+        type: content.type as
+          | "NOTE"
+          | "LINK"
+          | "VIDEO"
+          | "ARTICLE"
+          | "PDF",
         content: content.content,
         url: content.url,
         order: content.order,
       })),
     })),
-  });
+  }));
 
   return <RoadmapColumns roadmaps={data} />;
 }
