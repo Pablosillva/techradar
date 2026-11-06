@@ -286,7 +286,7 @@ export function RoadmapColumn({
             </div>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
               {statusCounts.map(({ status, count }) => {
-                const meta = STATUS_META[status as RoadmapItemStatus];
+                const meta = STATUS_META[status as keyof typeof STATUS_META];
                 return (
                   <span
                     key={status}
