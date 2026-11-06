@@ -1,18 +1,8 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { RoadmapWorkspace } from "@/components/roadmap/roadmap-workspace";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type {
-  RoadmapDto,
-  RoadmapItemStatus,
-  RoadmapLevel,
-  StudyContentType,
-} from "@/lib/roadmap/types";
-
-export const metadata: Metadata = {
-  title: "Roadmap",
-};
+import { RoadmapColumns } from "@/components/roadmap/roadmap-columns";
+import type { RoadmapDto } from "@/lib/roadmap/types";
 
 export default async function RoadmapPage() {
   const session = await auth();
@@ -42,21 +32,21 @@ export default async function RoadmapPage() {
     title: roadmap.title,
     description: roadmap.description,
     goal: roadmap.goal,
-    level: roadmap.level as RoadmapLevel,
+    level: roadmap.level,
     color: roadmap.color,
     order: roadmap.order,
     items: roadmap.items.map((item) => ({
       id: item.id,
       title: item.title,
       description: item.description,
-      status: item.status as RoadmapItemStatus,
+      status: item.status,
       order: item.order,
       estimatedMinutes: item.estimatedMinutes,
       resourceUrl: item.resourceUrl,
       contents: item.contents.map((content) => ({
         id: content.id,
         title: content.title,
-        type: content.type as StudyContentType,
+        type: content.type,
         content: content.content,
         url: content.url,
         order: content.order,
@@ -64,5 +54,5 @@ export default async function RoadmapPage() {
     })),
   }));
 
-  return <RoadmapWorkspace roadmaps={data} />;
+  return <RoadmapColumns roadmaps={data} />;
 }
