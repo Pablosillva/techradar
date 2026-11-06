@@ -72,13 +72,13 @@ async function seedDemoData(userId: string) {
 
   // ── Roadmap Full Stack Júnior - 42 itens
   const ROADMAP_ITEMS = [
-    // Módulo 1: Fundamentos (5 itens)
-    { title: "1. Terminal e Linux", status: "NOT_STARTED", order: 0, estimatedMinutes: 90 },
-    { title: "2. Git e GitHub", status: "NOT_STARTED", order: 1, estimatedMinutes: 120 },
-    { title: "3. Como a web funciona", status: "NOT_STARTED", order: 2, estimatedMinutes: 100 },
+    // Módulo 1: Fundamentos
+    { title: "1. Terminal e Linux: comandos e permissões", status: "NOT_STARTED", order: 0, estimatedMinutes: 90 },
+    { title: "2. Git e GitHub: commit, branch, merge, pull request", status: "NOT_STARTED", order: 1, estimatedMinutes: 120 },
+    { title: "3. Como a web funciona: cliente, servidor, HTTP, DNS", status: "NOT_STARTED", order: 2, estimatedMinutes: 100 },
     { title: "4. HTML semântico, formulários e acessibilidade", status: "NOT_STARTED", order: 3, estimatedMinutes: 120 },
-    { title: "5. CSS: seletores, box model, flexbox, grid e responsividade", status: "NOT_STARTED", order: 4, estimatedMinutes: 150 },
-    // Módulo 2: JavaScript (7 itens)
+    { title: "5. CSS: seletores, box model, flexbox, grid, responsividade", status: "NOT_STARTED", order: 4, estimatedMinutes: 150 },
+    // Módulo 2: JavaScript
     { title: "6. Variáveis, tipos, operadores, if/else e switch", status: "NOT_STARTED", order: 5, estimatedMinutes: 90 },
     { title: "7. Loops e funções (incluindo arrow functions)", status: "NOT_STARTED", order: 6, estimatedMinutes: 90 },
     { title: "8. Arrays e objects, com map, filter, find e reduce", status: "NOT_STARTED", order: 7, estimatedMinutes: 90 },
@@ -89,33 +89,33 @@ async function seedDemoData(userId: string) {
     { title: "13. useEffect e consumo de API", status: "NOT_STARTED", order: 12, estimatedMinutes: 120 },
     { title: "14. Listas, formulários e renderização condicional", status: "NOT_STARTED", order: 13, estimatedMinutes: 90 },
     { title: "15. React Router, Context e custom hooks", status: "NOT_STARTED", order: 14, estimatedMinutes: 90 },
-    { title: "16. Formulários validados com React Hook Form + Zod e cache com TanStack Query", status: "NOT_STARTED", order: 15, estimatedMinutes: 120 },
-    // Módulo 5: Tailwind CSS (1 item)
+    { title: "16. Formulários validados com React Hook Form + Zod e TanStack Query", status: "NOT_STARTED", order: 15, estimatedMinutes: 120 },
+    // Módulo 5: Tailwind CSS
     { title: "17. Layout (flex/grid), responsividade, estados e dark mode", status: "NOT_STARTED", order: 16, estimatedMinutes: 90 },
-    // Módulo 6: Node.js + Express (3 itens)
+    // Módulo 6: Node.js + Express
     { title: "18. Node, npm, módulos e variáveis de ambiente", status: "NOT_STARTED", order: 17, estimatedMinutes: 90 },
     { title: "19. Rotas, middlewares e organização de pastas", status: "NOT_STARTED", order: 18, estimatedMinutes: 90 },
     { title: "20. API REST completa: validação, erros e status HTTP", status: "NOT_STARTED", order: 19, estimatedMinutes: 120 },
-    // Módulo 7: PostgreSQL (4 itens)
+    // Módulo 7: PostgreSQL
     { title: "21. SQL básico: SELECT, INSERT, UPDATE, DELETE", status: "NOT_STARTED", order: 20, estimatedMinutes: 90 },
     { title: "22. Relacionamentos, JOIN, índices e modelagem de tabelas", status: "NOT_STARTED", order: 21, estimatedMinutes: 120 },
     { title: "23. Conectando o banco ao Express", status: "NOT_STARTED", order: 22, estimatedMinutes: 90 },
     { title: "24. ORM com Prisma: schema, migrations e queries", status: "NOT_STARTED", order: 23, estimatedMinutes: 120 },
-    // Módulo 8: Autenticação e segurança (2 itens)
+    // Módulo 8: Autenticação e segurança
     { title: "25. Hash de senha com bcrypt e autenticação com JWT", status: "NOT_STARTED", order: 24, estimatedMinutes: 120 },
     { title: "26. CORS, validação de entrada, proteção de rotas e segurança", status: "NOT_STARTED", order: 25, estimatedMinutes: 120 },
-    // Módulo 9: Testes e qualidade (3 itens)
+    // Módulo 9: Testes e qualidade
     { title: "27. Testes unitários com Vitest ou Jest", status: "NOT_STARTED", order: 26, estimatedMinutes: 90 },
     { title: "28. Testes de componentes React e de API com Supertest", status: "NOT_STARTED", order: 27, estimatedMinutes: 120 },
     { title: "29. ESLint, Prettier, code review e boas práticas de commits", status: "NOT_STARTED", order: 28, estimatedMinutes: 60 },
-    // Módulo 10: Docker e deploy (3 itens)
+    // Módulo 10: Docker e deploy
     { title: "30. Docker e Docker Compose: rodar API e banco em containers", status: "NOT_STARTED", order: 29, estimatedMinutes: 120 },
     { title: "31. CI/CD com GitHub Actions: rodar testes e lint a cada push", status: "NOT_STARTED", order: 30, estimatedMinutes: 120 },
     { title: "32. Deploy (front, API e banco)", status: "NOT_STARTED", order: 31, estimatedMinutes: 120 },
-    // Módulo 11: Juntando tudo (2 itens)
+    // Módulo 11: Juntando tudo
     { title: "33. Integrando front e back", status: "NOT_STARTED", order: 32, estimatedMinutes: 150 },
     { title: "34. Projeto final de portfólio: CRUD completo, login, banco, testes, deploy e README", status: "NOT_STARTED", order: 33, estimatedMinutes: 300 },
-    // Módulo 12: Lógica, portfólio e entrevistas (4 itens)
+    // Módulo 12: Lógica, portfólio e entrevistas
     { title: "35. Lógica e estruturas de dados básicas", status: "NOT_STARTED", order: 34, estimatedMinutes: 120 },
     { title: "36. GitHub, README e LinkedIn: como apresentar seus projetos", status: "NOT_STARTED", order: 35, estimatedMinutes: 60 },
     { title: "37. Currículo e entrevistas técnicas e comportamentais para vaga júnior", status: "NOT_STARTED", order: 36, estimatedMinutes: 60 },
@@ -143,17 +143,7 @@ async function seedDemoData(userId: string) {
           status: item.status,
           order: item.order,
           estimatedMinutes: item.estimatedMinutes,
-          contents: item.contents ? {
-            create: item.contents.map((c, ci) => ({
-              userId,
-              title: c.title,
-              type: c.type,
-              content: c.content || null,
-              url: c.url || null,
-              order: ci,
-            }))
-          } : undefined,
-        }),
+        })),
       },
     },
     include: { items: true },
