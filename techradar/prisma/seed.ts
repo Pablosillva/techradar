@@ -869,7 +869,7 @@ async function seedDemoData(userId: string) {
         mimeType: "audio/mpeg",
         fileSize: null,
         totalPages: null,
-        currentPage: null,
+        currentPage: 0,
         durationSec: 39600,
         positionSec: 0,
         rating: null,
