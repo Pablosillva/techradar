@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileText, ArrowLeft, Save, AlertTriangle, RotateCcw } from "lucide-react";
 import Link from "next/link";
+import { apiJson } from "@/lib/api-client";
 
 interface SecurePdfReaderProps {
   fileUrl: string;
@@ -43,23 +44,28 @@ export function SecurePdfReader({
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`/api/library/${libraryId}`, {
+      // apiJson injeta o header X-CSRF-Token (double-submit cookie) automaticamente.
+      await apiJson(`/api/library/${libraryId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPage: page }),
       });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as
-          | { error?: string }
-          | null;
-        throw new Error(body?.error ?? "Falha ao salvar página");
-      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha ao salvar página");
     } finally {
       setSaving(false);
     }
   }, [libraryId, page]);
+
+  const handlePageKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        void savePage();
+      }
+    },
+    [savePage],
+  );
 
   return (
     <div className="flex flex-col h-full">
@@ -115,6 +121,8 @@ export function SecurePdfReader({
                   onChange={(e) =>
                     setPage(Math.max(1, Number(e.target.value) || 1))
                   }
+                  onBlur={savePage}
+                  onKeyDown={handlePageKeyDown}
                   className="w-24 text-xs"
                   aria-label="Número da página"
                 />

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Play, Pause, Volume2, VolumeX, Clock2 } from "lucide-react";
 import Link from "next/link";
 import { calculateProgress, formatTime, roundPosition } from "@/lib/study/progress";
+import { apiJson } from "@/lib/api-client";
 
 interface SecureAudioPlayerProps {
   fileUrl: string;
@@ -40,26 +41,65 @@ export function SecureAudioPlayer({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const progress = calculateProgress(position, durationSec);
+  const [detectedDuration, setDetectedDuration] = useState(durationSec ?? null);
+  const effectiveDuration = detectedDuration ?? durationSec ?? null;
 
-  const debouncedSave = useCallback((pos: number) => {
-    if (saveTimeout.current) clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(async () => {
+  const progress = calculateProgress(position, effectiveDuration);
+
+  /** Persiste um patch parcial no item da biblioteca (envia X-CSRF-Token via api-client). */
+  const savePatch = useCallback(
+    async (data: Record<string, unknown>) => {
       try {
-        const res = await fetch(`/api/library/${libraryId}`, {
+        await apiJson(`/api/library/${libraryId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            positionSec: roundPosition(pos),
-            progress: calculateProgress(pos, durationSec),
-          }),
+          body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("Falha ao salvar posição");
-      } catch {
-        // Salvamentos debounced falham silenciosamente para não quebrar a UX.
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Falha ao salvar posição");
+        throw e;
       }
-    }, 2000);
-  }, [libraryId, durationSec]);
+    },
+    [libraryId],
+  );
+
+  const debouncedSave = useCallback(
+    (pos: number) => {
+      if (saveTimeout.current) clearTimeout(saveTimeout.current);
+      saveTimeout.current = setTimeout(async () => {
+        try {
+          await savePatch({
+            positionSec: roundPosition(pos),
+            progress: calculateProgress(pos, effectiveDuration),
+          });
+        } catch {
+          // Salvamentos debounced falham silenciosamente para não quebrar a UX.
+        }
+      }, 2000);
+    },
+    [libraryId, effectiveDuration, savePatch],
+  );
+
+  const savePositionNow = useCallback(
+    async (pos: number, completed = false) => {
+      if (saveTimeout.current) {
+        clearTimeout(saveTimeout.current);
+        saveTimeout.current = null;
+      }
+      setSaving(true);
+      try {
+        await savePatch({
+          positionSec: roundPosition(pos),
+          progress: completed ? 100 : calculateProgress(pos, effectiveDuration),
+        });
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Falha ao salvar posição");
+      } finally {
+        setSaving(false);
+      }
+    },
+    [libraryId, effectiveDuration, savePatch],
+  );
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -71,6 +111,17 @@ export function SecureAudioPlayer({
       debouncedSave(audio.currentTime);
     };
 
+    // Detecta a duração real do áudio a partir dos metadados quando não está
+    // pré-cadastrada no item, e a persiste para que o progresso funcione.
+    const handleLoadedMetadata = () => {
+      const dur = audio.duration;
+      if (dur && dur > 0 && !effectiveDuration) {
+        const rounded = Math.round(dur);
+        setDetectedDuration(rounded);
+        void savePatch({ durationSec: rounded });
+      }
+    };
+
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => {
       setIsPlaying(false);
@@ -78,47 +129,27 @@ export function SecureAudioPlayer({
     };
     const handleEnded = async () => {
       setIsPlaying(false);
-      if (durationSec) {
-        await savePositionNow(durationSec, true);
+      const target = effectiveDuration ?? audio.duration;
+      if (target) {
+        await savePositionNow(target, true);
       }
     };
 
-    async function savePositionNow(pos: number, completed = false) {
-      if (saveTimeout.current) {
-        clearTimeout(saveTimeout.current);
-        saveTimeout.current = null;
-      }
-      setSaving(true);
-      try {
-        const res = await fetch(`/api/library/${libraryId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            positionSec: roundPosition(pos),
-            progress: completed ? 100 : calculateProgress(pos, durationSec),
-          }),
-        });
-        if (!res.ok) throw new Error("Falha ao salvar posição");
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Falha ao salvar posição");
-      } finally {
-        setSaving(false);
-      }
-    }
-
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("play", handlePlay);
     audio.addEventListener("pause", handlePause);
     audio.addEventListener("ended", handleEnded);
 
     return () => {
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("pause", handlePause);
       audio.removeEventListener("ended", handleEnded);
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
     };
-  }, [libraryId, durationSec, debouncedSave]);
+  }, [libraryId, effectiveDuration, debouncedSave, savePositionNow]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
