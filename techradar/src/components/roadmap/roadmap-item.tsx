@@ -12,11 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { STATUS_META, formatDuration, safeHttpUrl } from "@/lib/roadmap/presentation";
-import type {
-  RoadmapItemDto,
-  RoadmapItemStatus,
-  ROADMAP_ITEM_STATUSES,
-} from "@/lib/roadmap/types";
+import type { RoadmapItemDto, RoadmapItemStatus } from "@/lib/roadmap/types";
+import { ROADMAP_ITEM_STATUSES } from "@/lib/roadmap/types";
 import { cn } from "@/lib/utils";
 
 interface RoadmapItemProps {
