@@ -315,6 +315,11 @@ async function seedDemoData(userId: string) {
           { userId, title: "APIs com Node.js e Prisma", status: "NOT_STARTED", order: 4, estimatedMinutes: 900 },
           { userId, title: "PostgreSQL e modelagem de dados", status: "NEEDS_REVIEW", order: 5, estimatedMinutes: 480 },
           { userId, title: "Deploy, CI/CD e observabilidade", status: "NOT_STARTED", order: 6, estimatedMinutes: 360 },
+          { userId, title: "Git e controle de versão", status: "NOT_STARTED", order: 7, estimatedMinutes: 240 },
+          { userId, title: "GitHub e GitLab", status: "NOT_STARTED", order: 8, estimatedMinutes: 180 },
+          { userId, title: "CI/CD (Integração e Entrega Contínua)", status: "NOT_STARTED", order: 9, estimatedMinutes: 300 },
+          { userId, title: "Docker e contêineres", status: "NOT_STARTED", order: 10, estimatedMinutes: 360 },
+          { userId, title: "Tailwind CSS", status: "NOT_STARTED", order: 11, estimatedMinutes: 240 },
         ],
       },
     },
@@ -324,6 +329,15 @@ async function seedDemoData(userId: string) {
   const reactItem = roadmap.items.find((item) => item.title.startsWith("React"));
   const nextItem = roadmap.items.find((item) => item.title.startsWith("Next.js"));
   const sqlItem = roadmap.items.find((item) => item.title.startsWith("PostgreSQL"));
+  const jsItem = roadmap.items.find((item) => item.title.startsWith("Fundamentos de JavaScript"));
+  const tsItem = roadmap.items.find((item) => item.title.startsWith("TypeScript"));
+  const nodeItem = roadmap.items.find((item) => item.title.startsWith("APIs com Node.js"));
+  const deployItem = roadmap.items.find((item) => item.title.startsWith("Deploy, CI/CD"));
+  const gitItem = roadmap.items.find((item) => item.title.startsWith("Git e controle"));
+  const githubItem = roadmap.items.find((item) => item.title.startsWith("GitHub e GitLab"));
+  const cicdItem = roadmap.items.find((item) => item.title.startsWith("CI/CD ("));
+  const dockerItem = roadmap.items.find((item) => item.title.startsWith("Docker"));
+  const tailwindItem = roadmap.items.find((item) => item.title.startsWith("Tailwind"));
 
   if (reactItem) {
     await prisma.studyContent.create({
@@ -361,6 +375,132 @@ async function seedDemoData(userId: string) {
         type: "NOTE",
         content:
           "1. Entender quando o planner usa índice.\n2. Diferenciar INNER, LEFT e FULL JOIN.\n3. Praticar EXPLAIN ANALYZE em consultas lentas.",
+        order: 0,
+      },
+    });
+  }
+
+  if (jsItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: jsItem.id,
+        title: "Fundamentos de JavaScript",
+        type: "NOTE",
+        content:
+          "# JavaScript Moderno\n\n## Variáveis\n`let`, `const` e `var` — escopo de bloco vs função.\n\n## Tipos de dados\nString, Number, Boolean, null, undefined, Symbol, BigInt, Object.\n\n## Funções\nDeclaração, expressão, arrow functions, parâmetros rest e spread.\n\n## Async/Await\nPromises, `async`/`await`, `fetch`, tratamento de erros com try/catch.\n\n## DOM\nManipulação de elementos, eventos, seleção por querySelector.\n\n## Módulos\n`import`/`export`, CommonJS vs ES Modules.",
+        order: 0,
+      },
+    });
+  }
+
+  if (tsItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: tsItem.id,
+        title: "TypeScript na prática",
+        type: "NOTE",
+        content:
+          "# TypeScript\n\n## Tipagem estática\nInterfaces, tipos, union types, intersection types.\n\n## Tipos úteis\nPartial, Required, Readonly, Pick, Omit, Record.\n\n## Generics\nFunções e componentes genéricos, restrições de tipo.\n\n## Integração com React\nTipagem de props, estado, eventos.\n\n## tsconfig\nstrict, noImplicitAny, esModuleInterop.",
+        order: 0,
+      },
+    });
+  }
+
+  if (nodeItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: nodeItem.id,
+        title: "APIs com Node.js e Prisma",
+        type: "NOTE",
+        content:
+          "# Node.js + Prisma\n\n## Node.js\nHTTP nativo, Express, middlewares, rotas, controladores.\n\n## Prisma ORM\nSchema.prisma, models, relações, migrations.\n\n## Consultas\nfindMany, findUnique, create, update, delete, include, select.\n\n## Validação\nZod para validação de entrada de requisições.\n\n## Segurança\nHash de senhas (bcrypt), JWT, middleware de autenticação.",
+        order: 0,
+      },
+    });
+  }
+
+  if (deployItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: deployItem.id,
+        title: "Deploy, CI/CD e observabilidade",
+        type: "NOTE",
+        content:
+          "# Deploy e CI/CD\n\n## CI/CD\nGitHub Actions, pipelines, testes automatizados, lint, build.\n\n## Deploy\nVercel, variáveis de ambiente, domínios, SSL.\n\n## Observabilidade\nLogs, métricas, rastreamento de erros (Sentry).\n\n## Docker\nDockerfile, docker-compose, imagens otimizadas.\n\n## Variáveis de ambiente\n.ENV, segredos, configuração por ambiente.",
+        order: 0,
+      },
+    });
+  }
+
+  if (gitItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: gitItem.id,
+        title: "Git e controle de versão",
+        type: "NOTE",
+        content:
+          "# Git\n\n## Comandos básicos\ninit, clone, add, commit, push, pull, status, log.\n\n## Ramificações\nbranch, checkout, merge, rebase, resolve de conflitos.\n\n## Trabalho remoto\norigin, remote, fetch, pull request, fork.\n\n## Desfazer alterações\nreset, revert, restore, stash.\n\n## Boas práticas\nCommits atômicos, mensagens descritivas, .gitignore.",
+        order: 0,
+      },
+    });
+  }
+
+  if (githubItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: githubItem.id,
+        title: "GitHub e GitLab",
+        type: "NOTE",
+        content:
+          "# GitHub e GitLab\n\n## Repositórios\nCriação, clonagem, push, pull, branches protegidas.\n\n## Colaboração\nIssues, Pull Requests, code review, merge strategies.\n\n## GitHub Actions\nWorkflows, CI/CD, testes automatizados, deploy.\n\n## GitLab\nCI/CD nativo, runners, pipelines, MRs.\n\n## Organizações\nTeams, permissões, repositórios privados/públicos.",
+        order: 0,
+      },
+    });
+  }
+
+  if (cicdItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: cicdItem.id,
+        title: "CI/CD (Integração e Entrega Contínua)",
+        type: "NOTE",
+        content:
+          "# CI/CD\n\n## Conceitos\nIntegração Contínua, Entrega Contínua, Deploy Contínuo.\n\n## GitHub Actions\nYAML workflows, triggers, jobs, steps, actions.\n\n## Pipeline\nLint, testes unitários, build, deploy automatizado.\n\n## Qualidade\nSonarQube, ESLint, Prettier, testes de cobertura.\n\n## Rollback\nEstratégias de reversão, blue-green deployment.",
+        order: 0,
+      },
+    });
+  }
+
+  if (dockerItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: dockerItem.id,
+        title: "Docker e contêineres",
+        type: "NOTE",
+        content:
+          "# Docker\n\n## Conceitos\nImagens, contêineres, Dockerfile, volumes, redes.\n\n## Dockerfile\nFROM, COPY, RUN, CMD, ENTRYPOINT, EXPOSE.\n\n## docker-compose\nServiços, rede, volumes, variáveis de ambiente.\n\n## Boas práticas\nImagens multinível (multi-stage), .dockerignore, imagens leves.\n\n## Orquestração\nDocker Swarm, Kubernetes (conceitos básicos).",
+        order: 0,
+      },
+    });
+  }
+
+  if (tailwindItem) {
+    await prisma.studyContent.create({
+      data: {
+        userId,
+        roadmapItemId: tailwindItem.id,
+        title: "Tailwind CSS",
+        type: "NOTE",
+        content:
+          "# Tailwind CSS\n\n## Utilitários\nClasses de utilitário para layout, espaçamento, tipografia, cores.\n\n## Responsividade\nPrefixos sm, md, lg, xl, 2xl para breakpoints.\n\n## Estados\nhover, focus, active, disabled, group-hover.\n\n## Personalização\ntailwind.config.js, cores, fontes, espaçamento customizado.\n\n## Integração\nNext.js, React, componentes reutilizáveis.",
         order: 0,
       },
     });
