@@ -17,6 +17,7 @@ import {
   Trash2,
   Plus,
   Target,
+  Route,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -37,11 +38,10 @@ import type {
   StudyContentDto,
 } from "@/lib/roadmap/types";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 
 interface RoadmapItemCardProps {
   item: RoadmapItemDto;
-  onStatusChange: (itemId: string, status: RoadmapItemStatus) => Promise<void>;
+  onStatusChange: (itemId: string, status: RoadmapItemStatus) => void;
   onEdit: (item: RoadmapItemDto) => void;
   onDelete: (itemId: string) => void;
   onAddContent: (item: RoadmapItemDto) => void;
@@ -60,8 +60,7 @@ export function RoadmapItemCard({
 
   async function handleStatusChange(next: RoadmapItemStatus) {
     setStatus(next);
-    const success = await onStatusChange(item.id, next);
-    if (!success) setStatus(item.status);
+    await onStatusChange(item.id, next);
   }
 
   const getStatusProgress = (status: RoadmapItemStatus) => {
@@ -166,7 +165,7 @@ interface RoadmapColumnProps {
   onEditItem: (item: RoadmapItemDto) => void;
   onDeleteItem: (itemId: string) => void;
   onAddContent: (item: RoadmapItemDto) => void;
-  onStatusChange: (itemId: string, status: RoadmapItemStatus) => Promise<boolean>;
+  onStatusChange: (itemId: string, status: RoadmapItemStatus) => void;
 }
 
 export function RoadmapColumn({
@@ -323,7 +322,7 @@ export function RoadmapColumn({
                   <RoadmapItemCard
                     key={item.id}
                     item={item}
-                    onStatusChange={(itemId, status) => onStatusChange(itemId, status)}
+                    onStatusChange={(status) => onStatusChange(item.id, status)}
                     onEdit={onEditItem}
                     onDelete={onDeleteItem}
                     onAddContent={onAddContent}
@@ -415,7 +414,7 @@ export function RoadmapColumns({ roadmaps }: RoadmapColumnsProps) {
               onEditItem={() => {}}
               onDeleteItem={() => {}}
               onAddContent={() => {}}
-              onStatusChange={() => Promise.resolve(true)}
+              onStatusChange={() => {}}
             />
           ))}
         </div>
