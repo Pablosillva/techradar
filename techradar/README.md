@@ -287,3 +287,5 @@ Recomendado: a cada 6 horas (0 */6 * * *)
 ## Licen√ßa
 
 MIT
+#   f i x :   f o r Á a   r e b u i l d   d o   r o a d m a p - c o l u m n s . t s x  
+ 
