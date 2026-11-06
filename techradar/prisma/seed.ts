@@ -228,9 +228,9 @@ async function main() {
 // ══════════════════════════════════════════════════════════════════════════
 
 const ADMIN_EMAIL = "admin@devpath.com";
-const ADMIN_PASSWORD = "DevPath@2026!Admin";
+const ADMIN_PASSWORD = "D3vP@th_2026!S3cure_Adm#91";
 const DEMO_EMAIL = "pablo@devpath.com";
-const DEMO_PASSWORD = "DevPath@2026!User";
+const DEMO_PASSWORD = "D3vP@th_2026!Us3r_S3cure#82";
 
 async function seedDemoUsers() {
   console.log("🌱 Criando usuários de demonstração...");
