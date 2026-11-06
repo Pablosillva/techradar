@@ -286,7 +286,7 @@ export function RoadmapColumn({
             </div>
             <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
               {statusCounts.map(({ status, count }) => {
-                const meta = STATUS_META[status];
+                const meta = STATUS_META[status as RoadmapItemStatus];
                 return (
                   <span
                     key={status}
@@ -322,7 +322,7 @@ export function RoadmapColumn({
                   <RoadmapItemCard
                     key={item.id}
                     item={item}
-                    onStatusChange={(status) => onStatusChange(item.id, status)}
+                    onStatusChange={(status) => onStatusChange(item.id, status as RoadmapItemStatus)}
                     onEdit={onEditItem}
                     onDelete={onDeleteItem}
                     onAddContent={onAddContent}
