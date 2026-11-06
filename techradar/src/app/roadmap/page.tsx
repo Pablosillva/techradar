@@ -32,7 +32,7 @@ export default async function RoadmapPage() {
     title: roadmap.title,
     description: roadmap.description,
     goal: roadmap.goal,
-    level: roadmap.level,
+    level: roadmap.level as "beginner" | "intermediate" | "advanced",
     color: roadmap.color,
     order: roadmap.order,
     items: roadmap.items.map((item) => ({

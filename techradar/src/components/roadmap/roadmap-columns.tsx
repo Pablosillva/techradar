@@ -17,14 +17,10 @@ import {
   Trash2,
   Plus,
   Target,
-  Route,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Modal } from "./modal";
 import {
   STATUS_META,
@@ -170,7 +166,7 @@ interface RoadmapColumnProps {
   onEditItem: (item: RoadmapItemDto) => void;
   onDeleteItem: (itemId: string) => void;
   onAddContent: (item: RoadmapItemDto) => void;
-  onStatusChange: (item: RoadmapItemDto, status: RoadmapItemStatus) => Promise<boolean>;
+  onStatusChange: (itemId: string, status: RoadmapItemStatus) => Promise<boolean>;
 }
 
 export function RoadmapColumn({
@@ -187,7 +183,7 @@ export function RoadmapColumn({
   onStatusChange,
 }: RoadmapColumnProps) {
   const summary = summarizeRoadmap(roadmap);
-  const level = LEVEL_META[roadmap.level] ?? LEVEL_META.beginner;
+  const level = LEVEL_META[roadmap.level as keyof typeof LEVEL_META] ?? LEVEL_META.beginner;
   const statusCounts = [
     { status: "COMPLETED", count: summary.completed },
     { status: "IN_PROGRESS", count: summary.inProgress },
@@ -327,7 +323,7 @@ export function RoadmapColumn({
                   <RoadmapItemCard
                     key={item.id}
                     item={item}
-                    onStatusChange={onStatusChange}
+                    onStatusChange={(itemId, status) => onStatusChange(itemId, status)}
                     onEdit={onEditItem}
                     onDelete={onDeleteItem}
                     onAddContent={onAddContent}
@@ -365,11 +361,10 @@ export function RoadmapColumns({ roadmaps }: RoadmapColumnsProps) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex items-start gap-3.5">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/10 text-cyan-300">
-            <Route className="h-5 w-5" />
+            <Target className="h-5 w-5" />
           </span>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-300/80">
@@ -428,6 +423,3 @@ export function RoadmapColumns({ roadmaps }: RoadmapColumnsProps) {
     </div>
   );
 }
-
-export { RoadmapColumns };
-export { RoadmapItemCard };
