@@ -34,6 +34,22 @@ As rotas de admin utilizam:
 - `GET /api/admin/audiobooks` — lista audiobooks
 - `PUT /api/admin/audiobooks/[id]` — atualiza audiobook
 
+## Roadmap (Etapa 3)
+
+A rota `/roadmap` é totalmente orientada pelos dados do usuário:
+
+- **Trilhas**: CRUD completo (criar, editar e excluir) com nível, objetivo, cor e ordem.
+- **Itens de estudo**: CRUD, quatro status (`Não iniciado`, `Em andamento`, `Concluído`,
+  `Precisa revisar`), tempo estimado e link oficial (somente `http/https`).
+- **Conteúdo teórico**: CRUD inline por item — notas, links, vídeos, artigos e PDFs.
+  O texto é renderizado como texto puro (sem HTML), evitando XSS.
+- **Progresso**: barra por trilha e resumo geral calculados a partir dos status reais.
+- **Página `/conteudo`**: visão consolidada de todo o conteúdo teórico e links oficiais,
+  agrupada por trilha.
+
+As rotas usadas estão em `/api/roadmaps`, `/api/roadmap-items` e `/api/study-contents`,
+sempre com validação Zod e escopo por `userId`.
+
 ## Dashboard (Etapa 2)
 
 A rota `/` agora usa o shell dark do DevPath Hub (sidebar colapsável, topbar com busca
@@ -287,6 +303,6 @@ Recomendado: a cada 6 horas (0 */6 * * *)
 ## Licença
 
 MIT
-#   f i x :   f o r � a   r e b u i l d   d o   r o a d m a p - c o l u m n s . t s x  
- #   f i x :   f o r � a   r e b u i l d   c o m p l e t o   d o   r o a d m a p - c o l u m n s . t s x  
+#   f i x :   f o r � a   r e b u i l d   d o   r o a d m a p - c o l u m n s . t s x  
+ #   f i x :   f o r � a   r e b u i l d   c o m p l e t o   d o   r o a d m a p - c o l u m n s . t s x  
  

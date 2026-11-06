@@ -151,6 +151,69 @@ async function seedDemoData(userId: string) {
 
   console.log(`✅ ${ROADMAP_ITEMS.length} itens de roadmap criados`);
 
+  // Conteúdo teórico e links oficiais de demonstração (primeiros itens)
+  const itemIdByOrder = new Map(roadmap.items.map((item) => [item.order, item.id]));
+
+  await prisma.studyContent.createMany({
+    data: [
+      {
+        userId,
+        roadmapItemId: itemIdByOrder.get(0)!,
+        title: "Comandos essenciais do terminal",
+        type: "NOTE",
+        content:
+          "pwd — mostra o diretório atual\nls -la — lista arquivos, inclusive ocultos\ncd pasta — entra na pasta\ncd .. — volta um nível\nmkdir nome — cria pasta\ntouch arquivo — cria arquivo vazio\nchmod +x arquivo — dá permissão de execução",
+        order: 0,
+      },
+      {
+        userId,
+        roadmapItemId: itemIdByOrder.get(0)!,
+        title: "Linux Journey — curso gratuito",
+        type: "LINK",
+        url: "https://linuxjourney.com/",
+        order: 1,
+      },
+      {
+        userId,
+        roadmapItemId: itemIdByOrder.get(1)!,
+        title: "Git — documentação oficial",
+        type: "LINK",
+        url: "https://git-scm.com/doc",
+        order: 0,
+      },
+      {
+        userId,
+        roadmapItemId: itemIdByOrder.get(1)!,
+        title: "Fluxo básico de branches",
+        type: "NOTE",
+        content:
+          "git switch -c minha-feature — cria e entra na branch\ngit add . && git commit -m \"feat: ...\" — registra a mudança\ngit push -u origin minha-feature — publica a branch\ngit switch main && git pull — atualiza a main antes do merge",
+        order: 1,
+      },
+      {
+        userId,
+        roadmapItemId: itemIdByOrder.get(2)!,
+        title: "MDN — Como a web funciona",
+        type: "ARTICLE",
+        url: "https://developer.mozilla.org/pt-BR/docs/Learn/Getting_started_with_the_web/How_the_Web_works",
+        order: 0,
+      },
+      {
+        userId,
+        roadmapItemId: itemIdByOrder.get(21)!,
+        title: "Prisma — documentação oficial",
+        type: "LINK",
+        url: "https://www.prisma.io/docs",
+        order: 0,
+      },
+    ],
+  });
+
+  await prisma.roadmapItem.updateMany({
+    where: { id: itemIdByOrder.get(1), userId },
+    data: { resourceUrl: "https://git-scm.com/doc" },
+  });
+
   // ── Biblioteca relacionada ao roadmap
   const bibliotecaItens = [
     {

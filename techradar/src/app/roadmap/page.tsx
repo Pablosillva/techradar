@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { RoadmapColumns } from "@/components/roadmap/roadmap-columns";
+import { RoadmapWorkspace } from "@/components/roadmap/roadmap-workspace";
 import type { RoadmapDto } from "@/lib/roadmap/types";
 
 export default async function RoadmapPage() {
@@ -63,5 +63,5 @@ export default async function RoadmapPage() {
     })),
   }));
 
-  return <RoadmapColumns roadmaps={data} />;
+  return <RoadmapWorkspace roadmaps={data} />;
 }

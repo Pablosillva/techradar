@@ -22,6 +22,7 @@ import type {
   RoadmapDto,
   RoadmapItemDto,
   RoadmapItemStatus,
+  StudyContentDto,
 } from "@/lib/roadmap/types";
 import { cn } from "@/lib/utils";
 import { RoadmapItem } from "./roadmap-item";
@@ -37,6 +38,9 @@ interface RoadmapCardProps {
   onEditItem: (item: RoadmapItemDto) => void;
   onDeleteItem: (item: RoadmapItemDto) => void;
   onStatusChange: (item: RoadmapItemDto, status: RoadmapItemStatus) => Promise<boolean>;
+  onAddContent: (item: RoadmapItemDto) => void;
+  onEditContent: (item: RoadmapItemDto, content: StudyContentDto) => void;
+  onDeleteContent: (item: RoadmapItemDto, content: StudyContentDto) => void;
 }
 
 export function RoadmapCard({
@@ -50,6 +54,9 @@ export function RoadmapCard({
   onEditItem,
   onDeleteItem,
   onStatusChange,
+  onAddContent,
+  onEditContent,
+  onDeleteContent,
 }: RoadmapCardProps) {
   const panelId = useId();
   const summary = summarizeRoadmap(roadmap);
@@ -219,7 +226,9 @@ export function RoadmapCard({
                     onStatusChange={onStatusChange}
                     onEdit={onEditItem}
                     onDelete={onDeleteItem}
-                    onAddContent={() => {}}
+                    onAddContent={onAddContent}
+                    onEditContent={onEditContent}
+                    onDeleteContent={onDeleteContent}
                   />
                 ))}
               </div>
