@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Modal } from "./modal";
+import { Select } from "@/components/ui/select";
 import {
   STATUS_META,
   summarizeRoadmap,
@@ -38,6 +38,7 @@ import type {
   StudyContentDto,
 } from "@/lib/roadmap/types";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface RoadmapItemCardProps {
   item: RoadmapItemDto;
@@ -55,7 +56,7 @@ export function RoadmapItemCard({
   onAddContent,
 }: RoadmapItemCardProps) {
   const [status, setStatus] = useState<RoadmapItemStatus>(item.status);
-  const statusMeta = STATUS_META[status] ?? STATUS_META.NOT_STARTED;
+  const meta = STATUS_META[status as keyof typeof STATUS_META];
   const resourceUrl = safeHttpUrl(item.resourceUrl);
 
   async function handleStatusChange(next: RoadmapItemStatus) {
@@ -78,19 +79,17 @@ export function RoadmapItemCard({
 
   return (
     <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-4 mb-4 hover:bg-white/[0.03] transition-colors">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-violet-400/10 text-violet-300">
-            <FileText className="h-3 w-3" />
-          </span>
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-slate-200 truncate" title={item.title}>
-              {item.title}
-            </h3>
-            <Badge variant={statusMeta.badge} className="text-xs mt-1">
-              {statusMeta.label}
-            </Badge>
-          </div>
+      <div className="flex items-start gap-2 p-3">
+        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-violet-400/10 text-violet-300">
+          <FileText className="h-3 w-3" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-slate-200 truncate" title={item.title}>
+            {item.title}
+          </h3>
+          <Badge variant={statusMeta.badge} className="text-[10px]">
+            {statusMeta.label}
+          </Badge>
         </div>
         <div className="flex items-center gap-1">
           <Button
@@ -304,11 +303,11 @@ export function RoadmapColumn({
       </div>
 
       {!collapsed && (
-        <div className="divide-y divide-white/[0.04]">
+        <div id={panelId} className="border-t border-white/[0.05]">
           {roadmap.items.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 px-5 py-10 text-center">
               <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] text-slate-500">
-                <Route className="h-4 w-4" />
+                <MoreHorizontal className="h-4 w-4" />
               </span>
               <p className="text-xs text-slate-500">Esta trilha ainda não tem itens de estudo.</p>
               <Button type="button" variant="outline" size="sm" onClick={onAddItem}>
@@ -360,6 +359,7 @@ export function RoadmapColumns({ roadmaps }: RoadmapColumnsProps) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
+      {/* Cabeçalho */}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="flex items-start gap-3.5">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/10 text-cyan-300">
@@ -373,8 +373,8 @@ export function RoadmapColumns({ roadmaps }: RoadmapColumnsProps) {
               Roadmap de Estudos
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-400">
-              Organize suas trilhas, acompanhe o progresso e mantenha o conteúdo
-              teórico e os links oficiais sempre à mão.
+              Organize suas trilhas, acompanhe o progresso e mantenha o
+              conteúdo teórico e os links oficiais sempre à mão.
             </p>
           </div>
         </div>
