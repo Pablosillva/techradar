@@ -105,6 +105,29 @@ export interface ActiveTimer {
   startedAt: Date;
 }
 
+/** Pasta dentro do Caderno (Notebook). */
+export interface NotebookFolder {
+  id: string;
+  title: string;
+  parentId: string | null;
+  order: number;
+}
+
+/** Nota dentro do Caderno. */
+export interface NotebookNote {
+  id: string;
+  title: string;
+  content: string; // HTML do Tiptap
+  parentFolderId: string | null;
+  tags: string[];
+  relatedModuleId?: string;
+  relatedNodeId?: string;
+  wordCount: number;
+  updatedAt: Date;
+  createdAt: Date;
+}
+
+/** Métricas agregadas de evolução. */
 export interface StudyState {
   roadmapNodes: RoadmapNode[];
   modules: Module[];
@@ -114,4 +137,8 @@ export interface StudyState {
   timeSpent: Record<string, number>; // moduleId -> segundos
   activeTimer: ActiveTimer | null;
   lastSync: Date;
+
+  // Caderno / Notas
+  notebooks: NotebookNote[];
+  notebookFolders: NotebookFolder[];
 }

@@ -11,6 +11,8 @@ import type {
   ModuleCategory,
   RoadmapStatus,
   ActiveTimer,
+  NotebookFolder,
+  NotebookNote,
 } from "@/lib/study/types";
 
 /* ============================================================
@@ -139,6 +141,27 @@ const initialModules: Module[] = [
   },
 ];
 
+const initialNotebookFolders: NotebookFolder[] = [
+  { id: "folder-root", title: "Notebook", parentId: null, order: 0 },
+  { id: "folder-web", title: "Web Fundamentals", parentId: "folder-root", order: 1 },
+  { id: "folder-react", title: "React & State", parentId: "folder-web", order: 2 },
+  { id: "folder-node", title: "Node.js", parentId: "folder-root", order: 3 },
+];
+
+const initialNotebooks: NotebookNote[] = [
+  {
+    id: "note-1",
+    title: "React Hooks Deep Dive",
+    content: `<h1>React Hooks Deep Dive</h1><p>Structured hook-driven Ives dive into thinking about hooks via react hooks. Files are rightline-hookuse development more maintainable.</p><pre><code>export default hooks = hooks {\n  const hooks = () => {\n    return Log(setState.React(data, instapt));\n  };\n}</code></pre>`,
+    parentFolderId: "folder-react",
+    tags: ["React", "Hooks"],
+    relatedModuleId: "mod-react",
+    wordCount: 45,
+    updatedAt: new Date(Date.now() - 3600000),
+    createdAt: new Date(Date.now() - 86400000 * 3),
+  },
+];
+
 const initialTimeSpent: Record<string, number> = {
   "web-development": 1200,
   "mobile-dev": 0,
@@ -156,6 +179,8 @@ const initialState: StudyState = {
   timeSpent: initialTimeSpent,
   activeTimer: null,
   lastSync: new Date(),
+  notebooks: initialNotebooks,
+  notebookFolders: initialNotebookFolders,
 };
 
 /* ============================================================
@@ -172,7 +197,17 @@ type StudyAction =
   | { type: "UNCOMPLETE_EXERCISE"; payload: { exerciseId: string } }
   | { type: "MARK_REVIEW_DONE"; payload: { reviewId: string } }
   | { type: "GENERATE_REVIEWS" }
-  | { type: "SET_NODE_STATUS"; payload: { nodeId: string; status: RoadmapStatus } };
+  | { type: "SET_NODE_STATUS"; payload: { nodeId: string; status: RoadmapStatus } }
+  // Notebook actions
+  | { type: "CREATE_FOLDER"; payload: { title: string; parentId: string | null } }
+  | { type: "DELETE_FOLDER"; payload: { folderId: string } }
+  | { type: "UPDATE_FOLDER"; payload: { folderId: string; title: string } }
+  | { type: "CREATE_NOTE"; payload: { title: string; content: string; parentFolderId: string | null; tags: string[]; relatedModuleId?: string; relatedNodeId?: string } }
+  | { type: "UPDATE_NOTE"; payload: { noteId: string; title?: string; content?: string; tags?: string[] } }
+  | { type: "DELETE_NOTE"; payload: { noteId: string } }
+  | { type: "MOVE_NOTE"; payload: { noteId: string; parentFolderId: string | null } }
+  | { type: "ADD_TAG_TO_NOTE"; payload: { noteId: string; tag: string } }
+  | { type: "REMOVE_TAG_FROM_NOTE"; payload: { noteId: string; tag: string } };
 
 /* ============================================================
    HELPERS PUROS
@@ -357,6 +392,128 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
     case "SET_NODE_STATUS": {
       const { nodeId, status } = action.payload;
       return { ...state, roadmapNodes: state.roadmapNodes.map((n) => (n.id === nodeId ? { ...n, status } : n)), lastSync: new Date() };
+    }
+
+    // ===== NOTEBOOK ACTIONS =====
+    case "CREATE_FOLDER": {
+      const { title, parentId } = action.payload;
+      const newFolder: NotebookFolder = {
+        id: `folder-${Date.now()}`,
+        title,
+        parentId,
+        order: state.notebookFolders.filter((f) => f.parentId === parentId).length,
+      };
+      return { ...state, notebookFolders: [...state.notebookFolders, newFolder], lastSync: new Date() };
+    }
+
+    case "DELETE_FOLDER": {
+      const { folderId } = action.payload;
+      if (folderId === "folder-root") return state;
+      // Move notes from this folder to root
+      const notesMoved = state.notebooks.map((n) =>
+        n.parentFolderId === folderId ? { ...n, parentFolderId: null, updatedAt: new Date() } : n
+      );
+      return {
+        ...state,
+        notebookFolders: state.notebookFolders.filter((f) => f.id !== folderId),
+        notebooks: notesMoved,
+        lastSync: new Date(),
+      };
+    }
+
+    case "UPDATE_FOLDER": {
+      const { folderId, title } = action.payload;
+      return {
+        ...state,
+        notebookFolders: state.notebookFolders.map((f) =>
+          f.id === folderId ? { ...f, title } : f
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "CREATE_NOTE": {
+      const { title, content, parentFolderId, tags, relatedModuleId, relatedNodeId } = action.payload;
+      const wordCount = content ? content.split(/\s+/).filter(Boolean).length : 0;
+      const now = new Date();
+      const newNote: NotebookNote = {
+        id: `note-${Date.now()}`,
+        title,
+        content,
+        parentFolderId,
+        tags,
+        relatedModuleId,
+        relatedNodeId,
+        wordCount,
+        updatedAt: now,
+        createdAt: now,
+      };
+      return { ...state, notebooks: [...state.notebooks, newNote], lastSync: now };
+    }
+
+    case "UPDATE_NOTE": {
+      const { noteId, title, content, tags } = action.payload;
+      const now = new Date();
+      return {
+        ...state,
+        notebooks: state.notebooks.map((n) => {
+          if (n.id !== noteId) return n;
+          const updated: NotebookNote = { ...n, updatedAt: now };
+          if (title !== undefined) updated.title = title;
+          if (content !== undefined) {
+            updated.content = content;
+            updated.wordCount = content.split(/\s+/).filter(Boolean).length;
+          }
+          if (tags !== undefined) updated.tags = tags;
+          return updated;
+        }),
+        lastSync: now,
+      };
+    }
+
+    case "DELETE_NOTE": {
+      const { noteId } = action.payload;
+      return {
+        ...state,
+        notebooks: state.notebooks.filter((n) => n.id !== noteId),
+        lastSync: new Date(),
+      };
+    }
+
+    case "MOVE_NOTE": {
+      const { noteId, parentFolderId } = action.payload;
+      return {
+        ...state,
+        notebooks: state.notebooks.map((n) =>
+          n.id === noteId ? { ...n, parentFolderId, updatedAt: new Date() } : n
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "ADD_TAG_TO_NOTE": {
+      const { noteId, tag } = action.payload;
+      return {
+        ...state,
+        notebooks: state.notebooks.map((n) => {
+          if (n.id !== noteId) return n;
+          if (n.tags.includes(tag)) return n;
+          return { ...n, tags: [...n.tags, tag], updatedAt: new Date() };
+        }),
+        lastSync: new Date(),
+      };
+    }
+
+    case "REMOVE_TAG_FROM_NOTE": {
+      const { noteId, tag } = action.payload;
+      return {
+        ...state,
+        notebooks: state.notebooks.map((n) => {
+          if (n.id !== noteId) return n;
+          return { ...n, tags: n.tags.filter((t) => t !== tag), updatedAt: new Date() };
+        }),
+        lastSync: new Date(),
+      };
     }
 
     default:

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useReducer, useCallback, type ReactNode } from "react";
 import { studyReducer, initialState, type StudyState } from "./reducer";
-import type { ModuleCategory, Module, Lesson, RoadmapNode } from "@/lib/study/types";
+import type { ModuleCategory, Module, Lesson, RoadmapNode, NotebookFolder, NotebookNote } from "@/lib/study/types";
 
 function moduleProgress(module: Module): number {
   if (module.lessons.length === 0) return 0;
@@ -70,6 +70,19 @@ interface StudyContextValue extends StudyState {
   completeExercise: (exerciseId: string, score: number) => void;
   generateReviews: () => void;
   markReviewDone: (reviewId: string) => void;
+  // Notebook actions
+  createFolder: (title: string, parentId: string | null) => void;
+  deleteFolder: (folderId: string) => void;
+  updateFolder: (folderId: string, title: string) => void;
+  createNote: (title: string, content: string, parentFolderId: string | null, tags: string[], relatedModuleId?: string, relatedNodeId?: string) => void;
+  updateNote: (noteId: string, title?: string, content?: string, tags?: string[]) => void;
+  deleteNote: (noteId: string) => void;
+  moveNote: (noteId: string, parentFolderId: string | null) => void;
+  addTagToNote: (noteId: string, tag: string) => void;
+  removeTagFromNote: (noteId: string, tag: string) => void;
+  getNotesByFolder: (folderId: string | null) => NotebookNote[];
+  getFolderById: (folderId: string) => NotebookFolder | undefined;
+  getFoldersByParent: (parentId: string | null) => NotebookFolder[];
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -127,6 +140,58 @@ export function StudyProvider({ children }: StudyProviderProps) {
     dispatch({ type: "MARK_REVIEW_DONE", payload: { reviewId } });
   }, []);
 
+  // Notebook actions
+  const createFolder = useCallback((title: string, parentId: string | null) => {
+    dispatch({ type: "CREATE_FOLDER", payload: { title, parentId } });
+  }, []);
+
+  const deleteFolder = useCallback((folderId: string) => {
+    dispatch({ type: "DELETE_FOLDER", payload: { folderId } });
+  }, []);
+
+  const updateFolder = useCallback((folderId: string, title: string) => {
+    dispatch({ type: "UPDATE_FOLDER", payload: { folderId, title } });
+  }, []);
+
+  const createNote = useCallback(
+    (title: string, content: string, parentFolderId: string | null, tags: string[], relatedModuleId?: string, relatedNodeId?: string) => {
+      dispatch({ type: "CREATE_NOTE", payload: { title, content, parentFolderId, tags, relatedModuleId, relatedNodeId } });
+    },
+    []
+  );
+
+  const updateNote = useCallback((noteId: string, title?: string, content?: string, tags?: string[]) => {
+    dispatch({ type: "UPDATE_NOTE", payload: { noteId, title, content, tags } });
+  }, []);
+
+  const deleteNote = useCallback((noteId: string) => {
+    dispatch({ type: "DELETE_NOTE", payload: { noteId } });
+  }, []);
+
+  const moveNote = useCallback((noteId: string, parentFolderId: string | null) => {
+    dispatch({ type: "MOVE_NOTE", payload: { noteId, parentFolderId } });
+  }, []);
+
+  const addTagToNote = useCallback((noteId: string, tag: string) => {
+    dispatch({ type: "ADD_TAG_TO_NOTE", payload: { noteId, tag } });
+  }, []);
+
+  const removeTagFromNote = useCallback((noteId: string, tag: string) => {
+    dispatch({ type: "REMOVE_TAG_FROM_NOTE", payload: { noteId, tag } });
+  }, []);
+
+  const getNotesByFolder = useCallback((folderId: string | null) => {
+    return state.notebooks.filter((n) => n.parentFolderId === folderId).sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+  }, [state.notebooks]);
+
+  const getFolderById = useCallback((folderId: string) => {
+    return state.notebookFolders.find((f) => f.id === folderId);
+  }, [state.notebookFolders]);
+
+  const getFoldersByParent = useCallback((parentId: string | null) => {
+    return state.notebookFolders.filter((f) => f.parentId === parentId).sort((a, b) => a.order - b.order);
+  }, [state.notebookFolders]);
+
   const metrics = computeMetrics(state);
 
   const modulesByCategory = (category: ModuleCategory) => state.modules.filter((m) => m.category === category);
@@ -167,6 +232,18 @@ export function StudyProvider({ children }: StudyProviderProps) {
     completeExercise,
     generateReviews,
     markReviewDone,
+    createFolder,
+    deleteFolder,
+    updateFolder,
+    createNote,
+    updateNote,
+    deleteNote,
+    moveNote,
+    addTagToNote,
+    removeTagFromNote,
+    getNotesByFolder,
+    getFolderById,
+    getFoldersByParent,
   };
 
   return <StudyContext.Provider value={contextValue}>{children}</StudyContext.Provider>;
