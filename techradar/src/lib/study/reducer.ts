@@ -13,6 +13,11 @@ import type {
   ActiveTimer,
   NotebookFolder,
   NotebookNote,
+  LabFile,
+  LabProject,
+  TerminalLine,
+  TerminalState,
+  OpenTab,
 } from "@/lib/study/types";
 
 /* ============================================================
@@ -170,6 +175,185 @@ const initialTimeSpent: Record<string, number> = {
   "data-science": 0,
 };
 
+/* ============================================================
+   DADOS MOCKADOS DO LABORATÓRIO
+   ============================================================ */
+
+const initialLabFiles: LabFile[] = [
+  {
+    id: "file-1",
+    name: "ProductList.js",
+    path: "src/components/ProductList.js",
+    content: `import React, { useState, useEffect } from "react";
+import Products from "../api/products";
+
+export default function ProductList({ Component }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await Products.fetchAll();
+      setProducts(data);
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) return <div>Carregando...</div>;
+
+  return (
+    <div className="product-grid">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+`,
+    language: "jsx",
+    isOpen: true,
+    isActive: true,
+  },
+  {
+    id: "file-2",
+    name: "productController.js",
+    path: "src/controllers/productController.js",
+    content: `const Product = require("../models/Product");
+
+const productController = {
+  async getAll(req, res) {
+    try {
+      const products = await Product.find();
+      res.json(products);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  async create(req, res) {
+    try {
+      const product = new Product(req.body);
+      await product.save();
+      res.status(201).json(product);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  },
+};
+
+module.exports = productController;
+`,
+    language: "javascript",
+    isOpen: true,
+    isActive: false,
+  },
+  {
+    id: "file-3",
+    name: "style.css",
+    path: "src/styles/style.css",
+    content: `.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.product-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-card h3 {
+  color: #06b6d4;
+  margin-bottom: 0.5rem;
+}
+
+.product-card p {
+  color: #64748b;
+  font-size: 0.9rem;
+}`,
+    language: "css",
+    isOpen: true,
+    isActive: false,
+  },
+];
+
+const initialLabProjects: LabProject[] = [
+  {
+    id: "lab-1",
+    title: "Atividade Guiada: Deploy no AWS",
+    description: "Configure e faça deploy de uma aplicação full-stack na AWS utilizando EC2, S3 e RDS.",
+    category: "devops",
+    status: "in-progress",
+    progress: 45,
+    files: initialLabFiles.filter((f) => f.path.includes("ProductList") || f.path.includes("productController")),
+    relatedNodeId: "devops-cloud",
+  },
+  {
+    id: "lab-2",
+    title: "Projeto Final: Portfólio",
+    description: "Crie um portfólio pessoal utilizando React, Node.js e banco de dados PostgreSQL.",
+    category: "web-development",
+    status: "not-started",
+    progress: 0,
+    files: [],
+    relatedNodeId: "react-estado",
+  },
+  {
+    id: "lab-3",
+    title: "Sandbox: Python Data Analysis",
+    description: "Analise conjuntos de dados utilizando Python, Pandas e visualizações com Matplotlib.",
+    category: "data-science",
+    status: "in-progress",
+    progress: 30,
+    files: [],
+    relatedNodeId: undefined,
+  },
+];
+
+const initialTerminalLines: TerminalLine[] = [
+  {
+    id: "term-1",
+    type: "output",
+    text: "> e-commerce E-Commerce-Full-Stack 1v3.981",
+    timestamp: new Date(Date.now() - 60000),
+  },
+  {
+    id: "term-2",
+    type: "input",
+    text: "> npm start",
+    timestamp: new Date(Date.now() - 45000),
+  },
+  {
+    id: "term-3",
+    type: "output",
+    text: "Local: http://localhost:3000",
+    timestamp: new Date(Date.now() - 44000),
+  },
+  {
+    id: "term-4",
+    type: "output",
+    text: "Compiling...",
+    timestamp: new Date(Date.now() - 43000),
+  },
+];
+
+const initialTerminalState: TerminalState = {
+  lines: initialTerminalLines,
+  currentInput: "",
+  historyIndex: -1,
+  commandHistory: [],
+};
+
+const initialOpenTabs: OpenTab[] = [
+  { fileId: "file-1", fileName: "ProductList.js", language: "jsx", isActive: true },
+  { fileId: "file-2", fileName: "productController.js", language: "javascript", isActive: false },
+  { fileId: "file-3", fileName: "style.css", language: "css", isActive: false },
+];
+
 const initialState: StudyState = {
   roadmapNodes: initialRoadmapNodes,
   modules: initialModules,
@@ -181,6 +365,12 @@ const initialState: StudyState = {
   lastSync: new Date(),
   notebooks: initialNotebooks,
   notebookFolders: initialNotebookFolders,
+  labProjects: initialLabProjects,
+  activeProjectId: "lab-1",
+  openTabs: initialOpenTabs,
+  activeFileId: "file-1",
+  terminal: initialTerminalState,
+  labTimeSpent: 0,
 };
 
 /* ============================================================
@@ -207,7 +397,18 @@ type StudyAction =
   | { type: "DELETE_NOTE"; payload: { noteId: string } }
   | { type: "MOVE_NOTE"; payload: { noteId: string; parentFolderId: string | null } }
   | { type: "ADD_TAG_TO_NOTE"; payload: { noteId: string; tag: string } }
-  | { type: "REMOVE_TAG_FROM_NOTE"; payload: { noteId: string; tag: string } };
+  | { type: "REMOVE_TAG_FROM_NOTE"; payload: { noteId: string; tag: string } }
+  // Lab actions
+  | { type: "SET_ACTIVE_PROJECT"; payload: { projectId: string } }
+  | { type: "UPDATE_LAB_FILE"; payload: { fileId: string; content: string } }
+  | { type: "SET_ACTIVE_FILE"; payload: { fileId: string | null } }
+  | { type: "ADD_OPEN_TAB"; payload: { tab: OpenTab } }
+  | { type: "REMOVE_OPEN_TAB"; payload: { fileId: string } }
+  | { type: "SET_ACTIVE_TAB"; payload: { fileId: string } }
+  | { type: "TERMINAL_INPUT"; payload: { text: string } }
+  | { type: "TERMINAL_EXECUTE"; payload: { command: string } }
+  | { type: "TERMINAL_ADD_LINE"; payload: { line: TerminalLine } }
+  | { type: "TICK_LAB_TIMER"; payload: { seconds: number } };
 
 /* ============================================================
    HELPERS PUROS
@@ -512,6 +713,189 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
           if (n.id !== noteId) return n;
           return { ...n, tags: n.tags.filter((t) => t !== tag), updatedAt: new Date() };
         }),
+        lastSync: new Date(),
+      };
+    }
+
+    // ===== LAB ACTIONS =====
+    case "SET_ACTIVE_PROJECT": {
+      const { projectId } = action.payload;
+      const project = state.labProjects.find((p) => p.id === projectId);
+      if (!project) return state;
+      return {
+        ...state,
+        activeProjectId: projectId,
+        activeFileId: project.files[0]?.id ?? null,
+        openTabs: project.files.map((f) => ({
+          fileId: f.id,
+          fileName: f.name,
+          language: f.language,
+          isActive: f.id === (project.files[0]?.id ?? ""),
+        })),
+        lastSync: new Date(),
+      };
+    }
+
+    case "UPDATE_LAB_FILE": {
+      const { fileId, content } = action.payload;
+      return {
+        ...state,
+        labProjects: state.labProjects.map((p) => ({
+          ...p,
+          files: p.files.map((f) =>
+            f.id === fileId ? { ...f, content, updatedAt: new Date() } : f
+          ),
+        })),
+        lastSync: new Date(),
+      };
+    }
+
+    case "SET_ACTIVE_FILE": {
+      const { fileId } = action.payload;
+      return {
+        ...state,
+        activeFileId: fileId,
+        openTabs: state.openTabs.map((t) => ({ ...t, isActive: t.fileId === fileId })),
+        lastSync: new Date(),
+      };
+    }
+
+    case "ADD_OPEN_TAB": {
+      const { tab } = action.payload;
+      if (state.openTabs.some((t) => t.fileId === tab.fileId)) return state;
+      return {
+        ...state,
+        openTabs: state.openTabs.map((t) => ({ ...t, isActive: false })).concat({
+          ...tab,
+          isActive: true,
+        }),
+        activeFileId: tab.fileId,
+        lastSync: new Date(),
+      };
+    }
+
+    case "REMOVE_OPEN_TAB": {
+      const { fileId } = action.payload;
+      const tabs = state.openTabs.filter((t) => t.fileId !== fileId);
+      const activeTab = tabs.find((t) => t.isActive);
+      return {
+        ...state,
+        openTabs: tabs,
+        activeFileId: activeTab?.fileId ?? null,
+        lastSync: new Date(),
+      };
+    }
+
+    case "SET_ACTIVE_TAB": {
+      const { fileId } = action.payload;
+      return {
+        ...state,
+        openTabs: state.openTabs.map((t) => ({ ...t, isActive: t.fileId === fileId })),
+        activeFileId: fileId,
+        lastSync: new Date(),
+      };
+    }
+
+    case "TERMINAL_INPUT": {
+      const { text } = action.payload;
+      return {
+        ...state,
+        terminal: { ...state.terminal, currentInput: text },
+      };
+    }
+
+    case "TERMINAL_EXECUTE": {
+      const { command } = action.payload;
+      const now = new Date();
+      const inputLine: TerminalLine = {
+        id: `term-${Date.now()}`,
+        type: "input",
+        text: `> ${command}`,
+        timestamp: now,
+      };
+
+      let outputLines: TerminalLine[] = [inputLine];
+
+      // Simulação de comandos
+      const cmd = command.trim().toLowerCase();
+      if (cmd === "npm start") {
+        outputLines.push(
+          {
+            id: `term-${Date.now() + 1}`,
+            type: "output",
+            text: "Local: http://localhost:3000",
+            timestamp: new Date(now.getTime() + 100),
+          },
+          {
+            id: `term-${Date.now() + 2}`,
+            type: "output",
+            text: "Compiling...",
+            timestamp: new Date(now.getTime() + 200),
+          },
+          {
+            id: `term-${Date.now() + 3}`,
+            type: "success",
+            text: "Compiled successfully! You can now view e-commerce in the browser.",
+            timestamp: new Date(now.getTime() + 500),
+          }
+        );
+      } else if (cmd === "ls") {
+        outputLines.push(
+          {
+            id: `term-${Date.now() + 1}`,
+            type: "output",
+            text: "src/  package.json  README.md  node_modules/",
+            timestamp: new Date(now.getTime() + 100),
+          }
+        );
+      } else if (cmd === "clear") {
+        outputLines = [];
+      } else if (cmd === "e-commerce") {
+        outputLines.push(
+          {
+            id: `term-${Date.now() + 1}`,
+            type: "output",
+            text: "E-Commerce-Full-Stack 1v3.981",
+            timestamp: new Date(now.getTime() + 100),
+          }
+        );
+      } else {
+        outputLines.push(
+          {
+            id: `term-${Date.now() + 1}`,
+            type: "error",
+            text: `Comando não reconhecido: ${command}`,
+            timestamp: new Date(now.getTime() + 100),
+          }
+        );
+      }
+
+      return {
+        ...state,
+        terminal: {
+          ...state.terminal,
+          lines: [...state.terminal.lines, ...outputLines],
+          currentInput: "",
+          commandHistory: [...state.terminal.commandHistory, command],
+          historyIndex: -1,
+        },
+        labTimeSpent: state.labTimeSpent + 5,
+        lastSync: now,
+      };
+    }
+
+    case "TERMINAL_ADD_LINE": {
+      const { line } = action.payload;
+      return {
+        ...state,
+        terminal: { ...state.terminal, lines: [...state.terminal.lines, line] },
+      };
+    }
+
+    case "TICK_LAB_TIMER": {
+      return {
+        ...state,
+        labTimeSpent: state.labTimeSpent + (action.payload.seconds ?? 0),
         lastSync: new Date(),
       };
     }

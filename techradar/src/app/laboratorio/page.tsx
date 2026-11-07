@@ -1,26 +1,10 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { StudyProvider } from "@/lib/study/context";
+import LaboratorioPage from "@/components/study/laboratorio/page";
 
-export default async function LaboratorioPage() {
-  const session = await auth();
-
-  if (!session?.user) {
-    redirect("/entrar");
-  }
-
+export default function LaboratorioRoutePage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-        Laboratório
-      </h1>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Pratique código e experimente novas tecnologias.
-      </p>
-      <div className="mt-8">
-        <p className="text-gray-500 dark:text-gray-400">
-          Acesse o Treino de Código para praticar exercícios práticos.
-        </p>
-      </div>
-    </div>
+    <StudyProvider>
+      <LaboratorioPage />
+    </StudyProvider>
   );
 }

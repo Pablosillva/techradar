@@ -2,7 +2,19 @@
 
 import { createContext, useContext, useEffect, useRef, useReducer, useCallback, type ReactNode } from "react";
 import { studyReducer, initialState, type StudyState } from "./reducer";
-import type { ModuleCategory, Module, Lesson, RoadmapNode, NotebookFolder, NotebookNote } from "@/lib/study/types";
+import type {
+  ModuleCategory,
+  Module,
+  Lesson,
+  RoadmapNode,
+  NotebookFolder,
+  NotebookNote,
+  LabFile,
+  LabProject,
+  TerminalLine,
+  TerminalState,
+  OpenTab,
+} from "@/lib/study/types";
 
 function moduleProgress(module: Module): number {
   if (module.lessons.length === 0) return 0;
@@ -83,6 +95,20 @@ interface StudyContextValue extends StudyState {
   getNotesByFolder: (folderId: string | null) => NotebookNote[];
   getFolderById: (folderId: string) => NotebookFolder | undefined;
   getFoldersByParent: (parentId: string | null) => NotebookFolder[];
+  // Lab actions
+  setActiveProject: (projectId: string) => void;
+  updateLabFile: (fileId: string, content: string) => void;
+  setActiveFile: (fileId: string | null) => void;
+  addOpenTab: (tab: OpenTab) => void;
+  removeOpenTab: (fileId: string) => void;
+  setActiveTab: (fileId: string) => void;
+  terminalInput: (text: string) => void;
+  terminalExecute: (command: string) => void;
+  terminalAddLine: (line: TerminalLine) => void;
+  tickLabTimer: (seconds: number) => void;
+  getActiveProject: () => LabProject | undefined;
+  getActiveFile: () => LabFile | undefined;
+  getOpenTabs: () => OpenTab[];
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -94,6 +120,7 @@ interface StudyProviderProps {
 export function StudyProvider({ children }: StudyProviderProps) {
   const [state, dispatch] = useReducer(studyReducer, initialState);
   const timerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const labTimerInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!state.activeTimer) {
@@ -111,6 +138,17 @@ export function StudyProvider({ children }: StudyProviderProps) {
       timerInterval.current = null;
     };
   }, [state.activeTimer]);
+
+  // Lab timer - conta tempo gasto no laboratório
+  useEffect(() => {
+    labTimerInterval.current = setInterval(() => {
+      dispatch({ type: "TICK_LAB_TIMER", payload: { seconds: 1 } });
+    }, 1000);
+    return () => {
+      if (labTimerInterval.current) clearInterval(labTimerInterval.current);
+      labTimerInterval.current = null;
+    };
+  }, []);
 
   const completeLesson = useCallback((moduleId: string, lessonId: string) => {
     dispatch({ type: "COMPLETE_LESSON", payload: { moduleId, lessonId } });
@@ -192,6 +230,61 @@ export function StudyProvider({ children }: StudyProviderProps) {
     return state.notebookFolders.filter((f) => f.parentId === parentId).sort((a, b) => a.order - b.order);
   }, [state.notebookFolders]);
 
+  // Lab actions
+  const setActiveProject = useCallback((projectId: string) => {
+    dispatch({ type: "SET_ACTIVE_PROJECT", payload: { projectId } });
+  }, []);
+
+  const updateLabFile = useCallback((fileId: string, content: string) => {
+    dispatch({ type: "UPDATE_LAB_FILE", payload: { fileId, content } });
+  }, []);
+
+  const setActiveFile = useCallback((fileId: string | null) => {
+    dispatch({ type: "SET_ACTIVE_FILE", payload: { fileId } });
+  }, []);
+
+  const addOpenTab = useCallback((tab: OpenTab) => {
+    dispatch({ type: "ADD_OPEN_TAB", payload: { tab } });
+  }, []);
+
+  const removeOpenTab = useCallback((fileId: string) => {
+    dispatch({ type: "REMOVE_OPEN_TAB", payload: { fileId } });
+  }, []);
+
+  const setActiveTab = useCallback((fileId: string) => {
+    dispatch({ type: "SET_ACTIVE_TAB", payload: { fileId } });
+  }, []);
+
+  const terminalInput = useCallback((text: string) => {
+    dispatch({ type: "TERMINAL_INPUT", payload: { text } });
+  }, []);
+
+  const terminalExecute = useCallback((command: string) => {
+    dispatch({ type: "TERMINAL_EXECUTE", payload: { command } });
+  }, []);
+
+  const terminalAddLine = useCallback((line: TerminalLine) => {
+    dispatch({ type: "TERMINAL_ADD_LINE", payload: { line } });
+  }, []);
+
+  const tickLabTimer = useCallback((seconds: number) => {
+    dispatch({ type: "TICK_LAB_TIMER", payload: { seconds } });
+  }, []);
+
+  const getActiveProject = useCallback(() => {
+    return state.labProjects.find((p) => p.id === state.activeProjectId);
+  }, [state.labProjects, state.activeProjectId]);
+
+  const getActiveFile = useCallback(() => {
+    const project = getActiveProject();
+    if (!project) return undefined;
+    return project.files.find((f) => f.id === state.activeFileId);
+  }, [state.activeFileId, getActiveProject]);
+
+  const getOpenTabs = useCallback(() => {
+    return state.openTabs;
+  }, [state.openTabs]);
+
   const metrics = computeMetrics(state);
 
   const modulesByCategory = (category: ModuleCategory) => state.modules.filter((m) => m.category === category);
@@ -244,6 +337,19 @@ export function StudyProvider({ children }: StudyProviderProps) {
     getNotesByFolder,
     getFolderById,
     getFoldersByParent,
+    setActiveProject,
+    updateLabFile,
+    setActiveFile,
+    addOpenTab,
+    removeOpenTab,
+    setActiveTab,
+    terminalInput,
+    terminalExecute,
+    terminalAddLine,
+    tickLabTimer,
+    getActiveProject,
+    getActiveFile,
+    getOpenTabs,
   };
 
   return <StudyContext.Provider value={contextValue}>{children}</StudyContext.Provider>;

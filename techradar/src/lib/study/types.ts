@@ -127,6 +127,53 @@ export interface NotebookNote {
   createdAt: Date;
 }
 
+/** Projeto do Laboratório. */
+export interface LabFile {
+  id: string;
+  name: string;
+  path: string;
+  content: string;
+  language: "javascript" | "jsx" | "ts" | "tsx" | "css" | "json" | "html";
+  isOpen: boolean;
+  isActive: boolean;
+}
+
+export interface LabProject {
+  id: string;
+  title: string;
+  description: string;
+  category: ModuleCategory;
+  status: "not-started" | "in-progress" | "completed";
+  progress: number; // 0-100
+  files: LabFile[];
+  relatedNodeId?: string;
+  relatedModuleId?: string;
+}
+
+/** Linha do terminal simulado. */
+export interface TerminalLine {
+  id: string;
+  type: "input" | "output" | "error" | "success";
+  text: string;
+  timestamp: Date;
+}
+
+/** Estado do terminal. */
+export interface TerminalState {
+  lines: TerminalLine[];
+  currentInput: string;
+  historyIndex: number;
+  commandHistory: string[];
+}
+
+/** Aba aberta no editor. */
+export interface OpenTab {
+  fileId: string;
+  fileName: string;
+  language: LabFile["language"];
+  isActive: boolean;
+}
+
 /** Métricas agregadas de evolução. */
 export interface StudyState {
   roadmapNodes: RoadmapNode[];
@@ -141,4 +188,12 @@ export interface StudyState {
   // Caderno / Notas
   notebooks: NotebookNote[];
   notebookFolders: NotebookFolder[];
+
+  // Laboratório
+  labProjects: LabProject[];
+  activeProjectId: string | null;
+  openTabs: OpenTab[];
+  activeFileId: string | null;
+  terminal: TerminalState;
+  labTimeSpent: number; // segundos no laboratório
 }
