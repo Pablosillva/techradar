@@ -16,7 +16,8 @@ import type {
   OpenTab,
   ExerciseChallenge,
   ExerciseTestResult,
-  ExerciseMetrics,
+  ReviewCard,
+  ReviewSessionResult,
 } from "@/lib/study/types";
 
 function moduleProgress(module: Module): number {
@@ -92,6 +93,18 @@ interface StudyContextValue extends StudyState {
   getChallengesByDifficulty: (difficulty: string) => ExerciseChallenge[];
   getChallengesByStatus: (status: string) => ExerciseChallenge[];
   getExerciseMetrics: () => StudyState["exerciseMetrics"];
+  // Review / SRS actions
+  startReview: (reviewId: string) => void;
+  completeReview: (reviewId: string, isCorrect: boolean, difficulty: "facil" | "medio" | "dificil", timeSpentSeconds: number) => void;
+  generateReviewFromLesson: (lessonId: string, moduleId: string, title: string, question: string, answer: string) => void;
+  generateReviewFromExercise: (exerciseId: string, moduleId: string, title: string, question: string, answer: string) => void;
+  archiveReview: (reviewId: string) => void;
+  updateReviewTime: (reviewId: string, seconds: number) => void;
+  getActiveReview: () => ReviewCard | undefined;
+  getReviewsByStatus: (status: string) => ReviewCard[];
+  getReviewsByDifficulty: (difficulty: string) => ReviewCard[];
+  getReviewsByModule: (moduleId: string) => ReviewCard[];
+  getReviewMetrics: () => StudyState["reviewMetrics"];
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -309,6 +322,51 @@ export function StudyProvider({ children }: StudyProviderProps) {
     return state.exerciseMetrics;
   }, [state.exerciseMetrics]);
 
+  // Review / SRS actions
+  const startReview = useCallback((reviewId: string) => {
+    dispatch({ type: "START_REVIEW", payload: { reviewId } });
+  }, []);
+
+  const completeReview = useCallback((reviewId: string, isCorrect: boolean, difficulty: "facil" | "medio" | "dificil", timeSpentSeconds: number) => {
+    dispatch({ type: "COMPLETE_REVIEW", payload: { reviewId, isCorrect, difficulty, timeSpentSeconds } });
+  }, []);
+
+  const generateReviewFromLesson = useCallback((lessonId: string, moduleId: string, title: string, question: string, answer: string) => {
+    dispatch({ type: "GENERATE_REVIEW_FROM_LESSON", payload: { lessonId, moduleId, title, question, answer } });
+  }, []);
+
+  const generateReviewFromExercise = useCallback((exerciseId: string, moduleId: string, title: string, question: string, answer: string) => {
+    dispatch({ type: "GENERATE_REVIEW_FROM_EXERCISE", payload: { exerciseId, moduleId, title, question, answer } });
+  }, []);
+
+  const archiveReview = useCallback((reviewId: string) => {
+    dispatch({ type: "ARCHIVE_REVIEW", payload: { reviewId } });
+  }, []);
+
+  const updateReviewTime = useCallback((reviewId: string, seconds: number) => {
+    dispatch({ type: "UPDATE_REVIEW_TIME", payload: { reviewId, seconds } });
+  }, []);
+
+  const getActiveReview = useCallback(() => {
+    return state.reviewCards.find((r) => r.id === state.reviewCards[0]?.id);
+  }, [state.reviewCards]);
+
+  const getReviewsByStatus = useCallback((status: string) => {
+    return state.reviewCards.filter((r) => r.status === status);
+  }, [state.reviewCards]);
+
+  const getReviewsByDifficulty = useCallback((difficulty: string) => {
+    return state.reviewCards.filter((r) => r.difficulty === difficulty);
+  }, [state.reviewCards]);
+
+  const getReviewsByModule = useCallback((moduleId: string) => {
+    return state.reviewCards.filter((r) => r.moduleId === moduleId);
+  }, [state.reviewCards]);
+
+  const getReviewMetrics = useCallback(() => {
+    return state.reviewMetrics;
+  }, [state.reviewMetrics]);
+
   const modulesByCategory = (category: ModuleCategory) => state.modules.filter((m) => m.category === category);
   const moduleById = (id: string) => state.modules.find((m) => m.id === id);
   const nodeById = (id: string) => state.roadmapNodes.find((n) => n.id === id);
@@ -328,7 +386,7 @@ export function StudyProvider({ children }: StudyProviderProps) {
     if (mods.length === 0) return 0;
     return Math.round(mods.reduce((acc, m) => acc + moduleProgress(m), 0) / mods.length);
   };
-  const pendingReviewsCount = state.reviewsPending.length;
+  const pendingReviewsCount = state.reviewCards.filter((r) => r.status === "para-ler").length;
 
   const contextValue: StudyContextValue = {
     ...state,
@@ -381,6 +439,17 @@ export function StudyProvider({ children }: StudyProviderProps) {
     getChallengesByDifficulty,
     getChallengesByStatus,
     getExerciseMetrics,
+    startReview,
+    completeReview,
+    generateReviewFromLesson,
+    generateReviewFromExercise,
+    archiveReview,
+    updateReviewTime,
+    getActiveReview,
+    getReviewsByStatus,
+    getReviewsByDifficulty,
+    getReviewsByModule,
+    getReviewMetrics,
   };
 
   return <StudyContext.Provider value={contextValue}>{children}</StudyContext.Provider>;

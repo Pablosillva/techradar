@@ -7,7 +7,6 @@ import type {
   Module,
   Lesson,
   Exercise,
-  ReviewFlashcard,
   ModuleCategory,
   RoadmapStatus,
   ActiveTimer,
@@ -21,6 +20,9 @@ import type {
   ExerciseChallenge,
   ExerciseTestResult,
   ExerciseMetrics,
+  ReviewCard,
+  ReviewSessionResult,
+  ReviewMetrics,
 } from "@/lib/study/types";
 
 /* ============================================================
@@ -472,6 +474,154 @@ const initialExerciseChallenges: ExerciseChallenge[] = [
 ];
 
 /* ============================================================
+   DADOS MOCKADOS DE REVISÕES/SRS
+   ============================================================ */
+
+const initialReviewCards: ReviewCard[] = [
+  {
+    id: "review-1",
+    title: "Revisar Fundamentos Web",
+    moduleId: "mod-react",
+    question: "O que é o React e qual é o seu propósito principal?",
+    answer: "React é uma biblioteca JavaScript para construir interfaces de usuário, focada em componentes reutilizáveis e renderização eficiente.",
+    difficulty: "facil",
+    status: "para-ler",
+    nextReviewDate: new Date(Date.now() + 86400000), // amanhã
+    interval: 1,
+    repetitions: 0,
+    easeFactor: 2.5,
+    lastReviewedAt: null,
+    timesReviewed: 0,
+    source: "lesson",
+    sourceId: "less-react-1",
+  },
+  {
+    id: "review-2",
+    title: "Revisar Hooks do React",
+    moduleId: "mod-react",
+    question: "Qual a diferença entre useState e useEffect?",
+    answer: "useState gerencia estado local do componente, useEffect gerencia efeitos colaterais (buscar dados, inscrições, manipulação manual do DOM).",
+    difficulty: "medio",
+    status: "para-ler",
+    nextReviewDate: new Date(Date.now() - 43200000), // 12 horas atrás (vencido)
+    interval: 1,
+    repetitions: 1,
+    easeFactor: 2.3,
+    lastReviewedAt: new Date(Date.now() - 172800000),
+    timesReviewed: 1,
+    source: "lesson",
+    sourceId: "less-react-2",
+  },
+  {
+    id: "review-3",
+    title: "Revisar Context API",
+    moduleId: "mod-react",
+    question: "Quando usar Context API em vez de props?",
+    answer: "Use Context API quando precisar passar dados para muitos níveis de componentes (prop drilling) ou estado global simples.",
+    difficulty: "dificil",
+    status: "para-ler",
+    nextReviewDate: new Date(Date.now() - 172800000), // 2 dias atrás (vencido)
+    interval: 2,
+    repetitions: 2,
+    easeFactor: 2.1,
+    lastReviewedAt: new Date(Date.now() - 345600000),
+    timesReviewed: 2,
+    source: "lesson",
+    sourceId: "less-react-3",
+  },
+  {
+    id: "review-4",
+    title: "Revisar AWS EC2 e S3",
+    moduleId: "mod-aws",
+    question: "Qual a diferença entre EC2 e S3?",
+    answer: "EC2 é servidores virtuais (compute), S3 é armazenamento de objetos (storage).",
+    difficulty: "medio",
+    status: "arquivado",
+    nextReviewDate: new Date(Date.now() + 604800000), // 7 dias
+    interval: 7,
+    repetitions: 5,
+    easeFactor: 3.0,
+    lastReviewedAt: new Date(Date.now() - 604800000),
+    timesReviewed: 5,
+    source: "lesson",
+    sourceId: "less-aws-1",
+  },
+  {
+    id: "review-5",
+    title: "Revisar Erro: Arrow Functions",
+    moduleId: "mod-react",
+    question: "Por que usar arrow functions em callbacks de React?",
+    answer: "Arrow functions preservam o contexto 'this' do escopo léxico, evitando problemas com métodos de classe.",
+    difficulty: "dificil",
+    status: "para-ler",
+    nextReviewDate: new Date(Date.now() - 86400000), // ontem (vencido)
+    interval: 1,
+    repetitions: 1,
+    easeFactor: 1.8,
+    lastReviewedAt: new Date(Date.now() - 172800000),
+    timesReviewed: 1,
+    source: "exercise",
+    sourceId: "ex-2",
+  },
+];
+
+const initialReviewSessions: ReviewSessionResult[] = [];
+
+const initialReviewMetrics: ReviewMetrics = {
+  totalReviews: initialReviewCards.length,
+  pendingReviews: initialReviewCards.filter((r) => r.status === "para-ler").length,
+  completedReviews: initialReviewCards.filter((r) => r.status === "concluido").length,
+  accuracyRate: 75,
+  averageResponseTime: 45,
+  reviewsByModule: {
+    "web-development": 3,
+    "cloud-computing": 1,
+    "mobile-dev": 0,
+    "devops": 1,
+    "data-science": 0,
+  },
+  reviewsByDifficulty: {
+    facil: 1,
+    medio: 2,
+    dificil: 2,
+  },
+};
+
+const initialState: StudyState = {
+  roadmapNodes: initialRoadmapNodes,
+  modules: initialModules,
+  lessonsCompleted: ["less-react-1"],
+  exercisesDone: {},
+  timeSpent: initialTimeSpent,
+  activeTimer: null,
+  lastSync: new Date(),
+  notebooks: initialNotebooks,
+  notebookFolders: initialNotebookFolders,
+  labProjects: initialLabProjects,
+  activeProjectId: "lab-1",
+  openTabs: initialOpenTabs,
+  activeFileId: "file-1",
+  terminal: initialTerminalState,
+  labTimeSpent: 0,
+  exerciseChallenges: initialExerciseChallenges,
+  activeExerciseId: null,
+  exerciseTestResults: {},
+  exerciseTimeSpent: {},
+  exerciseMetrics: {
+    totalExercises: initialExerciseChallenges.length,
+    completedExercises: 0,
+    exercisesByDifficulty: { facil: 0, medio: 0, dificil: 0 },
+    exercisesByCategory: {},
+    totalTimeSpent: 0,
+    averageScore: 0,
+  },
+  reviewCards: initialReviewCards,
+  reviewSessions: initialReviewSessions,
+  reviewMetrics: initialReviewMetrics,
+  reviewTimeSpent: 0,
+};
+
+/* ============================================================
    ACTIONS
    ============================================================ */
 
@@ -509,7 +659,14 @@ type StudyAction =
   | { type: "COMPLETE_CHALLENGE"; payload: { exerciseId: string; score: number; testResults: ExerciseTestResult[] } }
   | { type: "FAIL_CHALLENGE"; payload: { exerciseId: string; testResults: ExerciseTestResult[] } }
   | { type: "UPDATE_EXERCISE_CODE"; payload: { exerciseId: string; code: string } }
-  | { type: "ADD_EXERCISE_TIME"; payload: { exerciseId: string; seconds: number } };
+  | { type: "ADD_EXERCISE_TIME"; payload: { exerciseId: string; seconds: number } }
+  // Review / SRS actions
+  | { type: "START_REVIEW"; payload: { reviewId: string } }
+  | { type: "COMPLETE_REVIEW"; payload: { reviewId: string; isCorrect: boolean; difficulty: "facil" | "medio" | "dificil"; timeSpentSeconds: number } }
+  | { type: "GENERATE_REVIEW_FROM_LESSON"; payload: { lessonId: string; moduleId: string; title: string; question: string; answer: string } }
+  | { type: "GENERATE_REVIEW_FROM_EXERCISE"; payload: { exerciseId: string; moduleId: string; title: string; question: string; answer: string } }
+  | { type: "ARCHIVE_REVIEW"; payload: { reviewId: string } }
+  | { type: "UPDATE_REVIEW_TIME"; payload: { reviewId: string; seconds: number } };
 
 /* ============================================================
    HELPERS PUROS
@@ -556,7 +713,6 @@ function computeMetrics(state: StudyState) {
     timeSpentByCategory[module.category] += state.timeSpent[module.id] ?? 0;
   }
 
-  // Exercise metrics
   const totalExercises = state.exerciseChallenges.length;
   const completedExercises = state.exerciseChallenges.filter((e) => e.status === "completed").length;
   const exercisesByDifficulty: Record<string, number> = { facil: 0, medio: 0, dificil: 0 };
@@ -583,6 +739,46 @@ function computeMetrics(state: StudyState) {
     averageScore,
   };
 
+  // Review metrics
+  const totalReviews = state.reviewCards.length;
+  const pendingReviews = state.reviewCards.filter((r) => r.status === "para-ler").length;
+  const completedReviews = state.reviewCards.filter((r) => r.status === "concluido").length;
+  const allSessionScores = state.reviewSessions.map((s) => (s.isCorrect ? 1 : 0));
+  const accuracyRate =
+    allSessionScores.length === 0
+      ? 0
+      : Math.round(
+          (allSessionScores.reduce((a: number, b: number) => a + b, 0) /
+            allSessionScores.length) *
+            100
+        );
+  const allResponseTimes = state.reviewSessions.map((s) => s.timeSpentSeconds);
+  const averageResponseTime =
+    allResponseTimes.length === 0
+      ? 0
+      : Math.round(
+          (allResponseTimes.reduce((a: number, b: number) => a + b, 0) /
+            allResponseTimes.length) *
+            100
+        );
+
+  const reviewsByModule: Record<string, number> = {};
+  const reviewsByDifficulty: Record<string, number> = { facil: 0, medio: 0, dificil: 0 };
+  for (const rc of state.reviewCards) {
+    reviewsByModule[rc.moduleId] = (reviewsByModule[rc.moduleId] ?? 0) + 1;
+    reviewsByDifficulty[rc.difficulty] = (reviewsByDifficulty[rc.difficulty] ?? 0) + 1;
+  }
+
+  const reviewMetrics: ReviewMetrics = {
+    totalReviews,
+    pendingReviews,
+    completedReviews,
+    accuracyRate,
+    averageResponseTime,
+    reviewsByModule,
+    reviewsByDifficulty,
+  };
+
   return {
     totalStudyMinutes,
     exerciseAccuracy,
@@ -590,6 +786,7 @@ function computeMetrics(state: StudyState) {
     totalLessons,
     timeSpentByCategory,
     exerciseMetrics,
+    reviewMetrics,
   };
 }
 
@@ -693,30 +890,36 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
 
     case "MARK_REVIEW_DONE": {
       const { reviewId } = action.payload;
-      return { ...state, reviewsPending: state.reviewsPending.filter((r) => r.id !== reviewId), lastSync: new Date() };
+      return { ...state, reviewCards: state.reviewCards.map((r) => (r.id === reviewId ? { ...r, status: "concluido" } : r)), lastSync: new Date() };
     }
 
     case "GENERATE_REVIEWS": {
-      const reviewedLessonIds = new Set(state.reviewsPending.filter((r) => r.source === "lesson").map((r) => r.sourceId));
+      const reviewedLessonIds = new Set(state.reviewCards.filter((r) => r.source === "lesson").map((r) => r.sourceId));
       const allLessons = state.modules.flatMap((m) => m.lessons);
-      const newReviews: ReviewFlashcard[] = [];
+      const newReviews: ReviewCard[] = [];
       for (const lessonId of state.lessonsCompleted) {
         if (reviewedLessonIds.has(lessonId)) continue;
         const lesson = allLessons.find((l) => l.id === lessonId);
         if (!lesson) continue;
         newReviews.push({
           id: `review-lesson-${lessonId}`,
-          source: "lesson",
-          sourceId: lessonId,
+          title: lesson.title,
+          moduleId: lesson.moduleId,
           question: `Revisão: ${lesson.title}`,
           answer: lesson.textContent ?? "Revise os principais conceitos da aula.",
-          dueDate: new Date(Date.now() + 86400000),
+          difficulty: "medio",
+          status: "para-ler",
+          nextReviewDate: new Date(Date.now() + 86400000),
           interval: 1,
-          repetitions: 1,
+          repetitions: 0,
           easeFactor: 2.5,
+          lastReviewedAt: null,
+          timesReviewed: 0,
+          source: "lesson",
+          sourceId: lessonId,
         });
       }
-      return { ...state, reviewsPending: [...newReviews, ...state.reviewsPending], lastSync: new Date() };
+      return { ...state, reviewCards: [...newReviews, ...state.reviewCards], lastSync: new Date() };
     }
 
     case "SET_NODE_STATUS": {
@@ -1035,7 +1238,7 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
         activeExerciseId: exerciseId,
         exerciseChallenges: state.exerciseChallenges.map((ex) =>
           ex.id === exerciseId
-            ? { ...ex, status: "in-progress", progress: ex.progress > 0 ? ex.progress : 5 }
+            ? { ...ex, status: "in-progress" as const, progress: ex.progress > 0 ? ex.progress : 5 }
             : ex
         ),
         lastSync: new Date(),
@@ -1078,24 +1281,30 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
 
       const newExercisesDone = { ...state.exercisesDone, [exerciseId]: { score, completedAt: now } };
 
-      let newReviews = state.reviewsPending;
+      let newReviews = state.reviewCards;
       if (challenge && score < 100) {
-        const alreadyExists = state.reviewsPending.some(
+        const alreadyExists = state.reviewCards.some(
           (r) => r.source === "exercise" && r.sourceId === exerciseId
         );
         if (!alreadyExists) {
           newReviews = [
-            ...state.reviewsPending,
+            ...state.reviewCards,
             {
               id: `review-ex-${exerciseId}`,
+              title: challenge.title,
+              moduleId: challenge.relatedModuleId!,
               source: "exercise",
               sourceId: exerciseId,
               question: `Revisão: ${challenge.title}`,
               answer: `Revise os conceitos do desafio: ${challenge.description}. Foque nos pontos que errou nos testes.`,
-              dueDate: new Date(Date.now() + 86400000),
+              nextReviewDate: new Date(Date.now() + 86400000),
               interval: 1,
               repetitions: 1,
               easeFactor: 2.0,
+              difficulty: challenge.difficulty,
+              status: "para-ler",
+              lastReviewedAt: null,
+              timesReviewed: 0,
             },
           ];
         }
@@ -1136,7 +1345,7 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
           [exerciseId]: testResults,
         },
         roadmapNodes: newNodes,
-        reviewsPending: newReviews,
+        reviewCards: newReviews,
         exerciseMetrics,
         lastSync: now,
       };
@@ -1148,7 +1357,7 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
         ...state,
         exerciseChallenges: state.exerciseChallenges.map((ex) =>
           ex.id === exerciseId
-            ? { ...ex, attempts: ex.attempts + 1, status: "in-progress" }
+            ? { ...ex, attempts: ex.attempts + 1, status: "in-progress" as const }
             : ex
         ),
         exerciseTestResults: {
@@ -1182,40 +1391,162 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
       };
     }
 
+    // ===== REVIEW / SRS ACTIONS =====
+    case "START_REVIEW": {
+      const { reviewId } = action.payload;
+      return {
+        ...state,
+        reviewCards: state.reviewCards.map((r) =>
+          r.id === reviewId ? { ...r, lastReviewedAt: new Date(), timesReviewed: r.timesReviewed + 1 } : r
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "COMPLETE_REVIEW": {
+      const { reviewId, isCorrect, difficulty, timeSpentSeconds } = action.payload;
+      const now = new Date();
+
+      const updatedCards = state.reviewCards.map((r) => {
+        if (r.id !== reviewId) return r;
+
+        // SM-2 algoritmo simplificado
+        let { interval, repetitions, easeFactor } = r;
+
+        if (isCorrect) {
+          if (repetitions === 0) interval = 1;
+          else if (repetitions === 1) interval = 6;
+          else interval = Math.round(interval * easeFactor);
+          repetitions += 1;
+          easeFactor = easeFactor + 0.1;
+        } else {
+          interval = 1;
+          repetitions = 0;
+          easeFactor = Math.max(1.3, easeFactor - 0.2);
+        }
+
+        const nextReviewDate = new Date(Date.now() + interval * 86400000);
+        const status: ReviewCard["status"] = "concluido";
+
+        return {
+          ...r,
+          status,
+          interval,
+          repetitions,
+          easeFactor,
+          lastReviewedAt: now,
+          nextReviewDate,
+          difficulty: difficulty as ReviewCard["difficulty"],
+        };
+      });
+
+      const newSessions = [
+        ...state.reviewSessions,
+        {
+          reviewId,
+          isCorrect,
+          difficulty: difficulty as ReviewCard["difficulty"],
+          timeSpentSeconds,
+          reviewedAt: now,
+        },
+      ];
+
+      return {
+        ...state,
+        reviewCards: updatedCards,
+        reviewSessions: newSessions,
+        reviewTimeSpent: state.reviewTimeSpent + timeSpentSeconds,
+        lastSync: now,
+      };
+    }
+
+    case "GENERATE_REVIEW_FROM_LESSON": {
+      const { lessonId, moduleId, title, question, answer } = action.payload;
+      const alreadyExists = state.reviewCards.some(
+        (r) => r.source === "lesson" && r.sourceId === lessonId
+      );
+      if (alreadyExists) return state;
+
+      const newCard: ReviewCard = {
+        id: `review-lesson-${lessonId}-${Date.now()}`,
+        title,
+        moduleId,
+        question,
+        answer,
+        difficulty: "medio",
+        status: "para-ler",
+        nextReviewDate: new Date(Date.now() + 86400000),
+        interval: 1,
+        repetitions: 0,
+        easeFactor: 2.5,
+        lastReviewedAt: null,
+        timesReviewed: 0,
+        source: "lesson",
+        sourceId: lessonId,
+      };
+
+      return {
+        ...state,
+        reviewCards: [...state.reviewCards, newCard],
+        lastSync: new Date(),
+      };
+    }
+
+    case "GENERATE_REVIEW_FROM_EXERCISE": {
+      const { exerciseId, moduleId, title, question, answer } = action.payload;
+      const alreadyExists = state.reviewCards.some(
+        (r) => r.source === "exercise" && r.sourceId === exerciseId
+      );
+      if (alreadyExists) return state;
+
+      const newCard: ReviewCard = {
+        id: `review-ex-${exerciseId}-${Date.now()}`,
+        title,
+        moduleId,
+        question,
+        answer,
+        difficulty: "dificil",
+        status: "para-ler",
+        nextReviewDate: new Date(Date.now() + 86400000),
+        interval: 1,
+        repetitions: 0,
+        easeFactor: 2.0,
+        lastReviewedAt: null,
+        timesReviewed: 0,
+        source: "exercise",
+        sourceId: exerciseId,
+      };
+
+      return {
+        ...state,
+        reviewCards: [...state.reviewCards, newCard],
+        lastSync: new Date(),
+      };
+    }
+
+    case "ARCHIVE_REVIEW": {
+      const { reviewId } = action.payload;
+      return {
+        ...state,
+        reviewCards: state.reviewCards.map((r) =>
+          r.id === reviewId ? { ...r, status: "arquivado" } : r
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "UPDATE_REVIEW_TIME": {
+      const { reviewId, seconds } = action.payload;
+      return {
+        ...state,
+        reviewTimeSpent: state.reviewTimeSpent + seconds,
+        lastSync: new Date(),
+      };
+    }
+
     default:
       return state;
   }
-};
-
-const initialState: StudyState = {
-  roadmapNodes: initialRoadmapNodes,
-  modules: initialModules,
-  lessonsCompleted: ["less-react-1"],
-  exercisesDone: {},
-  reviewsPending: [],
-  timeSpent: initialTimeSpent,
-  activeTimer: null,
-  lastSync: new Date(),
-  notebooks: initialNotebooks,
-  notebookFolders: initialNotebookFolders,
-  labProjects: initialLabProjects,
-  activeProjectId: "lab-1",
-  openTabs: initialOpenTabs,
-  activeFileId: "file-1",
-  terminal: initialTerminalState,
-  labTimeSpent: 0,
-  exerciseChallenges: initialExerciseChallenges,
-  activeExerciseId: null,
-  exerciseTestResults: {},
-  exerciseTimeSpent: {},
-  exerciseMetrics: {
-    totalExercises: initialExerciseChallenges.length,
-    completedExercises: 0,
-    exercisesByDifficulty: { facil: 0, medio: 0, dificil: 0 },
-    exercisesByCategory: {},
-    totalTimeSpent: 0,
-    averageScore: 0,
-  },
 };
 
 export { studyReducer, initialState };

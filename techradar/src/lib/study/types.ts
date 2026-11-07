@@ -216,13 +216,51 @@ export interface ExerciseMetrics {
   averageScore: number;
 }
 
+/** Card de revisão do SRS (Spaced Repetition System). */
+export interface ReviewCard {
+  id: string;
+  title: string;
+  moduleId: string;
+  question: string;
+  answer: string;
+  difficulty: "facil" | "medio" | "dificil";
+  status: "para-ler" | "concluido" | "arquivado";
+  nextReviewDate: Date;
+  interval: number; // dias até próxima revisão
+  repetitions: number;
+  easeFactor: number; // fator de facilidade (SM-2)
+  lastReviewedAt: Date | null;
+  timesReviewed: number;
+  source: "lesson" | "exercise";
+  sourceId: string;
+}
+
+/** Resultado de uma sessão de revisão. */
+export interface ReviewSessionResult {
+  reviewId: string;
+  isCorrect: boolean;
+  difficulty: "facil" | "medio" | "dificil";
+  timeSpentSeconds: number;
+  reviewedAt: Date;
+}
+
+/** Métricas de revisão/SRS. */
+export interface ReviewMetrics {
+  totalReviews: number;
+  pendingReviews: number;
+  completedReviews: number;
+  accuracyRate: number; // 0-100
+  averageResponseTime: number; // segundos
+  reviewsByModule: Record<string, number>;
+  reviewsByDifficulty: Record<string, number>;
+}
+
 /** Métricas agregadas de evolução. */
 export interface StudyState {
   roadmapNodes: RoadmapNode[];
   modules: Module[];
   lessonsCompleted: string[]; // ids de lições concluídas
   exercisesDone: Record<string, { score: number; completedAt: Date }>;
-  reviewsPending: ReviewFlashcard[];
   timeSpent: Record<string, number>; // moduleId -> segundos
   activeTimer: ActiveTimer | null;
   lastSync: Date;
@@ -245,4 +283,10 @@ export interface StudyState {
   exerciseTestResults: Record<string, ExerciseTestResult[]>;
   exerciseTimeSpent: Record<string, number>; // exerciseId -> segundos
   exerciseMetrics: ExerciseMetrics;
+
+  // Revisões / SRS
+  reviewCards: ReviewCard[];
+  reviewSessions: ReviewSessionResult[];
+  reviewMetrics: ReviewMetrics;
+  reviewTimeSpent: number; // segundos no total de revisões
 }
