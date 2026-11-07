@@ -14,6 +14,9 @@ import type {
   TerminalLine,
   TerminalState,
   OpenTab,
+  ExerciseChallenge,
+  ExerciseTestResult,
+  ExerciseMetrics,
 } from "@/lib/study/types";
 
 function moduleProgress(module: Module): number {
@@ -36,38 +39,7 @@ function isNodeUnlocked(state: StudyState, node: RoadmapNode): boolean {
   return node.unlockedBy.every((id) => state.roadmapNodes.find((n) => n.id === id)?.status === "completo");
 }
 
-function computeMetrics(state: StudyState) {
-  const totalLessons = state.modules.reduce((acc, m) => acc + m.lessons.length, 0);
-  const completedLessons = state.lessonsCompleted.length;
-
-  const allScores = Object.values(state.exercisesDone).map((e) => e.score);
-  const exerciseAccuracy =
-    allScores.length === 0 ? 0 : Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length);
-
-  const totalStudyMinutes = Math.round(Object.values(state.timeSpent).reduce((a, b) => a + b, 0) / 60);
-
-  const timeSpentByCategory: Record<ModuleCategory, number> = {
-    "web-development": 0,
-    "mobile-dev": 0,
-    devops: 0,
-    "cloud-computing": 0,
-    "data-science": 0,
-  };
-  for (const module of state.modules) {
-    timeSpentByCategory[module.category] += state.timeSpent[module.id] ?? 0;
-  }
-
-  return {
-    totalStudyMinutes,
-    exerciseAccuracy,
-    lessonsCompleted: completedLessons,
-    totalLessons,
-    timeSpentByCategory,
-  };
-}
-
 interface StudyContextValue extends StudyState {
-  metrics: ReturnType<typeof computeMetrics>;
   modulesByCategory: (category: ModuleCategory) => Module[];
   moduleById: (id: string) => Module | undefined;
   nodeById: (id: string) => RoadmapNode | undefined;
@@ -109,6 +81,17 @@ interface StudyContextValue extends StudyState {
   getActiveProject: () => LabProject | undefined;
   getActiveFile: () => LabFile | undefined;
   getOpenTabs: () => OpenTab[];
+  // Exercise challenge actions
+  startExercise: (exerciseId: string) => void;
+  completeChallenge: (exerciseId: string, score: number, testResults: ExerciseTestResult[]) => void;
+  failChallenge: (exerciseId: string, testResults: ExerciseTestResult[]) => void;
+  updateExerciseCode: (exerciseId: string, code: string) => void;
+  addExerciseTime: (exerciseId: string, seconds: number) => void;
+  getActiveExercise: () => ExerciseChallenge | undefined;
+  getChallengesByCategory: (category: ModuleCategory) => ExerciseChallenge[];
+  getChallengesByDifficulty: (difficulty: string) => ExerciseChallenge[];
+  getChallengesByStatus: (status: string) => ExerciseChallenge[];
+  getExerciseMetrics: () => StudyState["exerciseMetrics"];
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -139,7 +122,7 @@ export function StudyProvider({ children }: StudyProviderProps) {
     };
   }, [state.activeTimer]);
 
-  // Lab timer - conta tempo gasto no laboratório
+  // Lab timer
   useEffect(() => {
     labTimerInterval.current = setInterval(() => {
       dispatch({ type: "TICK_LAB_TIMER", payload: { seconds: 1 } });
@@ -285,7 +268,46 @@ export function StudyProvider({ children }: StudyProviderProps) {
     return state.openTabs;
   }, [state.openTabs]);
 
-  const metrics = computeMetrics(state);
+  // Exercise challenge actions
+  const startExercise = useCallback((exerciseId: string) => {
+    dispatch({ type: "START_EXERCISE", payload: { exerciseId } });
+  }, []);
+
+  const completeChallenge = useCallback((exerciseId: string, score: number, testResults: ExerciseTestResult[]) => {
+    dispatch({ type: "COMPLETE_CHALLENGE", payload: { exerciseId, score, testResults } });
+  }, []);
+
+  const failChallenge = useCallback((exerciseId: string, testResults: ExerciseTestResult[]) => {
+    dispatch({ type: "FAIL_CHALLENGE", payload: { exerciseId, testResults } });
+  }, []);
+
+  const updateExerciseCode = useCallback((exerciseId: string, code: string) => {
+    dispatch({ type: "UPDATE_EXERCISE_CODE", payload: { exerciseId, code } });
+  }, []);
+
+  const addExerciseTime = useCallback((exerciseId: string, seconds: number) => {
+    dispatch({ type: "ADD_EXERCISE_TIME", payload: { exerciseId, seconds } });
+  }, []);
+
+  const getActiveExercise = useCallback(() => {
+    return state.exerciseChallenges.find((e) => e.id === state.activeExerciseId);
+  }, [state.exerciseChallenges, state.activeExerciseId]);
+
+  const getChallengesByCategory = useCallback((category: ModuleCategory) => {
+    return state.exerciseChallenges.filter((e) => e.category === category);
+  }, [state.exerciseChallenges]);
+
+  const getChallengesByDifficulty = useCallback((difficulty: string) => {
+    return state.exerciseChallenges.filter((e) => e.difficulty === difficulty);
+  }, [state.exerciseChallenges]);
+
+  const getChallengesByStatus = useCallback((status: string) => {
+    return state.exerciseChallenges.filter((e) => e.status === status);
+  }, [state.exerciseChallenges]);
+
+  const getExerciseMetrics = useCallback(() => {
+    return state.exerciseMetrics;
+  }, [state.exerciseMetrics]);
 
   const modulesByCategory = (category: ModuleCategory) => state.modules.filter((m) => m.category === category);
   const moduleById = (id: string) => state.modules.find((m) => m.id === id);
@@ -310,7 +332,6 @@ export function StudyProvider({ children }: StudyProviderProps) {
 
   const contextValue: StudyContextValue = {
     ...state,
-    metrics,
     modulesByCategory,
     moduleById,
     nodeById,
@@ -350,6 +371,16 @@ export function StudyProvider({ children }: StudyProviderProps) {
     getActiveProject,
     getActiveFile,
     getOpenTabs,
+    startExercise,
+    completeChallenge,
+    failChallenge,
+    updateExerciseCode,
+    addExerciseTime,
+    getActiveExercise,
+    getChallengesByCategory,
+    getChallengesByDifficulty,
+    getChallengesByStatus,
+    getExerciseMetrics,
   };
 
   return <StudyContext.Provider value={contextValue}>{children}</StudyContext.Provider>;

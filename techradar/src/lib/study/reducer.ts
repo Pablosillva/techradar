@@ -18,6 +18,9 @@ import type {
   TerminalLine,
   TerminalState,
   OpenTab,
+  ExerciseChallenge,
+  ExerciseTestResult,
+  ExerciseMetrics,
 } from "@/lib/study/types";
 
 /* ============================================================
@@ -354,24 +357,119 @@ const initialOpenTabs: OpenTab[] = [
   { fileId: "file-3", fileName: "style.css", language: "css", isActive: false },
 ];
 
-const initialState: StudyState = {
-  roadmapNodes: initialRoadmapNodes,
-  modules: initialModules,
-  lessonsCompleted: ["less-react-1"],
-  exercisesDone: {},
-  reviewsPending: [],
-  timeSpent: initialTimeSpent,
-  activeTimer: null,
-  lastSync: new Date(),
-  notebooks: initialNotebooks,
-  notebookFolders: initialNotebookFolders,
-  labProjects: initialLabProjects,
-  activeProjectId: "lab-1",
-  openTabs: initialOpenTabs,
-  activeFileId: "file-1",
-  terminal: initialTerminalState,
-  labTimeSpent: 0,
-};
+/* ============================================================
+   DADOS MOCKADOS DE EXERCÍCIOS/DESAFIOS
+   ============================================================ */
+
+const initialExerciseChallenges: ExerciseChallenge[] = [
+  {
+    id: "ex-1",
+    title: "Array Mastery",
+    description: "Implement a custom sort function with O(n log n) complexity.",
+    category: "web-development",
+    difficulty: "facil",
+    language: "javascript",
+    type: "algorithm",
+    tags: ["React", "Sorting"],
+    status: "in-progress",
+    progress: 30,
+    relatedModuleId: "mod-react",
+    relatedNodeId: "react-estado",
+    timeSpent: 300,
+    bestScore: 75,
+    attempts: 2,
+    starterCode: `function customSort(arr) {\n  // Escreva sua solução aqui\n  return arr;\n}\n\nexport default customSort;`,
+    testCases: [
+      { input: "[3,1,2]", expectedOutput: "[1,2,3]" },
+      { input: "[5,3,8,1,2]", expectedOutput: "[1,2,3,5,8]" },
+    ],
+  },
+  {
+    id: "ex-2",
+    title: "Counter Component with Hooks",
+    description: "Build a stateful counter component using useState hook.",
+    category: "web-development",
+    difficulty: "medio",
+    language: "javascript",
+    type: "coding",
+    tags: ["React", "Hooks"],
+    status: "not-started",
+    progress: 0,
+    relatedModuleId: "mod-react",
+    relatedNodeId: "react-estado",
+    timeSpent: 0,
+    bestScore: undefined,
+    attempts: 0,
+    starterCode: `import React, { useState } from "react";\n\nexport default function Counter() {\n  // Implemente o contador aqui\n  return null;\n}`,
+    testCases: [
+      { input: "initial value 0", expectedOutput: "0" },
+      { input: "increment once", expectedOutput: "1" },
+    ],
+  },
+  {
+    id: "ex-3",
+    title: "Advanced Querying",
+    description: "Analyze e-commerce data to find top-selling product categories.",
+    category: "devops",
+    difficulty: "facil",
+    language: "sql",
+    type: "database",
+    tags: ["SQL", "Sorting"],
+    status: "not-started",
+    progress: 0,
+    relatedModuleId: "mod-aws",
+    relatedNodeId: "devops-cloud",
+    timeSpent: 0,
+    bestScore: undefined,
+    attempts: 0,
+    starterCode: `SELECT category, COUNT(*) as total\nFROM products\nGROUP BY category\nORDER BY total DESC;`,
+    testCases: [
+      { input: "sample data", expectedOutput: "category totals" },
+    ],
+  },
+  {
+    id: "ex-4",
+    title: "Data Processing Pipeline",
+    description: "Create a pipeline to clean and process raw customer data.",
+    category: "devops",
+    difficulty: "dificil",
+    language: "javascript",
+    type: "system-design",
+    tags: ["Node.js", "API", "Sorting"],
+    status: "not-started",
+    progress: 0,
+    relatedModuleId: "mod-aws",
+    relatedNodeId: "devops-cloud",
+    timeSpent: 0,
+    bestScore: undefined,
+    attempts: 0,
+    starterCode: `function processPipeline(data) {\n  // Implemente o pipeline de processamento\n  return data;\n}\n\nexport default processPipeline;`,
+    testCases: [
+      { input: "raw data", expectedOutput: "cleaned data" },
+    ],
+  },
+  {
+    id: "ex-5",
+    title: "SQL Joins Challenge",
+    description: "Write queries joining multiple tables with conditions.",
+    category: "devops",
+    difficulty: "medio",
+    language: "sql",
+    type: "database",
+    tags: ["Database", "API"],
+    status: "not-started",
+    progress: 0,
+    relatedModuleId: "mod-aws",
+    relatedNodeId: "devops-cloud",
+    timeSpent: 0,
+    bestScore: undefined,
+    attempts: 0,
+    starterCode: `SELECT o.id, c.name, p.title\nFROM orders o\nJOIN customers c ON o.customer_id = c.id\nJOIN products p ON o.product_id = p.id;`,
+    testCases: [
+      { input: "joined tables", expectedOutput: "order details" },
+    ],
+  },
+];
 
 /* ============================================================
    ACTIONS
@@ -388,7 +486,6 @@ type StudyAction =
   | { type: "MARK_REVIEW_DONE"; payload: { reviewId: string } }
   | { type: "GENERATE_REVIEWS" }
   | { type: "SET_NODE_STATUS"; payload: { nodeId: string; status: RoadmapStatus } }
-  // Notebook actions
   | { type: "CREATE_FOLDER"; payload: { title: string; parentId: string | null } }
   | { type: "DELETE_FOLDER"; payload: { folderId: string } }
   | { type: "UPDATE_FOLDER"; payload: { folderId: string; title: string } }
@@ -398,7 +495,6 @@ type StudyAction =
   | { type: "MOVE_NOTE"; payload: { noteId: string; parentFolderId: string | null } }
   | { type: "ADD_TAG_TO_NOTE"; payload: { noteId: string; tag: string } }
   | { type: "REMOVE_TAG_FROM_NOTE"; payload: { noteId: string; tag: string } }
-  // Lab actions
   | { type: "SET_ACTIVE_PROJECT"; payload: { projectId: string } }
   | { type: "UPDATE_LAB_FILE"; payload: { fileId: string; content: string } }
   | { type: "SET_ACTIVE_FILE"; payload: { fileId: string | null } }
@@ -408,7 +504,12 @@ type StudyAction =
   | { type: "TERMINAL_INPUT"; payload: { text: string } }
   | { type: "TERMINAL_EXECUTE"; payload: { command: string } }
   | { type: "TERMINAL_ADD_LINE"; payload: { line: TerminalLine } }
-  | { type: "TICK_LAB_TIMER"; payload: { seconds: number } };
+  | { type: "TICK_LAB_TIMER"; payload: { seconds: number } }
+  | { type: "START_EXERCISE"; payload: { exerciseId: string } }
+  | { type: "COMPLETE_CHALLENGE"; payload: { exerciseId: string; score: number; testResults: ExerciseTestResult[] } }
+  | { type: "FAIL_CHALLENGE"; payload: { exerciseId: string; testResults: ExerciseTestResult[] } }
+  | { type: "UPDATE_EXERCISE_CODE"; payload: { exerciseId: string; code: string } }
+  | { type: "ADD_EXERCISE_TIME"; payload: { exerciseId: string; seconds: number } };
 
 /* ============================================================
    HELPERS PUROS
@@ -455,12 +556,40 @@ function computeMetrics(state: StudyState) {
     timeSpentByCategory[module.category] += state.timeSpent[module.id] ?? 0;
   }
 
+  // Exercise metrics
+  const totalExercises = state.exerciseChallenges.length;
+  const completedExercises = state.exerciseChallenges.filter((e) => e.status === "completed").length;
+  const exercisesByDifficulty: Record<string, number> = { facil: 0, medio: 0, dificil: 0 };
+  const exercisesByCategory: Record<string, number> = {};
+  let totalExerciseTime = 0;
+  let challengeScores: number[] = [];
+
+  for (const ex of state.exerciseChallenges) {
+    exercisesByDifficulty[ex.difficulty] = (exercisesByDifficulty[ex.difficulty] ?? 0) + 1;
+    exercisesByCategory[ex.category] = (exercisesByCategory[ex.category] ?? 0) + 1;
+    totalExerciseTime += ex.timeSpent;
+    if (ex.bestScore !== undefined) challengeScores.push(ex.bestScore);
+  }
+
+  const averageScore =
+    challengeScores.length === 0 ? 0 : Math.round(challengeScores.reduce((a, b) => a + b, 0) / challengeScores.length);
+
+  const exerciseMetrics: ExerciseMetrics = {
+    totalExercises,
+    completedExercises,
+    exercisesByDifficulty,
+    exercisesByCategory,
+    totalTimeSpent: totalExerciseTime,
+    averageScore,
+  };
+
   return {
     totalStudyMinutes,
     exerciseAccuracy,
     lessonsCompleted: completedLessons,
     totalLessons,
     timeSpentByCategory,
+    exerciseMetrics,
   };
 }
 
@@ -610,7 +739,6 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
     case "DELETE_FOLDER": {
       const { folderId } = action.payload;
       if (folderId === "folder-root") return state;
-      // Move notes from this folder to root
       const notesMoved = state.notebooks.map((n) =>
         n.parentFolderId === folderId ? { ...n, parentFolderId: null, updatedAt: new Date() } : n
       );
@@ -816,7 +944,6 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
 
       let outputLines: TerminalLine[] = [inputLine];
 
-      // Simulação de comandos
       const cmd = command.trim().toLowerCase();
       if (cmd === "npm start") {
         outputLines.push(
@@ -900,9 +1027,195 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
       };
     }
 
+    // ===== EXERCISE CHALLENGE ACTIONS =====
+    case "START_EXERCISE": {
+      const { exerciseId } = action.payload;
+      return {
+        ...state,
+        activeExerciseId: exerciseId,
+        exerciseChallenges: state.exerciseChallenges.map((ex) =>
+          ex.id === exerciseId
+            ? { ...ex, status: "in-progress", progress: ex.progress > 0 ? ex.progress : 5 }
+            : ex
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "COMPLETE_CHALLENGE": {
+      const { exerciseId, score, testResults } = action.payload;
+      const now = new Date();
+
+      const challenge = state.exerciseChallenges.find((ex) => ex.id === exerciseId);
+      const relatedNodeId = challenge?.relatedNodeId;
+
+      let newNodes = state.roadmapNodes;
+      if (relatedNodeId) {
+        newNodes = state.roadmapNodes.map((node) => {
+          if (node.id !== relatedNodeId) return node;
+          const currentProgress = node.progress;
+          const newProgress = Math.min(100, currentProgress + 20);
+          let nodeStatus: RoadmapStatus = node.status;
+          if (newProgress >= 100) nodeStatus = "completo";
+          else if (newProgress > 0) nodeStatus = "em-andamento";
+          return { ...node, progress: newProgress, status: nodeStatus };
+        });
+      }
+
+      const updatedChallenges = state.exerciseChallenges.map((ex) => {
+        if (ex.id !== exerciseId) return ex;
+        const existingTime = state.exerciseTimeSpent[exerciseId] ?? 0;
+
+        return {
+          ...ex,
+          status: "completed" as ExerciseChallenge["status"],
+          progress: 100,
+          bestScore: ex.bestScore === undefined || score > ex.bestScore ? score : ex.bestScore,
+          attempts: ex.attempts + 1,
+          timeSpent: ex.timeSpent + existingTime,
+        };
+      });
+
+      const newExercisesDone = { ...state.exercisesDone, [exerciseId]: { score, completedAt: now } };
+
+      let newReviews = state.reviewsPending;
+      if (challenge && score < 100) {
+        const alreadyExists = state.reviewsPending.some(
+          (r) => r.source === "exercise" && r.sourceId === exerciseId
+        );
+        if (!alreadyExists) {
+          newReviews = [
+            ...state.reviewsPending,
+            {
+              id: `review-ex-${exerciseId}`,
+              source: "exercise",
+              sourceId: exerciseId,
+              question: `Revisão: ${challenge.title}`,
+              answer: `Revise os conceitos do desafio: ${challenge.description}. Foque nos pontos que errou nos testes.`,
+              dueDate: new Date(Date.now() + 86400000),
+              interval: 1,
+              repetitions: 1,
+              easeFactor: 2.0,
+            },
+          ];
+        }
+      }
+
+      const totalExercises = updatedChallenges.length;
+      const completedExercises = updatedChallenges.filter((e) => e.status === "completed").length;
+      const exercisesByDifficulty: Record<string, number> = { facil: 0, medio: 0, dificil: 0 };
+      const exercisesByCategory: Record<string, number> = {};
+      let totalExerciseTime = 0;
+      let challengeScores: number[] = [];
+
+      for (const ex of updatedChallenges) {
+        exercisesByDifficulty[ex.difficulty] = (exercisesByDifficulty[ex.difficulty] ?? 0) + 1;
+        exercisesByCategory[ex.category] = (exercisesByCategory[ex.category] ?? 0) + 1;
+        totalExerciseTime += ex.timeSpent;
+        if (ex.bestScore !== undefined) challengeScores.push(ex.bestScore);
+      }
+
+      const averageScore =
+        challengeScores.length === 0 ? 0 : Math.round(challengeScores.reduce((a, b) => a + b, 0) / challengeScores.length);
+
+      const exerciseMetrics: ExerciseMetrics = {
+        totalExercises,
+        completedExercises,
+        exercisesByDifficulty,
+        exercisesByCategory,
+        totalTimeSpent: totalExerciseTime,
+        averageScore,
+      };
+
+      return {
+        ...state,
+        exerciseChallenges: updatedChallenges,
+        exercisesDone: newExercisesDone,
+        exerciseTestResults: {
+          ...state.exerciseTestResults,
+          [exerciseId]: testResults,
+        },
+        roadmapNodes: newNodes,
+        reviewsPending: newReviews,
+        exerciseMetrics,
+        lastSync: now,
+      };
+    }
+
+    case "FAIL_CHALLENGE": {
+      const { exerciseId, testResults } = action.payload;
+      return {
+        ...state,
+        exerciseChallenges: state.exerciseChallenges.map((ex) =>
+          ex.id === exerciseId
+            ? { ...ex, attempts: ex.attempts + 1, status: "in-progress" }
+            : ex
+        ),
+        exerciseTestResults: {
+          ...state.exerciseTestResults,
+          [exerciseId]: testResults,
+        },
+        lastSync: new Date(),
+      };
+    }
+
+    case "UPDATE_EXERCISE_CODE": {
+      const { exerciseId, code } = action.payload;
+      return {
+        ...state,
+        exerciseChallenges: state.exerciseChallenges.map((ex) =>
+          ex.id === exerciseId ? { ...ex, starterCode: code } : ex
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "ADD_EXERCISE_TIME": {
+      const { exerciseId, seconds } = action.payload;
+      return {
+        ...state,
+        exerciseTimeSpent: {
+          ...state.exerciseTimeSpent,
+          [exerciseId]: (state.exerciseTimeSpent[exerciseId] ?? 0) + seconds,
+        },
+        lastSync: new Date(),
+      };
+    }
+
     default:
       return state;
   }
+};
+
+const initialState: StudyState = {
+  roadmapNodes: initialRoadmapNodes,
+  modules: initialModules,
+  lessonsCompleted: ["less-react-1"],
+  exercisesDone: {},
+  reviewsPending: [],
+  timeSpent: initialTimeSpent,
+  activeTimer: null,
+  lastSync: new Date(),
+  notebooks: initialNotebooks,
+  notebookFolders: initialNotebookFolders,
+  labProjects: initialLabProjects,
+  activeProjectId: "lab-1",
+  openTabs: initialOpenTabs,
+  activeFileId: "file-1",
+  terminal: initialTerminalState,
+  labTimeSpent: 0,
+  exerciseChallenges: initialExerciseChallenges,
+  activeExerciseId: null,
+  exerciseTestResults: {},
+  exerciseTimeSpent: {},
+  exerciseMetrics: {
+    totalExercises: initialExerciseChallenges.length,
+    completedExercises: 0,
+    exercisesByDifficulty: { facil: 0, medio: 0, dificil: 0 },
+    exercisesByCategory: {},
+    totalTimeSpent: 0,
+    averageScore: 0,
+  },
 };
 
 export { studyReducer, initialState };

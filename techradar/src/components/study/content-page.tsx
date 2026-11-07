@@ -32,7 +32,8 @@ export default function ContentPage() {
   const {
     modules,
     roadmapNodes,
-    metrics,
+    lessonsCompleted: lessonsCompletedArray,
+    timeSpent,
     modulesByCategory,
     moduleById,
     nodeById,
@@ -45,6 +46,23 @@ export default function ContentPage() {
     startTimer,
     stopTimer,
   } = useStudy();
+
+  const lessonsCompleted = lessonsCompletedArray.length;
+  const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0);
+  const totalStudyMinutes = Math.round(
+    Object.values(timeSpent).reduce((a, b) => a + b, 0) / 60
+  );
+
+  const timeSpentByCategory: Record<string, number> = {
+    "web-development": 0,
+    "mobile-dev": 0,
+    devops: 0,
+    "cloud-computing": 0,
+    "data-science": 0,
+  };
+  for (const m of modules) {
+    timeSpentByCategory[m.category] += timeSpent[m.id] ?? 0;
+  }
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<ModuleCategory | null>("web-development");
@@ -225,7 +243,7 @@ export default function ContentPage() {
                       strokeWidth="12"
                       fill="none"
                       strokeDasharray="503"
-                      strokeDashoffset={503 - (503 * metrics.lessonsCompleted) / Math.max(metrics.totalLessons, 1)}
+                      strokeDashoffset={503 - (503 * lessonsCompleted) / Math.max(totalLessons, 1)}
                       strokeLinecap="round"
                       className="transition-all duration-700"
                     />
@@ -237,13 +255,13 @@ export default function ContentPage() {
                     </defs>
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold text-white">{Math.round((metrics.lessonsCompleted / Math.max(metrics.totalLessons, 1)) * 100)}%</span>
+                    <span className="text-2xl font-bold text-white">{Math.round((lessonsCompleted / Math.max(totalLessons, 1)) * 100)}%</span>
                     <span className="text-xs text-slate-500">concluído</span>
                   </div>
                 </div>
               </div>
               <div className="mt-3 text-[10px] text-slate-400">
-                {metrics.lessonsCompleted} de {metrics.totalLessons} aulas
+                {lessonsCompleted} de {totalLessons} aulas
               </div>
             </div>
 
@@ -285,7 +303,7 @@ export default function ContentPage() {
             <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">Time Spent</h4>
             <div className="space-y-2">
               {["web-development", "mobile-dev", "devops", "cloud-computing", "data-science"].map((cat) => {
-                const seconds = metrics.timeSpentByCategory[cat as ModuleCategory];
+                const seconds = timeSpentByCategory[cat as ModuleCategory];
                 const m = Math.floor(seconds / 60);
                 const s = seconds % 60;
                 return (
@@ -297,7 +315,7 @@ export default function ContentPage() {
               })}
               <div className="border-t border-white/[0.05] pt-2 mt-2 flex justify-between text-xs font-bold text-white">
                 <span>Tempo Total</span>
-                <span>{Math.floor(metrics.totalStudyMinutes / 60)}:{String(metrics.totalStudyMinutes % 60).padStart(2, "0")}</span>
+                <span>{Math.floor(totalStudyMinutes / 60)}:{String(totalStudyMinutes % 60).padStart(2, "0")}</span>
               </div>
             </div>
           </div>

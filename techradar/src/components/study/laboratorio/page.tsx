@@ -56,7 +56,7 @@ export default function LaboratorioPage() {
     terminal,
     terminalInput,
     terminalExecute,
-    metrics,
+    getExerciseMetrics,
     categoryProgress,
     pendingReviewsCount,
     startTimer,
@@ -295,7 +295,7 @@ export default function LaboratorioPage() {
             activeProjectId={activeProjectId}
             setActiveProject={setActiveProject}
             totalProgress={totalLabProgress}
-            metrics={metrics}
+            metrics={getExerciseMetrics()}
             categoryProgress={categoryProgress}
             pendingReviewsCount={pendingReviewsCount}
           />

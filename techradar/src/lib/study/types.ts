@@ -174,6 +174,48 @@ export interface OpenTab {
   isActive: boolean;
 }
 
+/** Exercício/desafio de código. */
+export interface ExerciseChallenge {
+  id: string;
+  title: string;
+  description: string;
+  category: ModuleCategory;
+  difficulty: "facil" | "medio" | "dificil";
+  language: "javascript" | "python" | "sql" | "java";
+  type: "algorithm" | "coding" | "database" | "system-design";
+  tags: string[];
+  status: "not-started" | "in-progress" | "completed";
+  progress: number; // 0-100
+  relatedModuleId?: string;
+  relatedNodeId?: string;
+  timeSpent: number; // segundos
+  bestScore?: number; // 0-100
+  attempts: number;
+  starterCode: string;
+  solutionCode?: string;
+  testCases: Array<{ input: string; expectedOutput: string }>;
+}
+
+/** Resultado de execução de teste simulado. */
+export interface ExerciseTestResult {
+  passed: boolean;
+  testCaseIndex: number;
+  input: string;
+  expectedOutput: string;
+  actualOutput: string;
+  timeMs: number;
+}
+
+/** Métricas de exercícios. */
+export interface ExerciseMetrics {
+  totalExercises: number;
+  completedExercises: number;
+  exercisesByDifficulty: Record<string, number>;
+  exercisesByCategory: Record<string, number>;
+  totalTimeSpent: number;
+  averageScore: number;
+}
+
 /** Métricas agregadas de evolução. */
 export interface StudyState {
   roadmapNodes: RoadmapNode[];
@@ -196,4 +238,11 @@ export interface StudyState {
   activeFileId: string | null;
   terminal: TerminalState;
   labTimeSpent: number; // segundos no laboratório
+
+  // Exercícios / Desafios
+  exerciseChallenges: ExerciseChallenge[];
+  activeExerciseId: string | null;
+  exerciseTestResults: Record<string, ExerciseTestResult[]>;
+  exerciseTimeSpent: Record<string, number>; // exerciseId -> segundos
+  exerciseMetrics: ExerciseMetrics;
 }
