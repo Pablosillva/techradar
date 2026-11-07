@@ -16,8 +16,8 @@ export function ProjectBars({ projects }: { projects: LabProject[] }) {
         <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
           Desempenho nos Projetos
         </h3>
-        <Link href="/laboratorio" className="text-[10px] font-semibold text-cyan-400 hover:text-cyan-300">
-          Abrir Laboratório →
+        <Link href="/projetos" className="text-[10px] font-semibold text-cyan-400 hover:text-cyan-300">
+          Abrir Portfólio →
         </Link>
       </div>
 

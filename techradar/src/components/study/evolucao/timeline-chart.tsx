@@ -118,15 +118,7 @@ export function TimelineChart({ nodes }: { nodes: RoadmapNode[] }) {
                     };
                     const fill = STATUS_COLORS[payload.status];
                     return (
-                      <circle
-                        key={payload.id}
-                        cx={cx}
-                        cy={cy}
-                        r={6}
-                        fill={fill}
-                        stroke="#0f172a"
-                        strokeWidth={2}
-                      />
+                      <circle key={payload.id} cx={cx} cy={cy} r={6} fill={fill} stroke="#0f172a" strokeWidth={2} />
                     );
                   }}
                   activeDot={{ r: 7 }}
@@ -165,5 +157,3 @@ export function TimelineChart({ nodes }: { nodes: RoadmapNode[] }) {
     </div>
   );
 }
-
-export { TimelineChart as RoadmapChart };

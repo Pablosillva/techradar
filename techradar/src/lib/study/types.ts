@@ -150,6 +150,28 @@ export interface LabProject {
   relatedModuleId?: string;
 }
 
+/** Projeto de Portfólio (vitrine/coleção sincronizada com o Laboratório). */
+export type ProjectStatus = "in-progress" | "completed" | "idea";
+export type ProjectCover = "portfolio" | "aws" | "ecommerce" | "python" | "api" | "generic";
+
+export interface PortfolioProject {
+  id: string;
+  title: string;
+  description: string;
+  techs: string[];
+  progress: number; // 0-100
+  status: ProjectStatus;
+  isHighlighted: boolean;
+  needsReview: boolean;
+  commits: number;
+  testsPassed: number;
+  cover: ProjectCover;
+  category: ModuleCategory;
+  relatedLabProjectId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 /** Linha do terminal simulado. */
 export interface TerminalLine {
   id: string;
@@ -289,4 +311,7 @@ export interface StudyState {
   reviewSessions: ReviewSessionResult[];
   reviewMetrics: ReviewMetrics;
   reviewTimeSpent: number; // segundos no total de revisões
+
+  // Projetos / Portfólio
+  projects: PortfolioProject[];
 }

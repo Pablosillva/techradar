@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight, AlertTriangle, Target, Brain } from "lucide-react";
 import { useStudy } from "@/lib/study/context";
-import type { StudyState } from "@/lib/study/reducer";
 
 export interface Recommendation {
   id: string;
@@ -14,15 +13,17 @@ export interface Recommendation {
   kind: "exercise" | "review" | "roadmap";
 }
 
-export function generateRecommendations(state: StudyState): Recommendation[] {
+export function generateRecommendations(state: {
+  exerciseChallenges: Array<{ category: string; status: string; difficulty: string }>;
+  reviewCards: Array<{ status: string; nextReviewDate: Date }>;
+  roadmapNodes: Array<{ id: string; title: string; status: string; progress: number }>;
+}): Recommendation[] {
   const out: Recommendation[] = [];
-
   const byCategory: Record<string, { total: number; done: number }> = {};
   for (const ex of state.exerciseChallenges) {
-    const key = ex.category;
-    byCategory[key] ??= { total: 0, done: 0 };
-    byCategory[key].total += 1;
-    if (ex.status === "completed") byCategory[key].done += 1;
+    byCategory[ex.category] ??= { total: 0, done: 0 };
+    byCategory[ex.category].total += 1;
+    if (ex.status === "completed") byCategory[ex.category].done += 1;
   }
   const weakest = Object.entries(byCategory)
     .map(([cat, v]) => ({ cat, rate: v.total > 0 ? v.done / v.total : 1 }))
@@ -37,19 +38,17 @@ export function generateRecommendations(state: StudyState): Recommendation[] {
       kind: "exercise",
     });
   }
-
   const difficult = state.exerciseChallenges.filter((c) => c.difficulty === "dificil" && c.status !== "completed");
   if (difficult.length > 0) {
     out.push({
       id: "dificil",
       title: "Desafios Difíceis Pendentes",
-      description: `${difficult.length} desafio(s) de nível difícil sem conclusão. Os radares encolhem até resolvê-los.`,
+      description: `${difficult.length} desafio(s) de nível difícil sem conclusão.`,
       href: "/exercicios",
       cta: "Ver desafios",
       kind: "exercise",
     });
   }
-
   const overdue = state.reviewCards.filter((r) => r.status === "para-ler" && r.nextReviewDate <= new Date());
   if (overdue.length > 0) {
     out.push({
@@ -61,9 +60,8 @@ export function generateRecommendations(state: StudyState): Recommendation[] {
       kind: "review",
     });
   }
-
-  const blocked = state.roadmapNodes.find((n) => n.status === "bloqueado");
   const inProgress = state.roadmapNodes.find((n) => n.status === "em-andamento" && n.progress < 100);
+  const blocked = state.roadmapNodes.find((n) => n.status === "bloqueado");
   if (inProgress) {
     out.push({
       id: `node-${inProgress.id}`,
@@ -83,7 +81,6 @@ export function generateRecommendations(state: StudyState): Recommendation[] {
       kind: "roadmap",
     });
   }
-
   if (out.length === 0) {
     out.push({
       id: "ok",
@@ -98,8 +95,8 @@ export function generateRecommendations(state: StudyState): Recommendation[] {
 }
 
 export function Recommendations() {
-  const state = useStudy();
-  const recs = generateRecommendations(state as unknown as StudyState);
+  const { exerciseChallenges, reviewCards, roadmapNodes } = useStudy();
+  const recs = generateRecommendations({ exerciseChallenges, reviewCards, roadmapNodes });
 
   return (
     <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] p-5">

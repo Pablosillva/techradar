@@ -18,6 +18,9 @@ import type {
   ExerciseTestResult,
   ReviewCard,
   ReviewSessionResult,
+  PortfolioProject,
+  ProjectCover,
+  ProjectStatus,
 } from "@/lib/study/types";
 
 function moduleProgress(module: Module): number {
@@ -105,6 +108,21 @@ interface StudyContextValue extends StudyState {
   getReviewsByDifficulty: (difficulty: string) => ReviewCard[];
   getReviewsByModule: (moduleId: string) => ReviewCard[];
   getReviewMetrics: () => StudyState["reviewMetrics"];
+  // Portfolio Projects
+  addProject: (input: {
+    title: string;
+    description: string;
+    techs: string[];
+    category: ModuleCategory;
+    cover: ProjectCover;
+    status?: ProjectStatus;
+    progress?: number;
+  }) => void;
+  updateProjectProgress: (projectId: string, progress: number) => void;
+  toggleHighlight: (projectId: string) => void;
+  toggleReview: (projectId: string) => void;
+  updateProject: (projectId: string, changes: Partial<Pick<PortfolioProject, "title" | "description" | "techs" | "status" | "cover">>) => void;
+  updateLabProjectProgress: (projectId: string, progress: number) => void;
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -367,6 +385,61 @@ export function StudyProvider({ children }: StudyProviderProps) {
     return state.reviewMetrics;
   }, [state.reviewMetrics]);
 
+  const addProject = useCallback(
+    (input: {
+      title: string;
+      description: string;
+      techs: string[];
+      category: ModuleCategory;
+      cover: ProjectCover;
+      status?: ProjectStatus;
+      progress?: number;
+    }) => {
+      const now = new Date();
+      const project: PortfolioProject = {
+        id: `proj-${Date.now()}`,
+        title: input.title,
+        description: input.description,
+        techs: input.techs,
+        progress: input.progress ?? 0,
+        status: input.status ?? "in-progress",
+        isHighlighted: false,
+        needsReview: false,
+        commits: 0,
+        testsPassed: 0,
+        cover: input.cover,
+        category: input.category,
+        createdAt: now,
+        updatedAt: now,
+      };
+      dispatch({ type: "ADD_PROJECT", payload: { project } });
+    },
+    [],
+  );
+
+  const updateProjectProgress = useCallback((projectId: string, progress: number) => {
+    dispatch({ type: "UPDATE_PROJECT_PROGRESS", payload: { projectId, progress } });
+  }, []);
+
+  const toggleHighlight = useCallback((projectId: string) => {
+    dispatch({ type: "TOGGLE_HIGHLIGHT", payload: { projectId } });
+  }, []);
+
+  const toggleReview = useCallback((projectId: string) => {
+    dispatch({ type: "TOGGLE_REVIEW", payload: { projectId } });
+  }, []);
+
+  const updateProject = useCallback(
+    (projectId: string, changes: Partial<Pick<PortfolioProject, "title" | "description" | "techs" | "status" | "cover">>) => {
+      dispatch({ type: "UPDATE_PROJECT", payload: { projectId, changes } });
+    },
+    [],
+  );
+
+  const updateLabProjectProgress = useCallback((projectId: string, progress: number) => {
+    dispatch({ type: "UPDATE_LAB_PROJECT_PROGRESS", payload: { projectId, progress } });
+  }, []);
+
   const modulesByCategory = (category: ModuleCategory) => state.modules.filter((m) => m.category === category);
   const moduleById = (id: string) => state.modules.find((m) => m.id === id);
   const nodeById = (id: string) => state.roadmapNodes.find((n) => n.id === id);
@@ -450,6 +523,12 @@ export function StudyProvider({ children }: StudyProviderProps) {
     getReviewsByDifficulty,
     getReviewsByModule,
     getReviewMetrics,
+    addProject,
+    updateProjectProgress,
+    toggleHighlight,
+    toggleReview,
+    updateProject,
+    updateLabProjectProgress,
   };
 
   return <StudyContext.Provider value={contextValue}>{children}</StudyContext.Provider>;

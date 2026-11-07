@@ -23,6 +23,7 @@ import type {
   ReviewCard,
   ReviewSessionResult,
   ReviewMetrics,
+  PortfolioProject,
 } from "@/lib/study/types";
 
 /* ============================================================
@@ -319,6 +320,92 @@ const initialLabProjects: LabProject[] = [
   },
 ];
 
+const initialPortfolioProjects: PortfolioProject[] = [
+  {
+    id: "proj-portfolio",
+    title: "Portfólio 2.0",
+    description: "Full screen um positive website full screen contradarem.",
+    techs: ["React", "Node.js"],
+    progress: 80,
+    status: "in-progress",
+    isHighlighted: true,
+    needsReview: false,
+    commits: 1,
+    testsPassed: 3,
+    cover: "portfolio",
+    category: "web-development",
+    relatedLabProjectId: "lab-2",
+    createdAt: new Date(Date.now() - 86400000 * 14),
+    updatedAt: new Date(Date.now() - 86400000 * 2),
+  },
+  {
+    id: "proj-aws",
+    title: "Atividade AWS",
+    description: "Projetos para uma atividade AWS online.",
+    techs: ["AWS", "EC2", "S3"],
+    progress: 100,
+    status: "completed",
+    isHighlighted: false,
+    needsReview: false,
+    commits: 1,
+    testsPassed: 0,
+    cover: "aws",
+    category: "cloud-computing",
+    relatedLabProjectId: "lab-1",
+    createdAt: new Date(Date.now() - 86400000 * 10),
+    updatedAt: new Date(Date.now() - 86400000 * 5),
+  },
+  {
+    id: "proj-ecommerce",
+    title: "E-commerce API",
+    description: "JavaScript, Express, PostgreSQL",
+    techs: ["React", "Node.js", "PostgreSQL"],
+    progress: 50,
+    status: "in-progress",
+    isHighlighted: false,
+    needsReview: true,
+    commits: 4,
+    testsPassed: 2,
+    cover: "ecommerce",
+    category: "web-development",
+    createdAt: new Date(Date.now() - 86400000 * 7),
+    updatedAt: new Date(Date.now() - 86400000 * 1),
+  },
+  {
+    id: "proj-python",
+    title: "Sandbox Python",
+    description: "Python Data Analysis",
+    techs: ["Python", "Pandas", "Matplotlib"],
+    progress: 20,
+    status: "in-progress",
+    isHighlighted: false,
+    needsReview: false,
+    commits: 1,
+    testsPassed: 0,
+    cover: "python",
+    category: "data-science",
+    relatedLabProjectId: "lab-3",
+    createdAt: new Date(Date.now() - 86400000 * 3),
+    updatedAt: new Date(Date.now() - 86400000 * 1),
+  },
+  {
+    id: "proj-idea-api",
+    title: "API de Pagamentos",
+    description: "Ideia: gateway de pagamentos com webhook.",
+    techs: ["Node.js", "PostgreSQL"],
+    progress: 0,
+    status: "idea",
+    isHighlighted: false,
+    needsReview: false,
+    commits: 0,
+    testsPassed: 0,
+    cover: "api",
+    category: "web-development",
+    createdAt: new Date(Date.now() - 86400000 * 2),
+    updatedAt: new Date(Date.now() - 86400000 * 2),
+  },
+];
+
 const initialTerminalLines: TerminalLine[] = [
   {
     id: "term-1",
@@ -587,6 +674,8 @@ const initialReviewMetrics: ReviewMetrics = {
   },
 };
 
+
+
 const initialState: StudyState = {
   roadmapNodes: initialRoadmapNodes,
   modules: initialModules,
@@ -619,6 +708,7 @@ const initialState: StudyState = {
   reviewSessions: initialReviewSessions,
   reviewMetrics: initialReviewMetrics,
   reviewTimeSpent: 0,
+  projects: initialPortfolioProjects,
 };
 
 /* ============================================================
@@ -666,7 +756,14 @@ type StudyAction =
   | { type: "GENERATE_REVIEW_FROM_LESSON"; payload: { lessonId: string; moduleId: string; title: string; question: string; answer: string } }
   | { type: "GENERATE_REVIEW_FROM_EXERCISE"; payload: { exerciseId: string; moduleId: string; title: string; question: string; answer: string } }
   | { type: "ARCHIVE_REVIEW"; payload: { reviewId: string } }
-  | { type: "UPDATE_REVIEW_TIME"; payload: { reviewId: string; seconds: number } };
+  | { type: "UPDATE_REVIEW_TIME"; payload: { reviewId: string; seconds: number } }
+  // Projects / Portfolio
+  | { type: "ADD_PROJECT"; payload: { project: PortfolioProject } }
+  | { type: "UPDATE_PROJECT_PROGRESS"; payload: { projectId: string; progress: number } }
+  | { type: "TOGGLE_HIGHLIGHT"; payload: { projectId: string } }
+  | { type: "TOGGLE_REVIEW"; payload: { projectId: string } }
+  | { type: "UPDATE_PROJECT"; payload: { projectId: string; changes: Partial<Pick<PortfolioProject, "title" | "description" | "techs" | "status" | "cover">> } }
+  | { type: "UPDATE_LAB_PROJECT_PROGRESS"; payload: { projectId: string; progress: number } };
 
 /* ============================================================
    HELPERS PUROS
@@ -1540,6 +1637,90 @@ const studyReducer: Reducer<StudyState, StudyAction> = (state, action): StudySta
       return {
         ...state,
         reviewTimeSpent: state.reviewTimeSpent + seconds,
+        lastSync: new Date(),
+      };
+    }
+
+    // ===== PORTFOLIO PROJECTS ACTIONS =====
+    case "ADD_PROJECT": {
+      const { project } = action.payload;
+      return {
+        ...state,
+        projects: [project, ...state.projects],
+        lastSync: new Date(),
+      };
+    }
+
+    case "UPDATE_PROJECT_PROGRESS": {
+      const { projectId, progress } = action.payload;
+      const clamped = Math.min(100, Math.max(0, progress));
+      return {
+        ...state,
+        projects: state.projects.map((p) => {
+          if (p.id !== projectId) return p;
+          const status = clamped >= 100 ? "completed" : p.status === "idea" && clamped === 0 ? "idea" : "in-progress";
+          return {
+            ...p,
+            progress: clamped,
+            status,
+            commits: p.commits + (clamped > p.progress ? 1 : 0),
+            updatedAt: new Date(),
+          };
+        }),
+        lastSync: new Date(),
+      };
+    }
+
+    case "TOGGLE_HIGHLIGHT": {
+      const { projectId } = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map((p) =>
+          p.id === projectId ? { ...p, isHighlighted: !p.isHighlighted, updatedAt: new Date() } : p
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "TOGGLE_REVIEW": {
+      const { projectId } = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map((p) =>
+          p.id === projectId ? { ...p, needsReview: !p.needsReview, updatedAt: new Date() } : p
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "UPDATE_PROJECT": {
+      const { projectId, changes } = action.payload;
+      return {
+        ...state,
+        projects: state.projects.map((p) =>
+          p.id === projectId ? { ...p, ...changes, progress: changes.status === "completed" ? 100 : p.progress, updatedAt: new Date() } : p
+        ),
+        lastSync: new Date(),
+      };
+    }
+
+    case "UPDATE_LAB_PROJECT_PROGRESS": {
+      const { projectId, progress } = action.payload;
+      const clamped = Math.min(100, Math.max(0, progress));
+      const status = clamped >= 100 ? "completed" : clamped > 0 ? "in-progress" : "not-started";
+      // Regra A: sincroniza Laboratório -> Portfólio
+      const linked = state.projects.filter((p) => p.relatedLabProjectId === projectId);
+      return {
+        ...state,
+        labProjects: state.labProjects.map((p) =>
+          p.id === projectId ? { ...p, progress: clamped, status } : p
+        ),
+        projects: state.projects.map((p) => {
+          if (p.relatedLabProjectId !== projectId) return p;
+          const next: { progress: number; status: "in-progress" | "completed" | "idea" } =
+            clamped >= 100 ? { progress: 100, status: "completed" } : { progress: clamped, status: "in-progress" };
+          return { ...p, ...next, updatedAt: new Date() };
+        }),
         lastSync: new Date(),
       };
     }
